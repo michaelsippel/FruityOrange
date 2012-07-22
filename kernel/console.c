@@ -17,6 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdint.h>
+#include <stdarg.h>
+#include <string.h>
+
 #include <portio.h>
 
 #include <console.h>
@@ -38,6 +41,7 @@ static int x = 0, y = 0;
 			  } \
 			  setCursor(x, y);
 #define PUTC(c) video_mem[(x++) + (y*80)] = ( c | (color << 8) );
+#define NEWLINE y ++; x = 0;
 			  
 int putchar(char chr) {
   PUTC(chr);
@@ -46,21 +50,37 @@ int putchar(char chr) {
 }
 
 int puts(const char *str) {
-  int i;
-  for(i = 0; str[i] != '\0'; i++) {
-    switch(str[i]){
+  int i = 0;
+  while(*str) {
+    switch(*str){
       case '\n':
-	y ++; x = 0;
+	NEWLINE;
 	break;
       case '\t':
 	while(++x % TABULATOR_SIZE != 0);
 	break;
       default:
-	PUTC(str[i]);
+	PUTC(*str);
 	break;
     }
     VIDEOTEXT_CONTROL;
+    str++;
+    i++;
   }
+  return i;
+}
+
+int printf(const char *format, ...) {
+  va_list args;
+  int i;
+  char *buffer;
+  
+  va_start(args, format);
+  i = vsprintf(buffer, format, args);
+  va_end(args);
+  
+  puts(buffer);
+  
   return i;
 }
 

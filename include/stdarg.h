@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  include/stdarg.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,17 +16,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <alloca.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#ifndef _STDARG_H_
+#define _STDARG_H_
 
-#include <console.h>
-#include <portio.h>
+typedef __builtin_va_list va_list;
+#define va_start(ap, X)   __builtin_va_start(ap, X)
+#define va_arg(ap, type)  __builtin_va_arg(ap, type)
+#define va_end(ap)        __builtin_va_end(ap)
 
-void init(void) {
-  clearscreen();
-  printf("Hello World!\n\t");
-  printf("Printf-test: 0x%x\n",0x8);
-}
+#endif

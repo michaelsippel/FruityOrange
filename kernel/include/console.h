@@ -23,6 +23,7 @@
 
 int putchar(char chr);
 int puts(const char *str);
+int printf(const char *format, ...);
 void scroll(void);
 void setCursor(int x, int y);
 void setColor(uint8_t ncolor);

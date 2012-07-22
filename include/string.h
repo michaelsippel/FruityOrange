@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  kernel/include/string.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,17 +16,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <alloca.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
+#ifndef _STRING_H
+#define _STRING_H
+
 #include <stdint.h>
 
-#include <console.h>
-#include <portio.h>
+int vsprintf(char *buffer, const char *fmt, va_list args);
+int sprintf(char *buffer, const char *format, ...);
 
-void init(void) {
-  clearscreen();
-  printf("Hello World!\n\t");
-  printf("Printf-test: 0x%x\n",0x8);
-}
+#endif
