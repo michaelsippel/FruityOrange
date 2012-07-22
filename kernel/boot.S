@@ -16,7 +16,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-.section .multiboot
+.section multiboot
 #define MB_MAGIC 0x1BADB002
 #define MB_FLAGS 0x0
 #define MB_CHECKSUM -(MB_MAGIC + MB_FLAGS)

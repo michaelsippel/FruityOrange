@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  kernel/include/console.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,10 +16,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdint.h>
-#include <console.h>
+#ifndef _CONSOLE_H
+#define _CONSOLE_H
 
-void init(void) {
-  clearscreen();
-  puts("Hello World!");
-}
+#include <stdint.h>
+
+int puts(const char *str);
+void setColor(uint8_t ncolor);
+void setForegroundColor(uint8_t fcolor);
+void setBackgroundcolor(uint8_t bcolor);
+void clearscreen(void);
+
+#endif

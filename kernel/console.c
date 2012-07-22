@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  kernel/console.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -19,7 +19,33 @@
 #include <stdint.h>
 #include <console.h>
 
-void init(void) {
-  clearscreen();
-  puts("Hello World!");
+static uint16_t *video_mem = (uint16_t*) 0xB8000;
+static uint8_t color = 0x07;
+static int tp = 0;
+
+int puts(const char *str) {
+  int i;
+  for(i = 0; str[i] != '\0'; i++){
+    video_mem[tp++] = ( str[i] | (color << 8) );
+  }
+  return i;
+}
+
+void setColor(uint8_t ncolor) {
+  color = ncolor;
+}
+
+void setForegroundColor(uint8_t fcolor) {
+  color = ( (color&0xf0) | fcolor );
+}
+
+void setBackgroundcolor(uint8_t bcolor) {
+  color = ( (color&0x0f) | (bcolor << 8) );
+}
+
+void clearscreen(void) {
+  int i;
+  for( i = 0; i < (80 * 25); i++){
+    video_mem[i] = 0;
+  }
 }
