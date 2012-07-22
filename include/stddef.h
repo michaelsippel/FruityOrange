@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  include/stddef.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,14 +16,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#ifndef _STDDEF_H
+#define _STDDEF_H
 
-#include <console.h>
-#include <portio.h>
+#define NULL ((void*) 0)
 
-void init(void) {
-  clearscreen();
-  puts("Hello World!\n");
-}
+typedef __SIZE_TYPE__       size_t;
+typedef __PTRDIFF_TYPE__    ptrdiff_t;
+
+
+#endif

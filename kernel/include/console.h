@@ -21,7 +21,10 @@
 
 #include <stdint.h>
 
+int putchar(char chr);
 int puts(const char *str);
+void scroll(void);
+void setCursor(int x, int y);
 void setColor(uint8_t ncolor);
 void setForegroundColor(uint8_t fcolor);
 void setBackgroundcolor(uint8_t bcolor);
