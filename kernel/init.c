@@ -27,6 +27,9 @@
 
 void init(void) {
   clearscreen();
-  printf("Hello World!\n\t");
-  printf("Printf-test: 0x%x\n",0x8);
+  printf("Hello World!\n");
+  printf("Hex: 0x%x\n",1234);
+  printf("Dec: %d\n",  1234);
+  printf("Oct: %o\n",  1234);
+  printf("Str: %s\n", "Hallo");
 }

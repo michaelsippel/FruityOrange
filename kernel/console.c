@@ -38,8 +38,8 @@ static int x = 0, y = 0;
 			    if(++y > VIDEOTEXT_HEIGHT){ \
 			      scroll(); \
 			    } \
-			  } \
-			  setCursor(x, y);
+			  }
+			  
 #define PUTC(c) video_mem[(x++) + (y*80)] = ( c | (color << 8) );
 #define NEWLINE y ++; x = 0;
 			  
@@ -51,6 +51,7 @@ int putchar(char chr) {
 
 int puts(const char *str) {
   int i = 0;
+
   while(*str) {
     switch(*str){
       case '\n':
@@ -64,24 +65,30 @@ int puts(const char *str) {
 	break;
     }
     VIDEOTEXT_CONTROL;
+    
     str++;
     i++;
   }
+  /*if(*str-1 == '\n') */NEWLINE;
+  
   return i;
 }
 
 int printf(const char *format, ...) {
   va_list args;
-  int i;
-  char *buffer;
+  int i, j;
+  char *buffer = "";
   
   va_start(args, format);
   i = vsprintf(buffer, format, args);
   va_end(args);
   
-  puts(buffer);
+  j = puts(buffer);
   
-  return i;
+  if(j == i)
+    return i;
+  else
+    return -1;
 }
 
 void scroll(void) {
@@ -122,4 +129,5 @@ void clearscreen(void) {
   for( i = 0; i < (VIDEOTEXT_WIDTH * VIDEOTEXT_HEIGHT); i++){
     video_mem[i] = 0;
   }
+  setCursor(0, 0);
 }
