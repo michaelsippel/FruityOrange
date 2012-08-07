@@ -42,7 +42,7 @@ static int x = 0, y = 0;
 			  
 #define PUTC(c) video_mem[(x++) + (y*80)] = ( c | (color << 8) );
 #define NEWLINE y ++; x = 0;
-			  
+
 int putchar(char chr) {
   PUTC(chr);
   VIDEOTEXT_CONTROL;
@@ -69,8 +69,11 @@ int puts(const char *str) {
     str++;
     i++;
   }
-  /*if(*str-1 == '\n') */NEWLINE;
+  if(*str-1 == '\n'){
+    NEWLINE;
+  }
   
+  setCursor(x, y);
   return i;
 }
 
