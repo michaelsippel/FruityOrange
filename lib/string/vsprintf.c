@@ -21,10 +21,16 @@
 
 #include <string.h>
 
-void general_intformat(char *buf, long value, int base) {
-    char t[65];
-    char *tmp;
+void general_uintformat(char *buf, unsigned long value, int base, int num_chr) {
     char n;
+    char *tmp;
+    char t[65];
+    
+    int i = 0;
+    int min_num_chr = 0;
+    long dummy = value;
+    while((dummy /= base)) min_num_chr++;
+    if(min_num_chr > num_chr) num_chr = min_num_chr;
     
     if (base > 16) {
         return;
@@ -37,33 +43,31 @@ void general_intformat(char *buf, long value, int base) {
 	if(n > 9) *--tmp = (char) n + ('A'-10);
 	else      *--tmp = (char) n + '0';
         value /= base;
+	i++;
     } while (value);
     
+    while(i++ < num_chr){
+	*--tmp = '0';
+    }
+    
     while((*buf++ = *tmp++));
-    *buf = '\0';
 }
 
-void hex_str(char *buf, uint64_t value, int num_chr) {
-//   char tmp;
-//   int i;
-//   for(i = num_chr-1; i >= 0; i--) {
-//     tmp = (char) (value >> (i*num_chr)) & 0xf;
-//     
-//     if(tmp > 9) *buf++ = (char) tmp + ('A'-9);
-//     else 	*buf++ = (char) tmp + '0';
-//   }
-//   *buf = '\0';
-  general_intformat(buf, value, 16);
+void hex_str(char *buf, unsigned long value, int num_chr) {
+  general_uintformat(buf, value, 16, num_chr ? num_chr : 4);
 }
 
-void dec_str(char *buf, int value, int num_chr) {
-//   char *tmp = "";
-  general_intformat(buf, value, 10);
-  
+void int_dec_str(char *buf, long value, int num_chr, int signd) {
+  if( (value & 0x80000000) && signd) {
+    general_uintformat(buf+1, (-value), 10, num_chr);
+    *buf = '-';
+  } else {
+    general_uintformat(buf, value, 10, num_chr);
+  }
 }
 
-void oct_str(char *buf, int value, int num_chr) {
-  general_intformat(buf, value, 8);
+void oct_str(char *buf, unsigned long value, int num_chr) {
+  general_uintformat(buf, value, 8, num_chr);
 }
 
 int str_to_num(const char *buf) {
@@ -76,10 +80,11 @@ int str_to_num(const char *buf) {
 }
 
 int vsprintf(char *buffer, const char *fmt, va_list args) {
+  #define COPY while((*buffer++ = *tmp++)); buffer--;
   int num_chr = 0;
   int ret = (int) buffer;
   
-  int n = 0;
+  long n = 0;
   char *tmp = "";
 
   while(*fmt) {
@@ -88,8 +93,10 @@ int vsprintf(char *buffer, const char *fmt, va_list args) {
 	n = 0;
 	
 	fmt++;
-	if(*fmt >= '0' && *fmt <= '9') {
-	  while(*fmt >= '0' && *fmt <= '9') {
+	
+	#define IS_FMT_NUM (*fmt >= '0' && *fmt <= '9')
+	if(IS_FMT_NUM) {
+	  while(IS_FMT_NUM) {
 	    *tmp++ = *fmt++;
 	    n++;
 	  }
@@ -105,20 +112,43 @@ int vsprintf(char *buffer, const char *fmt, va_list args) {
 	  case 'X':
 	  case 'x':
 	    n = va_arg(args, unsigned long int);
-	    hex_str(tmp, n, num_chr ? num_chr : 4);
-	    while((*buffer++ = *tmp++));
+	    hex_str(tmp, n, num_chr);
+	    COPY;
 	    break;
 	  case 'D':
 	  case 'd':
 	    n = va_arg(args, int);
-	    dec_str(tmp, n, num_chr);
-	    while((*buffer++ = *tmp++));
+	    int_dec_str(tmp, n, num_chr, 1);
+	    COPY;
+	    break;
+	  case 'U':
+	  case 'u':
+	    n = va_arg(args, unsigned int);
+	    int_dec_str(tmp, n, num_chr, 0);
+	    COPY;
+	    break;
+	  case 'L':
+	  case 'l':
+	    switch(*fmt++) {
+	      case 'D':
+	      case 'd':
+		n = va_arg(args, long int);
+		int_dec_str(tmp, n, num_chr, 1);
+		COPY;
+		break;
+	      case 'U':
+	      case 'u':
+		n = va_arg(args, unsigned long int);
+		int_dec_str(tmp, n, num_chr, 0);
+		COPY;
+		break;
+	    }
 	    break;
 	  case 'O':
 	  case 'o':
-	    n = va_arg(args, int);
+	    n = va_arg(args, unsigned long int);
 	    oct_str(tmp, n, num_chr);
-	    while((*buffer++ = *tmp++));
+	    COPY;
 	    break;
 	  case 'C':
 	  case 'c':
@@ -128,10 +158,9 @@ int vsprintf(char *buffer, const char *fmt, va_list args) {
 	  case 'S':
 	  case 's':
 	    tmp = va_arg(args, char*);
-	    while((*buffer++ = *tmp++));
+	    COPY;
 	    break;
-	};
-	break;
+	}
     } else { 
 	*buffer++ = *fmt++;
     }

@@ -27,9 +27,7 @@
 
 void init(void) {
   clearscreen();
-  printf("Hello World!\n");
-  printf("Hex: 0x%x\n",1234);
-  printf("Dec: %d\n",  1234);
-  printf("Oct: %o\n",  1234);
-  printf("Str: %s\n", "Hallo");
+  setColor(0x6f);
+  printf("Hello in the OrangePalm World!\n\n");
+  setColor(0x0f);
 }
