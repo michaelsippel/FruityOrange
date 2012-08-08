@@ -1,12 +1,15 @@
-all: kernel
+all: lib kernel
 
 kernel:
 	$(MAKE) -C kernel
+lib:
+	$(MAKE) -C lib
 
-qemu: kernel
+qemu: all
 	qemu -kernel kernel/kernel
 
 clean:
 	$(MAKE) -C kernel clean
+	$(MAKE) -C lib clean
 
-.PHONY: all kernel clean qemu
+.PHONY: all kernel lib clean qemu

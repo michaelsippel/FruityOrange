@@ -27,7 +27,7 @@ void debug(const char *fmt, ...) {
   #if DEBUG_PRINT
     va_list args;
     char t = 0;
-    char *buffer = (char*) &t;
+    char *buffer = (char*) t;
     
     va_start(args, fmt);
     vsprintf(buffer, fmt, args);
