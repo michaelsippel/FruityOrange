@@ -49,24 +49,22 @@ void replace(char *s,int stelle, char *rs){
   s[i] = '\0';
 }
 
-void memset(void *addr, int zeich, size_t n){
+void* memset(void *addr, int zeich, size_t n){
   uint8_t *tmp = (uint8_t*) addr;
   while(n-- > 0) *tmp++ = zeich;
   return addr;
 }
-void* memcpy(void *ziel, const void *quelle, size_t n){
+void memcpy(void *ziel, const void *quelle, size_t n){
     const uint8_t *sp = (const uint8_t *)quelle;
     uint8_t *dp = (uint8_t *)ziel;
     while(n-- > 0) *dp++ = *sp++;
 }
 void strcpy(char *ziel, const char *quelle){
-  while(*ziel++ = *quelle++);
+  while((*ziel++ = *quelle++));
 }
 
 char* strcat(char *dest, const char *src){
-    while (*dest != 0){
-        *dest = *dest++;
-    }
+    while (*dest) dest++;
     
     do{
         *dest++ = *src++;

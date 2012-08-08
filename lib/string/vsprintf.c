@@ -90,7 +90,7 @@ int vsprintf(char *buffer, const char *fmt, va_list args) {
   while(*fmt) {
     if(*fmt == '%') {
 	fmt++;
-	*tmp = "";
+	tmp = "";
 	n = 0;
 	
 	#define IS_FMT_NUM (*fmt >= '0' && *fmt <= '9')

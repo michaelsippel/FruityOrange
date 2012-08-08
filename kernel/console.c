@@ -81,7 +81,7 @@ int printf(const char *format, ...) {
 //   char *buffer = format;
 //   while(*buffer++) i++;
   char t = 0;
-  char *buffer = (char*) t;
+  char *buffer = (char*) &t;
   
   va_start(args, format);
   i = vsprintf(buffer, format, args);
