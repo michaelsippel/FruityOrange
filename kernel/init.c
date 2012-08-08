@@ -39,8 +39,7 @@ void init(void) {
   kinip("Initalizing GDT... ");
     init_gdt();endini();
   kinip("Initaliting Interrupts... ");
-    init_idt();endini();
+    init_idt();init_pic();sti();endini();
   
-  asm volatile("int $0x0");
   while(1);
 }

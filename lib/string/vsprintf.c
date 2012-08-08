@@ -54,7 +54,7 @@ void general_uintformat(char *buf, unsigned long value, int base, int num_chr) {
 }
 
 void hex_str(char *buf, unsigned long value, int num_chr) {
-  general_uintformat(buf, value, 16, num_chr ? num_chr : 4);
+  general_uintformat(buf, value, 16, (num_chr-1) ? num_chr : 6);
 }
 
 void int_dec_str(char *buf, long value, int num_chr, int signd) {
@@ -67,7 +67,7 @@ void int_dec_str(char *buf, long value, int num_chr, int signd) {
 }
 
 void oct_str(char *buf, unsigned long value, int num_chr) {
-  general_uintformat(buf, value, 8, num_chr);
+  general_uintformat(buf, value, 8, (num_chr-1) ? num_chr : 4);
 }
 
 int str_to_num(const char *buf) {
@@ -81,7 +81,7 @@ int str_to_num(const char *buf) {
 
 int vsprintf(char *buffer, const char *fmt, va_list args) {
   #define COPY while(*tmp) *buffer++ = *tmp++;
-  int num_chr = 0;
+  int num_chr = 1;
   int ret = (int) buffer;
   
   long n = 0;
@@ -101,9 +101,9 @@ int vsprintf(char *buffer, const char *fmt, va_list args) {
 	  }
 	  *tmp = '\0';
 	  tmp -= n;
-	  num_chr = str_to_num(tmp);
+	  num_chr = str_to_num(tmp+1);
 	} else {
-	  num_chr = 0;
+	  num_chr = 1;
 	}
 	switch(*fmt++) {
 	  case '%':
