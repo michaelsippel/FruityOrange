@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  kernel/interrupt/handler.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,31 +16,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <alloca.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
+#ifndef _INTHANDLER_H
+#define _INTHANDLER_H
 
-#include <console.h>
-#include <debug.h>
-#include <gdt.h>
-#include <interrupt.h>
-#include <panic.h>
-#include <portio.h>
+extern void test_inthandler0x00(void);
 
-void init(void) {
-  clearscreen();
-  
-  setColor(0x06);
-  printf("Hello in the OrangePalm World!\n\n");
-  setColor(0x0f);
-  kinip("Initalizing GDT... ");
-    init_gdt();endini();
-  kinip("Initaliting Interrupts... ");
-    init_idt();endini();
-  
-  asm volatile("int $0x0");
-  while(1);
-}
+#endif

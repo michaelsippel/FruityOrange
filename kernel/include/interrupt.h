@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  kernel/include/interrupt.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,31 +16,19 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <alloca.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
+#ifndef _INTERRUPT_H
+#define _INTERRUPT_H
+
 #include <stdint.h>
-#include <string.h>
 
-#include <console.h>
-#include <debug.h>
-#include <gdt.h>
-#include <interrupt.h>
-#include <panic.h>
-#include <portio.h>
+#define INTERRUPT_GATE	0x06
+#define TRAP_GATE	0x07
+#define TASK_GATE	0x05
 
-void init(void) {
-  clearscreen();
-  
-  setColor(0x06);
-  printf("Hello in the OrangePalm World!\n\n");
-  setColor(0x0f);
-  kinip("Initalizing GDT... ");
-    init_gdt();endini();
-  kinip("Initaliting Interrupts... ");
-    init_idt();endini();
-  
-  asm volatile("int $0x0");
-  while(1);
-}
+void init_idt(void);
+void load_idt(void);
+
+#define sti() asm volatile("sti");
+#define cli() asm volatile("cli");
+
+#endif
