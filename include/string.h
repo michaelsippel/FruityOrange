@@ -1,5 +1,5 @@
 /**
- *  kernel/include/string.h
+ *  include/string.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -20,7 +20,17 @@
 #define _STRING_H
 
 #include <stdint.h>
+#include <stddef.h>
 
+size_t strlen(char *s);
+void cut(char *s,int stelle,char *os1,char *os2);
+void insert(char *s,int stelle,char *is);
+void replace(char *s,int stelle, char *rs);
+void memset(void *addr, int zeich, size_t n);
+void* memcpy(void *ziel, const void *quelle, size_t n);
+void strcpy(char *ziel, const char *quelle);
+char* strcat(char *dest, const char *src);
+int strcmp(char *str1, char *str2);
 int vsprintf(char *buffer, const char *fmt, va_list args);
 int sprintf(char *buffer, const char *format, ...);
 

@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  kernel/debug.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,29 +16,35 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <alloca.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <string.h>
 
 #include <console.h>
 #include <debug.h>
-#include <gdt.h>
-#include <panic.h>
-#include <portio.h>
 
-void init(void) {
-  clearscreen();
-  
-  setColor(0x06);
-  printf("Hello in the OrangePalm World!\n\n");
-  setColor(0x0f);
-  kinip("Initalizing GDT... ");
-    init_gdt();
-  endini();
-  
-  panic("Panic test");
-  while(1);
+void debug(const char *fmt, ...) {
+  #if DEBUG_PRINT
+    va_list args;
+    char t = 0;
+    char *buffer = (char*) t;
+    
+    va_start(args, fmt);
+    vsprintf(buffer, fmt, args);
+    va_end(args);
+    
+    puts(buffer);
+  #endif
+}
+
+void kinip(char *str) {
+  #if INI_PRINT == 1
+  printf("[kernelinit] %s", str);
+  #endif
+}
+
+void endini(void) {
+  #if INI_PRINT == 1
+  printf("(done)\n");
+  #endif
 }

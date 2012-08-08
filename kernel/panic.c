@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  kernel/panic.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,29 +16,16 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <alloca.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
 #include <console.h>
-#include <debug.h>
-#include <gdt.h>
 #include <panic.h>
-#include <portio.h>
 
-void init(void) {
-  clearscreen();
-  
-  setColor(0x06);
-  printf("Hello in the OrangePalm World!\n\n");
-  setColor(0x0f);
-  kinip("Initalizing GDT... ");
-    init_gdt();
-  endini();
-  
-  panic("Panic test");
-  while(1);
+void panic(const char *msg) {
+  setColor(0xf4);
+  printf("Panic: %s\n", msg);
+  printf("Kernel stopped.\n");
+  while(1) {
+    asm volatile("cli; hlt");
+  }
 }

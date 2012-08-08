@@ -4,13 +4,15 @@ OBJS = $(addsuffix .o,$(basename $(SRCS)))
 CC = gcc
 LD = ld
 
-INC = include
+INC = -Iinclude -I../include
 
 ASFLAGS = -m32
-CFLAGS = -m32 -Wall -g -fno-stack-protector -nostdinc -I$(INC)
+CFLAGS = -m32 -Wall -O3 -fno-stack-protector -fno-builtin -nostdinc $(INC)
 LDFLAGS = -melf_i386 -Tkernel.ld
 
-kernel: $(OBJS)
+KERNEL = kernel
+
+$(KERNEL): $(OBJS) ../lib/libc.a
 	$(LD) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
@@ -21,4 +23,6 @@ kernel: $(OBJS)
 
 clean:
 	rm $(OBJS)
+	rm $(KERNEL)
+
 .PHONY: clean

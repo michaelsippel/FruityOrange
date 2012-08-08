@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include <portio.h>
-
 #include <console.h>
 
 #define VIDEOTEXT_WIDTH  80
@@ -33,19 +32,22 @@ static uint16_t *video_mem = (uint16_t*) 0xB8000;
 static uint8_t color = 0x07;
 static int x = 0, y = 0;
 
-#define VIDEOTEXT_CONTROL if(x > VIDEOTEXT_WIDTH) { \
-			    x = 1; \
-			    if(++y > VIDEOTEXT_HEIGHT){ \
-			      scroll(); \
-			    } \
-			  }
-			  
 #define PUTC(c) video_mem[(x++) + (y*80)] = ( c | (color << 8) );
 #define NEWLINE y ++; x = 0;
 
+void videotext_control(void){
+ if(x > VIDEOTEXT_WIDTH) {
+    x = 1;
+    if(++y > VIDEOTEXT_HEIGHT){
+      scroll();
+    }
+  }
+}
+
 int putchar(char chr) {
   PUTC(chr);
-  VIDEOTEXT_CONTROL;
+  videotext_control();
+  setCursor(x, y);
   return 0;
 }
 
@@ -64,23 +66,22 @@ int puts(const char *str) {
 	PUTC(*str);
 	break;
     }
-    VIDEOTEXT_CONTROL;
-    
-    str++;
+    videotext_control();
     i++;
+    str++;
   }
-  if(*str-1 == '\n'){
-    NEWLINE;
-  }
-  
   setCursor(x, y);
   return i;
 }
 
 int printf(const char *format, ...) {
   va_list args;
-  int i, j;
-  char *buffer = "";
+  int i = 1, j;
+  
+//   char *buffer = format;
+//   while(*buffer++) i++;
+  char t = 0;
+  char *buffer = (char*) t;
   
   va_start(args, format);
   i = vsprintf(buffer, format, args);
@@ -106,9 +107,9 @@ void scroll(void) {
   }
 }
 
-void setCursor(int x, int y) {
+void setCursor(int cx, int cy) {
   uint16_t tmp;
-  tmp = y * VIDEOTEXT_WIDTH + x;
+  tmp = cy * VIDEOTEXT_WIDTH + cx;
   outb(0x3D4,14);
   outb(0x3D5,tmp >> 8);
   outb(0x3D4,15);
@@ -130,7 +131,7 @@ void setBackgroundcolor(uint8_t bcolor) {
 void clearscreen(void) {
   int i;
   for( i = 0; i < (VIDEOTEXT_WIDTH * VIDEOTEXT_HEIGHT); i++){
-    video_mem[i] = 0;
+    video_mem[i] = color << 8;
   }
   setCursor(0, 0);
 }

@@ -80,19 +80,18 @@ int str_to_num(const char *buf) {
 }
 
 int vsprintf(char *buffer, const char *fmt, va_list args) {
-  #define COPY while((*buffer++ = *tmp++)); buffer--;
+  #define COPY while(*tmp) *buffer++ = *tmp++;
   int num_chr = 0;
   int ret = (int) buffer;
   
   long n = 0;
   char *tmp = "";
-
+  
   while(*fmt) {
     if(*fmt == '%') {
-	tmp = "";
-	n = 0;
-	
 	fmt++;
+	*tmp = "";
+	n = 0;
 	
 	#define IS_FMT_NUM (*fmt >= '0' && *fmt <= '9')
 	if(IS_FMT_NUM) {
