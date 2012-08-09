@@ -23,10 +23,10 @@
 #include <portio.h>
 #include <console.h>
 
-#define VIDEOTEXT_WIDTH  80
-#define VIDEOTEXT_HEIGHT 25
-
 #define TABULATOR_SIZE 8
+
+static int videotext_width  = 80;
+static int videotext_height = 25;
 
 static uint16_t *video_mem = (uint16_t*) 0xB8000;
 static uint8_t color = 0x07;
@@ -36,9 +36,9 @@ static int x = 0, y = 0;
 #define NEWLINE y ++; x = 0;
 
 void videotext_control(void){
- if(x > VIDEOTEXT_WIDTH) {
-    x = 1;
-    if(++y > VIDEOTEXT_HEIGHT){
+ if(x > videotext_width) {
+    NEWLINE;
+    if(y >= videotext_height){
       scroll();
     }
   }
@@ -61,6 +61,11 @@ int puts(const char *str) {
 	break;
       case '\t':
 	while(++x % TABULATOR_SIZE != 0);
+	break;
+      case '\r':
+	x--;
+	PUTC(' ');
+	x--;
 	break;
       default:
 	PUTC(*str);
@@ -97,19 +102,19 @@ int printf(const char *format, ...) {
 
 void scroll(void) {
   y --;
-  
+  setCursor(x, y);
   int i;
-  for(i = 0; i < (80 * 24 * 2); i++) {
-    video_mem[i] = video_mem[i + 80 * 2];
+  for(i = 0; i < (videotext_width * (videotext_height-1)); i++) {
+    video_mem[i] = video_mem[i + videotext_width];
   }
-  for(i = 0; i < (80 * 2); i++) {
-    video_mem[i + (80 * 24 * 2)] = 0;
+  for(i = 0; i < (videotext_width * (videotext_height-1)); i++) {
+    video_mem[i + (videotext_width * (videotext_height-1))] = (color << 8);
   }
 }
 
 void setCursor(int cx, int cy) {
   uint16_t tmp;
-  tmp = cy * VIDEOTEXT_WIDTH + cx;
+  tmp = cy * videotext_width + cx;
   outb(0x3D4,14);
   outb(0x3D5,tmp >> 8);
   outb(0x3D4,15);
@@ -130,7 +135,7 @@ void setBackgroundcolor(uint8_t bcolor) {
 
 void clearscreen(void) {
   int i;
-  for( i = 0; i < (VIDEOTEXT_WIDTH * VIDEOTEXT_HEIGHT); i++){
+  for( i = 0; i < (videotext_width * videotext_height); i++){
     video_mem[i] = color << 8;
   }
   setCursor(0, 0);
