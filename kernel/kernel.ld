@@ -7,7 +7,6 @@ SECTIONS
       *   an 1 MB laden, also muessen wir dort die erste Sektion hinlegen
       */
      . = 0x100000;
-     /* -- Kernelanfang -- */
      kernel_start = .;
      /*
       * Der Multiboot-Header muss zuerst kommen (in den ersten 8 kB).
@@ -26,6 +25,5 @@ SECTIONS
       .bss ALIGN(4096) : {
 	  *(.bss)
       }
-      /* -- Kernelende -- */
       kernel_end = .;
 }

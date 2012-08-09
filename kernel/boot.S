@@ -32,6 +32,7 @@
 .global _start
 _start:
     mov $kernel_stack, %esp
+    push %ebx
     call init
     jmp _stop
 

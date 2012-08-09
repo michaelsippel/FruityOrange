@@ -29,21 +29,29 @@
 #include <debug.h>
 #include <gdt.h>
 #include <interrupt.h>
+#include <mm.h>
+#include <multiboot.h>
 #include <panic.h>
 #include <portio.h>
 
-void init(void) {
+void init(struct multiboot_info *mb_info) {
   clearscreen();
   
   setColor(0x06);
-  printf("Hello in the OrangePalm World!\n\n");
-  setColor(0x0f);
+  printf("The OrangePalm kernel is starting now...\n");
+  setColor(0x07);
+  kinip("Initalizing pmm... ");
+    pmm_init(mb_info);endini();
+  printf("\n");
   kinip("Initalizing GDT... ");
     init_gdt();endini();
   kinip("Initalizing interrupts... ");
     init_idt();init_pic();sti();endini();
   kinip("Initalizing keyboard... ");
     init_keyboard();endini();
+  setColor(0x06);
+  printf("The kernel is successfull started!\n");
+  setColor(0x0f);
   
   while(1) {
     printf("%c", getch());
