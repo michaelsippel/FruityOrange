@@ -69,6 +69,14 @@ static void (*irq_handler[16])(void) = {
   NULL, NULL
 };
 
+int set_irq_handler(int irq, void (*handler)(void)) {
+  if(irq_handler[irq] == NULL) {
+    irq_handler[irq] = handler;
+    return 0;
+  }
+  return 1;
+}
+
 cpu_state_t* handle_interrupt(cpu_state_t *cpu) {
   if(cpu->intr <= 0x1f) {
     setColor(0xf4);
@@ -92,4 +100,6 @@ cpu_state_t* handle_interrupt(cpu_state_t *cpu) {
       irq_handler[cpu->intr - 0x20]();
     }
   }
+  
+  return cpu;
 }

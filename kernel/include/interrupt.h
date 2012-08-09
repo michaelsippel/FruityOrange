@@ -40,6 +40,8 @@ void init_pic(void);
 void send_eoi(uint8_t irq);
 void common_eoi(uint32_t intrpt);
 
+int set_irq_handler(int irq, void (*handler)(void));
+
 #define sti() asm volatile("sti");
 #define cli() asm volatile("cli");
 

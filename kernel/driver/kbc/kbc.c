@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  kernel/driver/kbc/kbc.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,36 +16,26 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <alloca.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
-#include <driver/kbc.h>
-#include <driver/keyboard.h>
-#include <console.h>
-#include <debug.h>
-#include <gdt.h>
-#include <interrupt.h>
-#include <panic.h>
 #include <portio.h>
+#include <driver/kbc.h>
 
-void init(void) {
-  clearscreen();
+
+void send_kbc_command(uint8_t port,uint8_t command){
+  static int fz = 3; 
+  uint8_t ret;
   
-  setColor(0x06);
-  printf("Hello in the OrangePalm World!\n\n");
-  setColor(0x0f);
-  kinip("Initalizing GDT... ");
-    init_gdt();endini();
-  kinip("Initalizing interrupts... ");
-    init_idt();init_pic();sti();endini();
-  kinip("Initalizing keyboard... ");
-    init_keyboard();endini();
-  
-  while(1) {
-    printf("%c", getch());
+  while( inb(KBC_PORT_KBCREGISTER) & 0x2 );
+  outb(port, command);
+  while(inb(KBC_PORT_KBCREGISTER) & 0x1);
+  ret = inb(KBC_PORT_KBCDATA);
+
+  if(ret == KBC_COMMAND_OK || fz >= 3){
+    fz = 3;
+    return;
+  }else{
+    --fz;
+    send_kbc_command(port, command);
   }
 }

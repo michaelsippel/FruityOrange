@@ -1,5 +1,5 @@
 /**
- *  kernel/init.c
+ *  kernel/include/driver/kbc.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,36 +16,24 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <alloca.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
+#ifndef _KBC_H
+#define _KBC_H
+
 #include <stdint.h>
-#include <string.h>
 
-#include <driver/kbc.h>
-#include <driver/keyboard.h>
-#include <console.h>
-#include <debug.h>
-#include <gdt.h>
-#include <interrupt.h>
-#include <panic.h>
-#include <portio.h>
+#define KBC_PORT_KBDCOMMAND   0x60 /* command for Keyboard              */
+#define KBC_PORT_KBCDATA      0x60 /* read & write data-buffer          */
+#define KBC_PORT_KBCCOMMAND   0x64 /* command for KBC                   */
+#define KBC_PORT_KBCREGISTER  0x64 /* read register                     */
 
-void init(void) {
-  clearscreen();
-  
-  setColor(0x06);
-  printf("Hello in the OrangePalm World!\n\n");
-  setColor(0x0f);
-  kinip("Initalizing GDT... ");
-    init_gdt();endini();
-  kinip("Initalizing interrupts... ");
-    init_idt();init_pic();sti();endini();
-  kinip("Initalizing keyboard... ");
-    init_keyboard();endini();
-  
-  while(1) {
-    printf("%c", getch());
-  }
-}
+#define KBC_COMM_P1_PORT   0xC0
+#define KBC_COMM_READ_OPP  0xD0
+#define KBC_COMM_WRITE_OPP 0xD1
+#define KBC_COMM_READ_CCB  0x20
+#define KBC_COMM_WRITE_CCB 0x60
+
+#define KBC_COMMAND_OK 0xFA
+
+void send_kbc_command(uint8_t port,uint8_t command);
+
+#endif
