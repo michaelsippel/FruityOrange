@@ -35,12 +35,20 @@ static int x = 0, y = 0;
 #define PUTC(c) video_mem[(x++) + (y*80)] = ( c | (color << 8) );
 #define NEWLINE y ++; x = 0;
 
-void videotext_control(void){
- if(x > videotext_width) {
+void videotext_control(void) {
+  if(x > videotext_width) {
     NEWLINE;
-    if(y >= videotext_height){
-      scroll();
-    }
+  } else if(x < 0) {
+    x = videotext_width-1;
+    y --;
+  }
+  
+  if(y == videotext_height-1 && x == videotext_width) {
+    scroll();
+    NEWLINE;
+  }
+  if(y >= videotext_height) {
+    scroll();
   }
 }
 

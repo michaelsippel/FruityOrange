@@ -41,18 +41,20 @@ void init(struct multiboot_info *mb_info) {
   printf("The OrangePalm kernel is starting now...\n");
   setColor(0x07);
   kinip("Initalizing pmm... ");
-    pmm_init(mb_info);endini();
-  printf("\n");
+    init_pmm(mb_info);endini();
+//   kinip("Initalizing paging... ");
+//     init_vmm();endini();
   kinip("Initalizing GDT... ");
     init_gdt();endini();
   kinip("Initalizing interrupts... ");
     init_idt();init_pic();sti();endini();
   kinip("Initalizing keyboard... ");
     init_keyboard();endini();
+
   setColor(0x06);
   printf("The kernel is successfull started!\n");
-  setColor(0x0f);
   
+  setColor(0x0f);
   while(1) {
     printf("%c", getch());
   }

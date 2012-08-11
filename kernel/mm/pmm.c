@@ -28,7 +28,7 @@ uint32_t bitmap[BITMAP_SIZE];
 uint32_t last_free_page = 0;
 bool can_do_fast_alloc = FALSE;
 
-void pmm_init(struct multiboot_info *mb_info) {
+void init_pmm(struct multiboot_info *mb_info) {
   int i;
   uintptr_t addr;
   
@@ -38,7 +38,7 @@ void pmm_init(struct multiboot_info *mb_info) {
   }
   
   // 2. release the pages, which are marked in BIOS as free
-  struct multiboot_mmap *mmap = mb_info->mbs_mmap_addr;
+  struct multiboot_mmap *mmap = (void*) mb_info->mbs_mmap_addr;
   struct multiboot_mmap *mmap_end = (void*) ((uintptr_t) mb_info->mbs_mmap_addr +
                                                          mb_info->mbs_mmap_length);
   while(mmap < mmap_end) {
@@ -62,7 +62,7 @@ void pmm_init(struct multiboot_info *mb_info) {
   }
   
   // 4. occupy the multiboot-struct
-  struct multiboot_module *modules = mb_info->mbs_mods_addr;
+  struct multiboot_module *modules = (void*) mb_info->mbs_mods_addr;
   pmm_mark_used(mb_info);
   pmm_mark_used(modules);
   
@@ -78,19 +78,22 @@ void pmm_init(struct multiboot_info *mb_info) {
 
 void* pmm_alloc(void) {
   int i, j, k=0;
+  uintptr_t addr;
   if(can_do_fast_alloc) {
     can_do_fast_alloc = FALSE;
     i = last_free_page / sizeof(uint32_t);
     j = last_free_page % sizeof(uint32_t);
     
     bitmap[i] &= ~(1 << j);
-    return last_free_page * PAGE_SIZE;
+    addr = (uintptr_t) last_free_page * PAGE_SIZE;
+    return (void*) addr;
   } else {
     for(i = 0;i < BITMAP_SIZE; i++) {
       for(j = 0;j < sizeof(uint32_t); j++,k++) {
 	if(bitmap[i] & (1 << j)) {
 	  bitmap[i] &= ~(1 << j);
-	  return (uint32_t) k * PAGE_SIZE;
+	  addr = (uintptr_t) k * PAGE_SIZE;
+	  return (void*) addr;
 	}
       }
     }
