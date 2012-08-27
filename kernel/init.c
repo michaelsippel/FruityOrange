@@ -35,6 +35,7 @@
 #include <portio.h>
 
 void init(struct multiboot_info *mb_info) {
+  setColor(0x0f);
   clearscreen();
   
   setColor(0x06);
@@ -42,8 +43,8 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x07);
   kinip("Initalizing pmm... ");
     init_pmm(mb_info);endini();
-//   kinip("Initalizing paging... ");
-//     init_vmm();endini();
+  kinip("Initalizing paging... ");
+    init_vmm();endini();
   kinip("Initalizing GDT... ");
     init_gdt();endini();
   kinip("Initalizing interrupts... ");
@@ -52,7 +53,7 @@ void init(struct multiboot_info *mb_info) {
     init_keyboard();endini();
 
   setColor(0x06);
-  printf("The kernel is successfull started!\n");
+  printf("The OrangePalm kernel is successful started!\n");
   
   setColor(0x0f);
   while(1) {

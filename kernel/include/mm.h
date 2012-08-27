@@ -26,11 +26,21 @@
 #define PMM_USED 0
 #define PAGE_SIZE 0x1000
 #define PAGE_TABLE_SIZE 1024
+#define PAGE_DIR_SIZE 1024
+
+
+#define PTE_PRESENT 0x01
+#define PTE_WRITE   0x02
+#define PTE_USER    0x04
+
+#define VMM_KERNEL_FLAGS PTE_PRESENT | PTE_WRITE
+#define VMM_USER_FLAGS   PTE_PRESENT | PTE_WRITE | PTE_USER
 
 typedef struct vmm_context {
   uint32_t *pagedir;
   uintptr_t pagedir_paddr;
   uintptr_t alloc_offset;
+  uint8_t flags;
 } vmm_context_t;
 
 void init_pmm(struct multiboot_info *mb_info);
@@ -39,7 +49,9 @@ void pmm_free(void *ptr);
 void pmm_mark_used(void *ptr);
 
 void init_vmm(void);
+void vmm_map_kernel(vmm_context_t *context);
 int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
+void* vmm_alloc(void);
 uint32_t* vmm_create_pagetable(vmm_context_t *context, int index);
 void vmm_create_pagedir(vmm_context_t *context);
 vmm_context_t* vmm_create_context(void);

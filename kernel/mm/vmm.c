@@ -1,31 +1,28 @@
 /**
- *  kernel/mm/vmm.c
+ * kernel/mm/vmm.c
  *
- *  (C) Copyright 2012 Michael Sippel
+ * (C) Copyright 2012 Michael Sippel
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdint.h>
 #include <stddef.h>
 
 #include <console.h>
+#include <panic.h>
 #include <multiboot.h>
 #include <mm.h>
-
-#define PTE_PRESENT 0x01
-#define PTE_WRITE   0x02
-#define PTE_USER    0x04
 
 static vmm_context_t *kernel_context;
 static vmm_context_t *current_context;
@@ -33,26 +30,23 @@ static vmm_context_t *current_context;
 void init_vmm(void) {
   uint32_t cr0;
   
+  kernel_context->flags = VMM_KERNEL_FLAGS;
   kernel_context = vmm_create_context();
-  
-  // map kernel
-  uintptr_t addr = (uintptr_t) &kernel_start;
-  while(addr < (uintptr_t) &kernel_end){
-    vmm_map_page(kernel_context, addr, addr);
-    addr += PAGE_SIZE;
-  }
-  // map videomemory (0xB8000 - 0xBFFFF)
-  addr = 0xB8000;
-  while(addr < 0xBFFFF){
-    vmm_map_page(kernel_context, addr, addr);
-    addr += PAGE_SIZE;
-  }
-  
   vmm_activate_context(kernel_context);
   
   asm volatile("mov %%cr0, %0" : "=r" (cr0));
   cr0 |= (1 << 31);
   asm volatile("mov %0, %%cr0" : : "r" (cr0));
+}
+
+void vmm_map_kernel(vmm_context_t *context) {
+  uintptr_t vaddr = 0;
+  uintptr_t paddr = 0;
+  
+  for (paddr = 0; paddr < 4096 * 1024; paddr += PAGE_SIZE) {
+    vmm_map_page(context, vaddr, paddr);
+    vaddr += PAGE_SIZE;
+  }
 }
 
 int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
@@ -61,11 +55,12 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
   int pt_index = page % PAGE_TABLE_SIZE;
   
   uint32_t *page_table;
-  int i;
   
-  // We need 4k-alignment
+  // 4k-alignment needed
   if ((vaddr & 0xFFF) || (paddr & 0xFFF)) {
-    printf("Error: Can't map 0x%x to 0x%x!\n", vaddr, paddr);
+    setColor(0xf4);
+    printf("\nvmm_map_page(): Can't map 0x%x to 0x%x!\n", vaddr, paddr);
+    panic("vmm-mapping error. No 4k alignment!");
     return -1;
   }
   
@@ -79,7 +74,7 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
   }
   
   // entry the mapping in pagetable
-  page_table[pt_index] = paddr | PTE_PRESENT | PTE_WRITE;
+  page_table[pt_index] = paddr | context->flags;
   asm volatile("invlpg %0" : : "m" (*(char*)vaddr));
   
   return 0;
@@ -100,16 +95,19 @@ uint32_t* vmm_create_pagetable(vmm_context_t *context, int index) {
   for (i = 0; i < PAGE_TABLE_SIZE; i++) {
     page_table[i] = 0;
   }
-  context->pagedir[index] = (uint32_t) page_table | PTE_PRESENT | PTE_WRITE;
+  context->pagedir[index] = (uint32_t) page_table | context->flags;
   
   return page_table;
 }
 
 void vmm_create_pagedir(vmm_context_t *context) {
   int i;
-  context->pagedir = (uint32_t) pmm_alloc();
-  context->alloc_offset = 0;
-  for(i = 0; i < PAGE_TABLE_SIZE; i++) {
+  context->pagedir_paddr = (uint32_t) pmm_alloc();
+  context->pagedir = (uint32_t*) 0x1000;
+  vmm_map_page(context, (uintptr_t) context->pagedir, context->pagedir_paddr);
+  context->alloc_offset = 0x2000;
+  
+  for(i = 0; i < PAGE_DIR_SIZE; i++) {
     context->pagedir[i] = 0;
   }
 }
@@ -117,13 +115,14 @@ void vmm_create_pagedir(vmm_context_t *context) {
 vmm_context_t* vmm_create_context(void) {
   vmm_context_t *context = pmm_alloc();
   context->alloc_offset = 0;
-  // create pagedirectory
-  vmm_create_pagedir(context);
+  
+  vmm_create_pagedir(context);// create pagedirectory
+  vmm_map_kernel(context);// entry kernel-mapping
   
   return context;
 }
 
 void vmm_activate_context(vmm_context_t *context) {
   current_context = context;
-  asm volatile("mov %0, %%cr3" : : "r" (context->pagedir));
+  asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));
 }
