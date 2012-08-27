@@ -20,8 +20,8 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <console.h>
-#include <panic.h>
+#include <debug/panic.h>
+#include <driver/console.h>
 #include <multiboot.h>
 #include <mm.h>
 

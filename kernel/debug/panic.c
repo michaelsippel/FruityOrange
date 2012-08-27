@@ -1,5 +1,5 @@
 /**
- *  kernel/debug.c
+ *  kernel/panic.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -17,34 +17,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdint.h>
-#include <stdarg.h>
-#include <string.h>
 
-#include <console.h>
-#include <debug.h>
+#include <driver/console.h>
+#include <debug/panic.h>
 
-void debug(const char *fmt, ...) {
-  #if DEBUG_PRINT
-    va_list args;
-    char t = 0;
-    char *buffer = (char*) t;
-    
-    va_start(args, fmt);
-    vsprintf(buffer, fmt, args);
-    va_end(args);
-    
-    puts(buffer);
-  #endif
-}
-
-void kinip(char *str) {
-  #if INI_PRINT == 1
-  printf("[kernelinit] %s", str);
-  #endif
-}
-
-void endini(void) {
-  #if INI_PRINT == 1
-  printf("(done)\n");
-  #endif
+void panic(const char *msg) {
+  setColor(0xf4);
+  printf("Panic: %s\n", msg);
+  printf("Kernel stopped.\n");
+  while(1) {
+    asm volatile("cli; hlt");
+  }
 }

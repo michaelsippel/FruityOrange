@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include <portio.h>
-#include <console.h>
+#include <driver/console.h>
 
 #define TABULATOR_SIZE 8
 
@@ -138,7 +138,7 @@ void setForegroundColor(uint8_t fcolor) {
 }
 
 void setBackgroundcolor(uint8_t bcolor) {
-  color = ( (color&0x0f) | (bcolor << 8) );
+  color = ( (color&0x0f) | (bcolor << 4) );
 }
 
 void clearscreen(void) {

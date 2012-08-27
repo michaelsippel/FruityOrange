@@ -23,15 +23,15 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <debug/debug.h>
+#include <debug/panic.h>
 #include <driver/kbc.h>
 #include <driver/keyboard.h>
-#include <console.h>
-#include <debug.h>
-#include <gdt.h>
+#include <driver/console.h>
+#include <init/gdt.h>
 #include <interrupt.h>
 #include <mm.h>
 #include <multiboot.h>
-#include <panic.h>
 #include <portio.h>
 
 void init(struct multiboot_info *mb_info) {

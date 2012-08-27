@@ -19,9 +19,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <console.h>
+#include <debug/panic.h>
+#include <driver/console.h>
 #include <cpu.h>
-#include <panic.h>
 
 const char *exception_msg[] = {
   "Divide by Zero",

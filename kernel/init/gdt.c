@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdint.h>
-#include <gdt.h>
+#include <init/gdt.h>
 
 //Acessbyte
 #define GDT_PRESENT 0x80

@@ -20,10 +20,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include <console.h>
 #include <portio.h>
 #include <interrupt.h>
 
+#include <driver/console.h>
 #include <driver/kbc.h>
 #include <driver/keyboard.h>
 
