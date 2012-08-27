@@ -1,23 +1,24 @@
 /**
- * kernel/mm/vmm.c
+ *  kernel/mm/vmm.c
  *
- * (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2012 Michael Sippel
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include <console.h>
 #include <panic.h>
@@ -30,8 +31,35 @@ static vmm_context_t *current_context;
 void init_vmm(void) {
   uint32_t cr0;
   
+  // create kernel-context
   kernel_context->flags = VMM_KERNEL_FLAGS;
   kernel_context = vmm_create_context();
+  
+  // create kernel-mapping
+  uintptr_t vaddr = 0;
+  uintptr_t paddr = 0;
+  
+  // before kernel
+  while(paddr < &kernel_end) {
+    vmm_map_page(kernel_context, paddr, paddr);
+    paddr += PAGE_SIZE;
+  }
+  // kernel
+  vaddr = 0xC0000000;
+  paddr = &kernel_start;
+  while(paddr < &kernel_end) {
+    vmm_map_page(kernel_context, vaddr, paddr);
+    vaddr += PAGE_SIZE;
+    paddr += PAGE_SIZE;
+  }
+  // videomemory (0xB8000 - 0xBFFFF)
+  paddr = 0xB8000;
+  while(paddr < 0xBFFFF) {
+    vmm_map_page(kernel_context, paddr, paddr);
+    paddr += PAGE_SIZE;
+  }
+  
+  // start paging!
   vmm_activate_context(kernel_context);
   
   asm volatile("mov %%cr0, %0" : "=r" (cr0));
@@ -40,12 +68,11 @@ void init_vmm(void) {
 }
 
 void vmm_map_kernel(vmm_context_t *context) {
-  uintptr_t vaddr = 0;
-  uintptr_t paddr = 0;
-  
-  for (paddr = 0; paddr < 4096 * 1024; paddr += PAGE_SIZE) {
-    vmm_map_page(context, vaddr, paddr);
-    vaddr += PAGE_SIZE;
+  while(*kernel_context->pagedir) {
+    *context->pagedir = *kernel_context->pagedir;
+    
+    context->pagedir += sizeof(uintptr_t);
+    kernel_context->pagedir += sizeof(uintptr_t);
   }
 }
 
@@ -58,9 +85,9 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
   
   // 4k-alignment needed
   if ((vaddr & 0xFFF) || (paddr & 0xFFF)) {
-    setColor(0xf4);
-    printf("\nvmm_map_page(): Can't map 0x%x to 0x%x!\n", vaddr, paddr);
-    panic("vmm-mapping error. No 4k alignment!");
+    char msg[70];
+    sprintf(msg, "vmm_map_page(): Can't map 0x%x to 0x%x! No 4k alignment!", vaddr, paddr);
+    panic(msg);
     return -1;
   }
   
