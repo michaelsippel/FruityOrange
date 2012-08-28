@@ -20,6 +20,7 @@
 #define _MM_H
 
 #include <stdint.h>
+#include <stddef.h>
 #include <multiboot.h>
 
 #define PMM_FREE 1
@@ -43,18 +44,35 @@ typedef struct vmm_context {
   uint8_t flags;
 } vmm_context_t;
 
+typedef struct alloc_nd {
+  int bytes;
+  struct alloc_nd *prev_nd;
+  struct alloc_nd *next_nd;
+} alloc_nd_t;
+
+// pmm
 void init_pmm(struct multiboot_info *mb_info);
-void* pmm_alloc(void);
+void *pmm_alloc(void);
 void pmm_free(void *ptr);
 void pmm_mark_used(void *ptr);
 
+// vmm
 void init_vmm(void);
 void vmm_map_kernel(vmm_context_t *context);
 int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
-void* vmm_alloc(void);
-uint32_t* vmm_create_pagetable(vmm_context_t *context, int index);
+void *vmm_alloc(void);
+void *vmm_alloc_pages(size_t num);
+uint32_t *vmm_create_pagetable(vmm_context_t *context, int index);
 void vmm_create_pagedir(vmm_context_t *context);
-vmm_context_t* vmm_create_context(void);
+vmm_context_t *vmm_create_context(void);
 void vmm_activate_context(vmm_context_t *context);
+
+// heap
+void init_heap(void);
+alloc_nd_t *mk_nd(uintptr_t addr, size_t bytes, alloc_nd_t *next, alloc_nd_t *prev);
+void *malloc(size_t bytes);
+void *calloc(size_t num, size_t size);
+void *realloc(void *ptr, size_t bytes);
+void free(void *ptr);
 
 #endif

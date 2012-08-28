@@ -45,6 +45,8 @@ void init(struct multiboot_info *mb_info) {
     init_pmm(mb_info);endini();
   kinip("Initalizing paging... ");
     init_vmm();endini();
+  kinip("Initalizing kernel-heap... ");
+    init_heap();endini();
   kinip("Initalizing GDT... ");
     init_gdt();endini();
   kinip("Initalizing interrupts... ");

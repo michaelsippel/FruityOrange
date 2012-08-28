@@ -107,16 +107,29 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
   return 0;
 }
 
-void* vmm_alloc(void) {
+void *vmm_alloc(void) {
   uintptr_t paddr = (uintptr_t) pmm_alloc();
   uintptr_t vaddr = current_context->alloc_offset;
-  current_context->alloc_offset += PAGE_SIZE;
   vmm_map_page(current_context, vaddr, paddr);
+  current_context->alloc_offset += PAGE_SIZE;
   
   return (void*) vaddr;
 }
 
-uint32_t* vmm_create_pagetable(vmm_context_t *context, int index) {
+void *vmm_alloc_pages(size_t num) {
+  uintptr_t paddr, vaddr;
+  void *start_addr = (void*) current_context->alloc_offset;
+  while(num--) {
+    paddr = (uintptr_t) pmm_alloc();
+    vaddr = current_context->alloc_offset;
+    vmm_map_page(current_context, vaddr, paddr);
+    current_context->alloc_offset += PAGE_SIZE;
+  }
+  
+  return start_addr;
+}
+
+uint32_t *vmm_create_pagetable(vmm_context_t *context, int index) {
   uint32_t *page_table = pmm_alloc();
   int i;
   for (i = 0; i < PAGE_TABLE_SIZE; i++) {
@@ -132,16 +145,15 @@ void vmm_create_pagedir(vmm_context_t *context) {
   context->pagedir_paddr = (uint32_t) pmm_alloc();
   context->pagedir = (uint32_t*) 0x1000;
   vmm_map_page(context, (uintptr_t) context->pagedir, context->pagedir_paddr);
-  context->alloc_offset = 0x2000;
   
   for(i = 0; i < PAGE_DIR_SIZE; i++) {
     context->pagedir[i] = 0;
   }
 }
 
-vmm_context_t* vmm_create_context(void) {
+vmm_context_t *vmm_create_context(void) {
   vmm_context_t *context = pmm_alloc();
-  context->alloc_offset = 0;
+  context->alloc_offset = 0x2000;
   
   vmm_create_pagedir(context);// create pagedirectory
   vmm_map_kernel(context);// entry kernel-mapping
