@@ -18,6 +18,7 @@
  */
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #include <string.h>
 
@@ -70,15 +71,6 @@ void oct_str(char *buf, unsigned long value, int num_chr) {
   general_uintformat(buf, value, 8, (num_chr-1) ? num_chr : 4);
 }
 
-int str_to_num(const char *buf) {
-  int num = 0;
-  while(*buf) {
-    num *= 10;
-    num += *buf++ - '0';
-  }
-  return num;
-}
-
 int vsprintf(char *buffer, const char *fmt, va_list args) {
   #define COPY while(*tmp) *buffer++ = *tmp++;
   int num_chr = 1;
@@ -101,7 +93,7 @@ int vsprintf(char *buffer, const char *fmt, va_list args) {
 	  }
 	  *tmp = '\0';
 	  tmp -= n;
-	  num_chr = str_to_num(tmp+1);
+	  num_chr = atoi(tmp+1);
 	} else {
 	  num_chr = 1;
 	}

@@ -1,5 +1,5 @@
 /**
- *  include/string.h
+ *  lib/string/mem.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,26 +16,25 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STRING_H
-#define _STRING_H
-
 #include <stdint.h>
 #include <stddef.h>
-#include <stdarg.h>
 
-size_t strlen(char *s);
-void cut(char *s,int pos,char *os1,char *os2);
-void insert(char *s,int pos,char *is);
-void replace(char *s,int pos, char *rs);
-void strcpy(char *dest, const char *src);
-char *strcat(char *dest, const char *src);
-int strcmp(char *str1, char *str2);
+#include <string.h>
 
-void *memset(void *addr, int zeich, size_t n);
-void *memclr(void *addr, size_t n);
-void memcpy(void *dest, const void *src, size_t n);
+void *memset(void *addr, int zeich, size_t n){
+  uint8_t *tmp = (uint8_t*) addr;
+  while(n-- > 0) *tmp++ = zeich;
+  return addr;
+}
 
-int vsprintf(char *buffer, const char *fmt, va_list args);
-int sprintf(char *buffer, const char *format, ...);
+void *memclr(void *addr, size_t n) {
+  uint8_t *tmp = (uint8_t*) addr;
+  while(n-- > 0) *tmp++ = 0;
+  return addr;
+}
 
-#endif
+void memcpy(void *dest, const void *src, size_t n){
+    const uint8_t *sp = (const uint8_t *)dest;
+    uint8_t *dp = (uint8_t *)dest;
+    while(n-- > 0) *dp++ = *sp++;
+}

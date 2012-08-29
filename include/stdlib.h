@@ -1,5 +1,5 @@
 /**
- *  include/string.h
+ *  include/stdlib.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,26 +16,26 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STRING_H
-#define _STRING_H
+#ifndef _STDLIB_H
+#define _STDLIB_H
 
 #include <stdint.h>
-#include <stddef.h>
-#include <stdarg.h>
 
-size_t strlen(char *s);
-void cut(char *s,int pos,char *os1,char *os2);
-void insert(char *s,int pos,char *is);
-void replace(char *s,int pos, char *rs);
-void strcpy(char *dest, const char *src);
-char *strcat(char *dest, const char *src);
-int strcmp(char *str1, char *str2);
+typedef struct div {
+  int quot;
+  int rem;
+} div_t;
 
-void *memset(void *addr, int zeich, size_t n);
-void *memclr(void *addr, size_t n);
-void memcpy(void *dest, const void *src, size_t n);
+typedef struct ldiv {
+  long int quot;
+  long int rem;
+} ldiv_t;
 
-int vsprintf(char *buffer, const char *fmt, va_list args);
-int sprintf(char *buffer, const char *format, ...);
+long int labs(long int j);
+int abs(int j);
+int atoi(const char *string);
+long int atol(const char *string);
+div_t div(int count, int deniminator);
+ldiv_t ldiv(long int count, long int deniminator);
 
 #endif

@@ -17,10 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <alloca.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <debug/debug.h>

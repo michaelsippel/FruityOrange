@@ -1,5 +1,5 @@
 /**
- *  include/string.h
+ *  include/math.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,26 +16,20 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STRING_H
-#define _STRING_H
+#ifndef _MATH_H
+#define _MATH_H
 
-#include <stdint.h>
-#include <stddef.h>
-#include <stdarg.h>
+#define PI 3.1415926535897932384626433832795
+#define E  2.818281828
+#define pi() PI
+#define e() E
 
-size_t strlen(char *s);
-void cut(char *s,int pos,char *os1,char *os2);
-void insert(char *s,int pos,char *is);
-void replace(char *s,int pos, char *rs);
-void strcpy(char *dest, const char *src);
-char *strcat(char *dest, const char *src);
-int strcmp(char *str1, char *str2);
-
-void *memset(void *addr, int zeich, size_t n);
-void *memclr(void *addr, size_t n);
-void memcpy(void *dest, const void *src, size_t n);
-
-int vsprintf(char *buffer, const char *fmt, va_list args);
-int sprintf(char *buffer, const char *format, ...);
+double ceil(double x);
+double exp(double x);
+double fabs(double x);
+double floor(double x);
+double ldexp(double x, int exp);
+double pow(double base, double exp);
+double perc(double part, double all);
 
 #endif

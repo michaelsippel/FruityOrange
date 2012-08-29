@@ -1,5 +1,5 @@
 /**
- *  include/string.h
+ *  include/lib/math.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,26 +16,41 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STRING_H
-#define _STRING_H
-
 #include <stdint.h>
-#include <stddef.h>
-#include <stdarg.h>
+#include <math.h>
 
-size_t strlen(char *s);
-void cut(char *s,int pos,char *os1,char *os2);
-void insert(char *s,int pos,char *is);
-void replace(char *s,int pos, char *rs);
-void strcpy(char *dest, const char *src);
-char *strcat(char *dest, const char *src);
-int strcmp(char *str1, char *str2);
+double ceil(double x) {
+  if((x - (int)x) > 0) {
+    return x+1;
+  } else {
+    return x;
+  }
+}
 
-void *memset(void *addr, int zeich, size_t n);
-void *memclr(void *addr, size_t n);
-void memcpy(void *dest, const void *src, size_t n);
+double exp(double x) {
+  return pow(E, x);
+}
 
-int vsprintf(char *buffer, const char *fmt, va_list args);
-int sprintf(char *buffer, const char *format, ...);
+double fabs(double x) {
+  if(x < 0) return (-x);
+  return x;
+}
 
-#endif
+double floor(double x) {
+  return (double)((int) x);
+}
+
+double ldexp(double x, int exp) {
+  return pow(x*2,exp);
+}
+
+double pow(double base, double exp) {
+  double ret = base;
+  int i;
+  for(i = 0; i < exp; i++) ret *= ret;
+  return ret;
+}
+
+double perc(double part, double all) {
+  return ( (part / all) * (double)100.0 );
+}

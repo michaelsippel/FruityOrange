@@ -1,5 +1,5 @@
 /**
- *  include/string.h
+ *  lib/stdlib/stdlib.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,26 +16,29 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STRING_H
-#define _STRING_H
-
 #include <stdint.h>
-#include <stddef.h>
-#include <stdarg.h>
+#include <stdlib.h>
 
-size_t strlen(char *s);
-void cut(char *s,int pos,char *os1,char *os2);
-void insert(char *s,int pos,char *is);
-void replace(char *s,int pos, char *rs);
-void strcpy(char *dest, const char *src);
-char *strcat(char *dest, const char *src);
-int strcmp(char *str1, char *str2);
+long int labs(long int j){
+  return (j < 0) ? (-j) : j;
+}
 
-void *memset(void *addr, int zeich, size_t n);
-void *memclr(void *addr, size_t n);
-void memcpy(void *dest, const void *src, size_t n);
+int abs(int j){
+  return (j < 0) ? (-j) : j;
+}
 
-int vsprintf(char *buffer, const char *fmt, va_list args);
-int sprintf(char *buffer, const char *format, ...);
+div_t div(int count, int deniminator) {
+  div_t data;
+  data.quot = (int) (count / deniminator);
+  data.rem = (int) (count % deniminator);
+  
+  return data;
+}
 
-#endif
+ldiv_t ldiv(long int count, long int deniminator) {
+  ldiv_t data;
+  data.quot = (long int) (count / deniminator);
+  data.rem = (long int) (count % deniminator);
+  
+  return data;
+}

@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include <string.h>
 
 size_t strlen(char *s){
     int i;
@@ -27,43 +28,33 @@ size_t strlen(char *s){
     return(i);
 }
 
-void cut(char *s,int stelle,char *os1,char *os2){
+void cut(char *s,int pos,char *os1,char *os2){
   int i = 0;
-  while(i<stelle) {*os1++ = *s++;i++;}
+  while(i<pos) {*os1++ = *s++;i++;}
   os1[i] = '\0';
   while(*s !='\0') {*os2++ = *s++;}
   os2[i] = '\0';
 }
 
-void insert(char *s,int stelle,char *is){
+void insert(char *s,int pos,char *is){
   size_t i,j;
   char *bufferU = 0,*buffer = 0;
-  cut(s,stelle,bufferU,buffer);
-  for(i=0,j=stelle;i<strlen(is);i++,j++)s[j] = is[i];
+  cut(s,pos,bufferU,buffer);
+  for(i=0,j=pos;i<strlen(is);i++,j++)s[j] = is[i];
   for(i=0;buffer[i]!='\0';i++,j++)s[j] = buffer[i];
 }
 
-void replace(char *s,int stelle, char *rs){
+void replace(char *s,int pos, char *rs){
   int i,j;
-  for(i=stelle,j=0;rs[j]!='\0';i++,j++)s[i]=rs[j];
+  for(i=pos,j=0;rs[j]!='\0';i++,j++)s[i]=rs[j];
   s[i] = '\0';
 }
 
-void* memset(void *addr, int zeich, size_t n){
-  uint8_t *tmp = (uint8_t*) addr;
-  while(n-- > 0) *tmp++ = zeich;
-  return addr;
-}
-void memcpy(void *ziel, const void *quelle, size_t n){
-    const uint8_t *sp = (const uint8_t *)quelle;
-    uint8_t *dp = (uint8_t *)ziel;
-    while(n-- > 0) *dp++ = *sp++;
-}
-void strcpy(char *ziel, const char *quelle){
-  while((*ziel++ = *quelle++));
+void strcpy(char *dest, const char *src){
+  while((*dest++ = *src++));
 }
 
-char* strcat(char *dest, const char *src){
+char *strcat(char *dest, const char *src){
     while (*dest) dest++;
     
     do{
