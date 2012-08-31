@@ -31,9 +31,10 @@ void strcpy(char *dest, const char *src);
 char *strcat(char *dest, const char *src);
 int strcmp(char *str1, char *str2);
 
+void *memcpy(void *dest, const void *src, size_t n);
+void *memmove(void *dest, const void *src, size_t n);
 void *memset(void *addr, int zeich, size_t n);
 void *memclr(void *addr, size_t n);
-void memcpy(void *dest, const void *src, size_t n);
 
 int vsprintf(char *buffer, const char *fmt, va_list args);
 int sprintf(char *buffer, const char *format, ...);

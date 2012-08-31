@@ -21,9 +21,25 @@
 
 #include <string.h>
 
-void *memset(void *addr, int zeich, size_t n){
+void *memcpy(void *dest, const void *src, size_t n) {
+  const uint8_t *sp = (const uint8_t *) src;
+  uint8_t *dp = (uint8_t *) dest;
+  while(n-- > 0) *dp++ = *sp++;
+  
+  return dest;
+}
+
+void *memmove(void *dest, const void *src, size_t n) {
+  const uint8_t *sp = (const uint8_t *) src+n;
+  uint8_t *dp = (uint8_t *) dest+n;
+  while(n-- > 0) *dp-- = *sp--;
+  
+  return dest;
+}
+
+void *memset(void *addr, int value, size_t n) {
   uint8_t *tmp = (uint8_t*) addr;
-  while(n-- > 0) *tmp++ = zeich;
+  while(n-- > 0) *tmp++ = value;
   return addr;
 }
 
@@ -31,10 +47,4 @@ void *memclr(void *addr, size_t n) {
   uint8_t *tmp = (uint8_t*) addr;
   while(n-- > 0) *tmp++ = 0;
   return addr;
-}
-
-void memcpy(void *dest, const void *src, size_t n){
-    const uint8_t *sp = (const uint8_t *)dest;
-    uint8_t *dp = (uint8_t *)dest;
-    while(n-- > 0) *dp++ = *sp++;
 }

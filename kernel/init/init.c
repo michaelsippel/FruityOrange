@@ -41,7 +41,7 @@ void init(struct multiboot_info *mb_info) {
   clearscreen();
   
   setColor(0x06);
-  printf("The OrangePalm kernel is starting now...\n");
+  printf("The Fruity-kernel is starting now...\n");
   setColor(0x07);
   kinip("Initalizing pmm... ");
     init_pmm(mb_info);endini();
@@ -57,7 +57,7 @@ void init(struct multiboot_info *mb_info) {
     init_keyboard();endini();
 
   setColor(0x06);
-  printf("The OrangePalm kernel is successful started!\n");
+  printf("The kernel is successful started!\n");
   
   setColor(0x0f);
   while(1) {
