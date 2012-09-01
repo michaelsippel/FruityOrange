@@ -63,6 +63,7 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
 void *vmm_alloc(void);
 void *vmm_alloc_pages(size_t num);
 uint32_t *vmm_create_pagetable(vmm_context_t *context, int index);
+uint32_t *get_pagedir(vmm_context_t *context);
 void vmm_create_pagedir(vmm_context_t *context);
 vmm_context_t *vmm_create_context(void);
 void vmm_activate_context(vmm_context_t *context);

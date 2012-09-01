@@ -55,7 +55,7 @@ void init(struct multiboot_info *mb_info) {
     init_idt();init_pic();sti();endini();
   kinip("Initalizing keyboard... ");
     init_keyboard();endini();
-
+  
   setColor(0x06);
   printf("The kernel is successful started!\n");
   
