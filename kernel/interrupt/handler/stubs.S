@@ -95,7 +95,7 @@ common_intr_handler:
   
   push %esp
   call handle_interrupt
-  add $4, %esp
+  mov %eax, %esp
   
   pop %eax
   pop %ebx

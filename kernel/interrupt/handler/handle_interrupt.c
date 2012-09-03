@@ -77,7 +77,9 @@ int set_irq_handler(int irq, void (*handler)(void)) {
   return 1;
 }
 
+static cpu_state_t *new_cpu;
 cpu_state_t* handle_interrupt(cpu_state_t *cpu) {
+  new_cpu = cpu;
   if(cpu->intr <= 0x1f) {
     setColor(0xf4);
     printf("Exception occured: #%s!\n",exception_msg[cpu->intr]);
@@ -101,5 +103,13 @@ cpu_state_t* handle_interrupt(cpu_state_t *cpu) {
     }
   }
   
-  return cpu;
+  return new_cpu;
+}
+
+void set_cpu_state(cpu_state_t *cpu) {
+  new_cpu = cpu;
+}
+
+cpu_state_t *get_cpu_state(void) {
+  return new_cpu;
 }

@@ -16,6 +16,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <sys/types.h>
 #include <alloca.h>
 #include <math.h>
 #include <stdarg.h>
@@ -31,10 +32,17 @@
 #include <driver/keyboard.h>
 #include <driver/console.h>
 #include <init/gdt.h>
+#include <proc/scheduler.h>
+#include <proc/task.h>
 #include <interrupt.h>
 #include <mm.h>
 #include <multiboot.h>
 #include <portio.h>
+
+void test_proc(void) {
+  printf("Hello test-process!\n");
+  while(1);
+}
 
 void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
@@ -53,6 +61,8 @@ void init(struct multiboot_info *mb_info) {
     init_gdt();endini();
   kinip("Initalizing interrupts... ");
     init_idt();init_pic();sti();endini();
+  kinip("Initalizing scheduler... ");
+    init_scheduler();endini();
   kinip("Initalizing keyboard... ");
     init_keyboard();endini();
   
@@ -60,6 +70,7 @@ void init(struct multiboot_info *mb_info) {
   printf("The kernel is successful started!\n");
   
   setColor(0x0f);
+  create_proc(test_proc, "Test-process", 0);
   while(1) {
     printf("%c", getch());
   }
