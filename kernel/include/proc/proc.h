@@ -1,5 +1,5 @@
 /**
- *  kernel/include/interrupt.h
+ *  kernel/include/proc/proc.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,37 +16,30 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _INTERRUPT_H
-#define _INTERRUPT_H
+#ifndef _PROC_H
+#define _PROC_H
 
+#include <sys/types.h>
 #include <stdint.h>
+
 #include <cpu.h>
+#include <mm.h>
 
-#define INTERRUPT_GATE	0x06
-#define TRAP_GATE	0x07
-#define TASK_GATE	0x05
+typedef struct proc {
+  char *name;
+  pid_t pid;
+  uid_t uid;
+  int ticks;
+  cpu_state_t *cpu;
+  vmm_context_t *context;
+  size_t used_mem_pages;
+  
+  struct proc *next;
+  struct proc *prev;
+} proc_t;
 
-#define FIRST_EXEPTION 0x00
-#define EXEPTION_NUM   0x1F
-#define LAST_EXEPTION  (FIRST_EXEPTION + EXEPTION_NUM)
-
-#define IRQ_NUM   0xF
-#define FIRST_IRQ 0x20
-#define LAST_IRQ  (FIRST_IRQ + IRQ_NUM)
-
-void init_idt(void);
-void load_idt(void);
-
-void init_pic(void);
-void send_eoi(uint8_t irq);
-void common_eoi(uint32_t intrpt);
-
-int set_irq_handler(int irq, void (*handler)(void));
-void set_cpu_state(cpu_state_t *cpu);
-cpu_state_t *get_cpu_state(void);
-
-
-#define sti() asm volatile("sti");
-#define cli() asm volatile("cli");
+proc_t *create_proc(void *entry, char *name, uint8_t dpl);
+int exit_proc(proc_t *proc, int status);
+int kill_proc(proc_t *proc, int status);
 
 #endif

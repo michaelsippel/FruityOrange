@@ -22,34 +22,31 @@
 #include <mm.h>
 #include <interrupt.h>
 #include <proc/scheduler.h>
-#include <proc/task.h>
+#include <proc/proc.h>
 
 static proc_t *current_proc = NULL;
 extern proc_t *first_proc;
 
 void init_scheduler(void) {
-  set_irq_handler(0x0, timer_irq_handler);
+  set_irq_handler(0x0, schedule);
 }
 
-void timer_irq_handler(void) {
-  cpu_state_t *cpu = get_cpu_state();
-  cpu_state_t *new_cpu = schedule(cpu);
-  if(cpu != new_cpu) {
-    set_cpu_state(new_cpu);
-    if(current_proc->context != NULL) {
-      vmm_activate_context(current_proc->context);
-    } else {
-      
+void schedule(void) {
+  if(current_proc != NULL) {
+    cpu_state_t *cpu = get_cpu_state();
+    current_proc->cpu = cpu;
+    
+    current_proc = current_proc->next;
+    
+    cpu_state_t *new_cpu = current_proc->cpu;
+    if(cpu != new_cpu) {
+      set_cpu_state(new_cpu);
+    }
+  } else {
+    if(first_proc != NULL) {
+      current_proc = first_proc;
+      set_cpu_state(current_proc->cpu);
     }
   }
-}
-
-cpu_state_t *schedule(cpu_state_t *cpu) {
-  if(current_proc != NULL) {
-    current_proc = current_proc->next;
-    cpu = current_proc->cpu;
-  } else {
-    current_proc = first_proc;
-  }
-  return cpu;
+  common_eoi(0x20);
 }

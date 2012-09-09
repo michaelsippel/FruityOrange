@@ -126,7 +126,7 @@ void *vmm_alloc(void) {
 
 void *vmm_alloc_pages(size_t num) {
   uintptr_t paddr, vaddr;
-  void *start_addr = (void*) current_context->alloc_offset;
+  uintptr_t start_addr = (void*) current_context->alloc_offset;
   while(num--) {
     paddr = (uintptr_t) pmm_alloc();
     vaddr = current_context->alloc_offset;
@@ -134,7 +134,7 @@ void *vmm_alloc_pages(size_t num) {
     current_context->alloc_offset += PAGE_SIZE;
   }
   
-  return start_addr;
+  return (void*) start_addr;
 }
 
 uint32_t *vmm_create_pagetable(vmm_context_t *context, int index) {

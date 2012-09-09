@@ -33,15 +33,24 @@
 #include <driver/console.h>
 #include <init/gdt.h>
 #include <proc/scheduler.h>
+#include <proc/proc.h>
 #include <proc/task.h>
+#include <proc/thread.h>
 #include <interrupt.h>
 #include <mm.h>
 #include <multiboot.h>
 #include <portio.h>
 
-void test_proc(void) {
-  printf("Hello test-process!\n");
-  while(1);
+void proc_a(void) {
+  while(1) {
+    printf("A");
+  }
+}
+
+void proc_b(void) {
+  while(1) {
+    printf("B");
+  }
 }
 
 void init(struct multiboot_info *mb_info) {
@@ -70,7 +79,8 @@ void init(struct multiboot_info *mb_info) {
   printf("The kernel is successful started!\n");
   
   setColor(0x0f);
-  create_proc(test_proc, "Test-process", 0);
+  create_proc(proc_a, "process A", 0);
+  create_proc(proc_b, "process B", 0);
   while(1) {
     printf("%c", getch());
   }

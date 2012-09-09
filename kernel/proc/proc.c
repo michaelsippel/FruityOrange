@@ -1,5 +1,5 @@
 /**
- *  kernel/proc/task.c
+ *  kernel/proc/proc.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -22,7 +22,7 @@
 #include <cpu.h>
 #include <mm.h>
 #include <proc/scheduler.h>
-#include <proc/task.h>
+#include <proc/proc.h>
 
 static pid_t proc_count = 0;
 static size_t stack_size = 0x1000;
@@ -46,10 +46,10 @@ proc_t *create_proc(void *entry, char *name, uint8_t dpl) {
     .cs = 0x08 | (dpl&2) | (dpl&1)*0x10,
     .ss = 0x10 | (dpl&2) | (dpl&1)*0x10,
     
-    .eflags = 0x202,
+    .eflags = 0x200,
   };
   
-  proc_t *proc = vmm_alloc();//malloc(sizeof(proc_t));
+  proc_t *proc = vmm_alloc();
   
   strcpy(proc->name, name, sizeof(name));
   proc->pid = proc_count++;
@@ -67,6 +67,13 @@ proc_t *create_proc(void *entry, char *name, uint8_t dpl) {
     proc->next = proc;
     proc->prev = proc;
     first_proc = proc;
+  } else {
+    first_proc->prev->next = proc;
+    proc->prev = first_proc->prev;
+    first_proc->prev = proc;
+    proc->next = first_proc;
+    
+//     first_proc = proc;
   }
   
   return proc;

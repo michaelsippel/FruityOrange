@@ -22,26 +22,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-#include <cpu.h>
+#include <proc/proc.h>
+// #include <proc/thread.h>
 #include <iostream.h>
-#include <mm.h>
 
-struct proc;
-struct task;
 struct thread;
-
-typedef struct proc {
-  char *name;
-  pid_t pid;
-  uid_t uid;
-  int ticks;
-  cpu_state_t *cpu;
-  vmm_context_t *context;
-  size_t used_mem_pages;
-  
-  struct proc *next;
-  struct proc *prev;
-} proc_t;
 
 typedef struct task {
   proc_t *proc;
@@ -51,14 +36,8 @@ typedef struct task {
   struct thread **threads;
 } task_t;
 
-typedef struct thread {
-  tid_t tid;
-  proc_t *proc;
-  task_t *parent;
-} thread_t;
-
-proc_t *create_proc(void *entry, char *name, uint8_t dpl);
 task_t *create_task(void *entry, char *name);
-thread_t *create_thread(task_t *task, void *entry);
+int exit_task(task_t task, int status);
+int kill_task(task_t task, int status);
 
 #endif

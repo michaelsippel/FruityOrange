@@ -23,7 +23,6 @@
 #include <cpu.h>
 
 void init_scheduler(void);
-void timer_irq_handler(void);
-cpu_state_t *schedule(cpu_state_t *cpu);
+void schedule(void);
 
 #endif
