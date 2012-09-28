@@ -65,26 +65,31 @@ int_stub_nrm 0x1D //Reserved Interrupt
 int_stub_nrm 0x1E //Reserved Interrupt
 int_stub_nrm 0x1F //Reserved Interrupt
 
-int_stub_nrm 0x20
-int_stub_nrm 0x21
-int_stub_nrm 0x22
-int_stub_nrm 0x23
-int_stub_nrm 0x24
-int_stub_nrm 0x25
-int_stub_nrm 0x26
-int_stub_nrm 0x27
-int_stub_nrm 0x28
-int_stub_nrm 0x29
-int_stub_nrm 0x2A
-int_stub_nrm 0x2B
-int_stub_nrm 0x2C
-int_stub_nrm 0x2D
-int_stub_nrm 0x2E
-int_stub_nrm 0x2F
+int_stub_nrm 0x20 // PIT
+int_stub_nrm 0x21 // Keyboard (KBC)
+int_stub_nrm 0x22 // twice PIC
+int_stub_nrm 0x23 // RS-232
+int_stub_nrm 0x24 // RS-232
+int_stub_nrm 0x25 // LPT 2
+int_stub_nrm 0x26 // FDC
+int_stub_nrm 0x27 // LPT 1 & Spurious interrupt
+int_stub_nrm 0x28 // RTC
+int_stub_nrm 0x29 // free
+int_stub_nrm 0x2A // 4. ATA / ATAPI / (E)IDE
+int_stub_nrm 0x2B // 3. ATA / ATAPI / (E)IDE
+int_stub_nrm 0x2C // Mouse (KBC)
+int_stub_nrm 0x2D // FPU
+int_stub_nrm 0x2E // 1. ATA / ATAPI / (E)IDE
+int_stub_nrm 0x2F // 2. ATA / ATAPI / (E)IDE
 
 .extern handle_interrupt
 .extern common_eoi
 common_intr_handler:
+  push %gs
+  push %fs
+  push %es
+  push %ds
+  
   push %ebp
   push %edi
   push %esi
@@ -93,9 +98,19 @@ common_intr_handler:
   push %ebx
   push %eax
   
+  // load kernel-data-segments
+  mov $0x10, %ax
+  mov %ax, %ds
+  mov %ax, %es
+  
   push %esp
   call handle_interrupt
   mov %eax, %esp
+  
+  // load user-data-segments
+  mov $0x23, %ax
+  mov %ax, %ds
+  mov %ax, %es
   
   pop %eax
   pop %ebx
@@ -105,6 +120,12 @@ common_intr_handler:
   pop %edi
   pop %ebp
   
+  pop %ds
+  pop %es
+  pop %fs
+  pop %gs
+  
+  // interrupt number is already at the stack
   call common_eoi
   add $8, %esp
   iret

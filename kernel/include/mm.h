@@ -26,19 +26,24 @@
 #define PMM_FREE 1
 #define PMM_USED 0
 #define PAGE_SIZE 0x1000
-#define PAGE_TABLE_SIZE 1024
-#define PAGE_DIR_SIZE 1024
+#define PD_SIZE 1024
+#define PT_SIZE 1024
 
+#define PAGE_INDEX(x) (x / PAGE_SIZE)
+#define PD_INDEX(x) (x / PT_SIZE)
+#define PT_INDEX(x) (x % PT_SIZE)
 
-#define PTE_PRESENT 0x01
-#define PTE_WRITE   0x02
-#define PTE_USER    0x04
+#define VMM_PRESENT 0x01
+#define VMM_WRITE   0x02
+#define VMM_USER    0x04
+#define VMM_KERNEL_FLAGS VMM_PRESENT | VMM_WRITE
+#define VMM_USER_FLAGS   VMM_PRESENT | VMM_WRITE | VMM_USER
 
-#define VMM_KERNEL_FLAGS PTE_PRESENT | PTE_WRITE
-#define VMM_USER_FLAGS   PTE_PRESENT | PTE_WRITE | PTE_USER
+typedef uint32_t vmm_pd_t;
+typedef uint32_t vmm_pt_t;
 
 typedef struct vmm_context {
-  uint32_t *pagedir;
+  vmm_pd_t *pagedir;
   uintptr_t pagedir_paddr;
   uintptr_t alloc_offset;
   uint8_t flags;
@@ -58,15 +63,16 @@ void pmm_mark_used(void *ptr);
 
 // vmm
 void init_vmm(void);
-void vmm_map_kernel(vmm_context_t *context);
+void vmm_enable(void);
+void vmm_disable(void);
+void vmm_create_pagedir(vmm_context_t *context);
+vmm_pt_t *vmm_create_pagetable(vmm_context_t *context, int index);
+vmm_context_t *vmm_create_context(void);
 int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
 void *vmm_alloc(void);
-void *vmm_alloc_pages(size_t num);
-uint32_t *vmm_create_pagetable(vmm_context_t *context, int index);
-uint32_t *get_pagedir(vmm_context_t *context);
-void vmm_create_pagedir(vmm_context_t *context);
-vmm_context_t *vmm_create_context(void);
-void vmm_activate_context(vmm_context_t *context);
+void *vmm_alloc_area(size_t num);
+inline void vmm_activate_context(vmm_context_t *context);
+inline void vmm_flush_tld(uintptr_t vaddr);
 
 // heap
 void init_heap(void);

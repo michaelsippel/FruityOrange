@@ -26,8 +26,10 @@
 #define GDT_ENTRY_KERNEL_DATA 2
 #define GDT_ENTRY_USER_CODE 3
 #define GDT_ENTRY_USER_DATA 4
+#define GDT_ENTRY_TSS 5
 
-#define GDT_ENTRIES 5
+#define GDT_ENTRIES 6
+#define TSS_SIZE 32
 
 void init_gdt(void);
 

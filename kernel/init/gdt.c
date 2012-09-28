@@ -51,6 +51,7 @@ typedef union {
 
 
 uint64_t gdt[GDT_ENTRIES];
+uint32_t tss[TSS_SIZE] = {0, 0, 0x10};
 
 uint64_t create_gdt_entry(uint32_t limit, uint32_t base, uint16_t flags) {
     GDT_ENTRY ent;
@@ -100,7 +101,24 @@ void init_gdt(void) {
   gdt[GDT_ENTRY_USER_DATA] = create_gdt_entry(0xfffff, 0,
       GDT_DATASEG_WR | GDT_SEGMENT | GDT_RING3 | GDT_PRESENT |
       GDT_32_BIT  | GDT_4K_GRAN);
+      
+  //TSS
+  gdt[GDT_ENTRY_TSS] = create_gdt_entry(sizeof(tss), (uint32_t) tss,
+      GDT_TSS | GDT_RING3 | GDT_PRESENT);
   
   load_gdt();
+  // load task register
+  asm volatile("ltr %%ax" : : "a" (GDT_ENTRY_TSS << 3));
+  // reload segment registers
+  asm volatile(
+	"ljmpl $0x08, $1f\n\t"
+	"1:\n\t"
+        "mov $0x10, %eax\n\t"
+        "mov %eax, %ds\n\t"
+        "mov %eax, %es\n\t"
+        "mov %eax, %fs\n\t"
+        "mov %eax, %gs\n\t"
+        "mov %eax, %ss\n\t"
+  );
 }
 

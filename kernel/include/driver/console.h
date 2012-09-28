@@ -19,7 +19,15 @@
 #ifndef _CONSOLE_H
 #define _CONSOLE_H
 
+#include <sys/types.h>
 #include <stdint.h>
+#include <iostream.h>
+
+typedef struct vterm {
+  char *name;
+  id_t id;
+  iostream_t *iostream;
+} vterm_t;
 
 int putchar(char chr);
 int puts(const char *str);

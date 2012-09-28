@@ -55,9 +55,9 @@ void *malloc(size_t bytes) {
       node = node->next_nd;
     }
   }
-  first_nd->prev_nd = mk_nd(vmm_alloc_pages(bytes/PAGE_SIZE+1), 
-			    PAGE_SIZE*((size_t)bytes/PAGE_SIZE), 
-			    first_nd, NULL);
+//   first_nd->prev_nd = mk_nd(vmm_alloc_area(bytes/PAGE_SIZE+1), 
+// 			    PAGE_SIZE*((size_t)bytes/PAGE_SIZE), 
+// 			    first_nd, NULL);
   first_nd = first_nd->prev_nd;
   
   return NULL;

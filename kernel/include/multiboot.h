@@ -23,7 +23,7 @@
 
 extern const void kernel_start;
 extern const void kernel_end;
-  
+
 struct multiboot_info {
   uint32_t mbs_flags;
   

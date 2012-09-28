@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sys/types.h>
+#include <string.h>
 #include <stdint.h>
 
 #include <cpu.h>
@@ -29,11 +30,11 @@ static size_t stack_size = 0x1000;
 
 proc_t *first_proc = NULL;
 
-proc_t *create_proc(void *entry, char *name, uint8_t dpl) {
-  uint8_t *kern_stack = vmm_alloc();
+proc_t *create_proc(void *entry, char *name, dpl_t dpl) {
+  uint8_t *kern_stack = pmm_alloc();
   uint8_t *user_stack;
   if(dpl == 0) 	user_stack = kern_stack;
-  else		user_stack = vmm_alloc();
+  else		user_stack = pmm_alloc();
   
   cpu_state_t *proc_cpu_state = (void*) (kern_stack + stack_size - sizeof(cpu_state_t));
   *proc_cpu_state = (cpu_state_t) {
@@ -49,32 +50,27 @@ proc_t *create_proc(void *entry, char *name, uint8_t dpl) {
     .eflags = 0x200,
   };
   
-  proc_t *proc = vmm_alloc();
+  proc_t *proc = pmm_alloc();
   
-  strcpy(proc->name, name, sizeof(name));
+  strcpy(proc->name, name);
   proc->pid = proc_count++;
   proc->uid = 0;
+//   proc->dpl = dpl;
   proc->ticks = 3;
   proc->cpu = proc_cpu_state;
-  if(dpl == 0) proc->context = NULL;
-  else {
-    proc->context = vmm_create_context();
-    proc->context->flags = VMM_USER_FLAGS;
-  }
+  proc->context = vmm_create_context();
   proc->used_mem_pages = 2;
   
-  if(first_proc == NULL) {
+  if(proc_count == 1) {
     proc->next = proc;
     proc->prev = proc;
-    first_proc = proc;
   } else {
-    first_proc->prev->next = proc;
-    proc->prev = first_proc->prev;
-    first_proc->prev = proc;
     proc->next = first_proc;
-    
-//     first_proc = proc;
+    proc->prev = first_proc->prev;
+    first_proc->prev->next = proc;
+    first_proc->prev = proc;
   }
+  first_proc = proc;
   
   return proc;
 }

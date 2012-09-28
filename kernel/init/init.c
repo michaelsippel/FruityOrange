@@ -41,18 +41,6 @@
 #include <multiboot.h>
 #include <portio.h>
 
-void proc_a(void) {
-  while(1) {
-    printf("A");
-  }
-}
-
-void proc_b(void) {
-  while(1) {
-    printf("B");
-  }
-}
-
 void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
   clearscreen();
@@ -79,8 +67,6 @@ void init(struct multiboot_info *mb_info) {
   printf("The kernel is successful started!\n");
   
   setColor(0x0f);
-  create_proc(proc_a, "process A", 0);
-  create_proc(proc_b, "process B", 0);
   while(1) {
     printf("%c", getch());
   }

@@ -24,5 +24,6 @@ typedef unsigned int uid_t;
 typedef unsigned int gid_t;
 typedef unsigned int pid_t;
 typedef unsigned int tid_t;
+typedef unsigned char dpl_t;
 
 #endif

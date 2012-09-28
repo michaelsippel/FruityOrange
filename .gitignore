@@ -1,0 +1,10 @@
+*.o
+*.a
+*.c~
+*.h~
+*.S~
+.gitignore~
+.makefile~
+*.ld~
+.swp
+kernel

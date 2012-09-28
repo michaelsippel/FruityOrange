@@ -29,6 +29,7 @@ typedef struct proc {
   char *name;
   pid_t pid;
   uid_t uid;
+//   dpl_t dpl;
   int ticks;
   cpu_state_t *cpu;
   vmm_context_t *context;
@@ -40,6 +41,6 @@ typedef struct proc {
 
 proc_t *create_proc(void *entry, char *name, uint8_t dpl);
 int exit_proc(proc_t *proc, int status);
-int kill_proc(proc_t *proc, int status);
+int kill_proc(proc_t *proc);
 
 #endif

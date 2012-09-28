@@ -18,34 +18,43 @@
  */
 #include <stdint.h>
 
+#include <init/gdt.h>
 #include <cpu.h>
 #include <mm.h>
 #include <interrupt.h>
+
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 
 static proc_t *current_proc = NULL;
 extern proc_t *first_proc;
+extern uint32_t tss[TSS_SIZE];
 
 void init_scheduler(void) {
   set_irq_handler(0x0, schedule);
 }
 
+void activate_proc(proc_t *proc) {
+  cpu_state_t *cpu = get_cpu_state();
+  cpu_state_t *new_cpu = proc->cpu;
+  if(cpu != new_cpu) {
+    set_cpu_state(new_cpu);
+    tss[1] = (uint32_t) (new_cpu + 1);
+    if(proc->context != NULL) {
+      vmm_activate_context(proc->context);
+    }
+  }
+}
+
 void schedule(void) {
   if(current_proc != NULL) {
-    cpu_state_t *cpu = get_cpu_state();
-    current_proc->cpu = cpu;
-    
+    current_proc->cpu = get_cpu_state();
     current_proc = current_proc->next;
-    
-    cpu_state_t *new_cpu = current_proc->cpu;
-    if(cpu != new_cpu) {
-      set_cpu_state(new_cpu);
-    }
+    activate_proc(current_proc);
   } else {
     if(first_proc != NULL) {
       current_proc = first_proc;
-      set_cpu_state(current_proc->cpu);
+      activate_proc(current_proc);
     }
   }
   common_eoi(0x20);
