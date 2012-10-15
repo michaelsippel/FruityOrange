@@ -26,18 +26,21 @@
 #include <mm.h>
 
 typedef struct proc {
-  char *name;
+//   char *name;
   pid_t pid;
-  uid_t uid;
-//   dpl_t dpl;
-  int ticks;
+//   uid_t uid;
+//   int ticks;
   cpu_state_t *cpu;
-  vmm_context_t *context;
-  size_t used_mem_pages;
+//   vmm_context_t *context;
+//   size_t used_mem_pages;
   
   struct proc *next;
   struct proc *prev;
 } proc_t;
+
+#ifndef _PROC_C
+extern proc_t *first_proc;
+#endif
 
 proc_t *create_proc(void *entry, char *name, uint8_t dpl);
 int exit_proc(proc_t *proc, int status);

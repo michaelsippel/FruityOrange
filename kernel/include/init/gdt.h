@@ -31,6 +31,15 @@
 #define GDT_ENTRIES 6
 #define TSS_SIZE 32
 
+#define _KERNEL_CS 0x10
+#define _KERNEL_DS 0x18
+#define _USER_CS 0x23
+#define _USER_DS 0x2b
+
+#ifndef _GDT_C
+extern uint32_t tss[TSS_SIZE];
+#endif
+
 void init_gdt(void);
 
 void load_gdt(void);

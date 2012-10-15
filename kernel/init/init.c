@@ -41,6 +41,34 @@
 #include <multiboot.h>
 #include <portio.h>
 
+void proc_a(void) {
+  while(1) {
+    printf("A");
+    pow(12345,55555);
+  }
+}
+
+void proc_b(void) {
+  while(1) {
+    printf("B");
+    pow(12345,55555);
+  }
+}
+
+void proc_c(void) {
+  while(1) {
+    printf("C");
+    pow(12345,55555);
+  }
+}
+
+void proc_d(void) {
+  while(1) {
+    printf("D");
+    pow(12345,55555);
+  }
+}
+
 void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
   clearscreen();
@@ -65,6 +93,13 @@ void init(struct multiboot_info *mb_info) {
   
   setColor(0x06);
   printf("The kernel is successful started!\n");
+  
+  cli();
+  proc_t *p0 = create_proc(proc_a, "process A", 0);
+  proc_t *p1 = create_proc(proc_b, "process B", 0);
+  proc_t *p2 = create_proc(proc_c, "process C", 0);
+  proc_t *p3 = create_proc(proc_d, "process D", 0);
+  sti();
   
   setColor(0x0f);
   while(1) {

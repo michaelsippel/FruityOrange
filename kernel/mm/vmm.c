@@ -16,29 +16,34 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#define _VMM_C
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
 
+#include <debug/debug.h>
 #include <debug/panic.h>
 #include <driver/console.h>
 #include <multiboot.h>
 #include <mm.h>
 
-static vmm_context_t *current_context;
+#define PT_OFFSET 0x3fc00000
+
+vmm_context_t *current_context;
 static vmm_context_t *kernel_context;
 static bool paging_enabled = FALSE;
 static uint32_t cr0;
 
 void init_vmm(void) {
-  kernel_context = vmm_create_context();
+  kernel_context = vmm_create_context(VMM_KERNEL_FLAGS);
   
   // create kernel-mapping
   uintptr_t vaddr = 0;
   uintptr_t paddr = 0;
   
-  // before kernel
+  // until kernel_end 1:1 mapping
   while(paddr < (uintptr_t) &kernel_end) {
     vmm_map_page(kernel_context, paddr, paddr);
     paddr += PAGE_SIZE;
@@ -76,41 +81,55 @@ void vmm_disable(void) {
   paging_enabled = FALSE;
 }
 
-void vmm_create_pagedir(vmm_context_t *context) {
-  vmm_pd_t *pagedir = pmm_alloc();
-  int i;
-  for(i = 0; i < PD_SIZE; i++) {
-    pagedir[i] = 0;
-  }
+vmm_pd_t vmm_create_pagedir(vmm_context_t *context) {
+  vmm_pd_t pagedir = pmm_alloc();
+  memclr(pagedir, PAGE_SIZE);
   
-  uintptr_t vaddr = context->alloc_offset;
-  context->alloc_offset += (PD_SIZE / PAGE_SIZE) * PAGE_SIZE;
-  pagedir[PT_INDEX(PAGE_INDEX(vaddr))] = (vmm_pd_t) pagedir | context->flags;
+  uintptr_t vaddr = context->alloc_offset * PAGE_SIZE;
+  context->alloc_offset += PAGE_INDEX(PD_SIZE);
+  pagedir[PD_INDEX(PT_OFFSET)] = (uint32_t) pagedir | context->flags | VMM_PRESENT;
   
-  if(paging_enabled)
-    context->pagedir = vaddr;
-  else
-    context->pagedir = pagedir;
+  context->pagedir = vaddr;
   context->pagedir_paddr = (uintptr_t) pagedir;
+  
+  return context->pagedir;
 }
 
-vmm_pt_t *vmm_create_pagetable(vmm_context_t *context, int index) {
-  vmm_pt_t *pagetable = pmm_alloc();
-  int i;
-  for(i = 0; i < PT_SIZE; i++) {
-    pagetable[i] = 0;
+vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
+  vmm_pt_t pagetable = pmm_alloc();
+  memclr(pagetable, PAGE_SIZE);
+  
+  debug("vmm_create_pagetable(): pagetable = 0x%x\n", pagetable);
+  context->pagedir[index] = (uint32_t) pagetable | context->flags | VMM_PRESENT;
+  
+  return vmm_get_pagetable(context, index);
+}
+
+vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
+  vmm_pt_t pagetable;
+  
+  if(paging_enabled) {
+    pagetable = (vmm_pt_t) (context->pagedir[index] & ~0xfff);
+  } else {
+    pagetable = (vmm_pt_t) (context->pagedir[index] & ~0xfff);
   }
   
-  vmm_pd_t *pagedir = context->pagedir_paddr;
-  context->pagedir[index] = (vmm_pt_t) pagetable | context->flags;
   return pagetable;
 }
 
-vmm_context_t *vmm_create_context(void) {
+vmm_context_t *vmm_create_context(uint8_t flags) {
   vmm_context_t *context = pmm_alloc();
-  context->flags = VMM_PRESENT | VMM_WRITE;
-  context->alloc_offset = 1*PAGE_SIZE;
+  context->flags = flags;
+  context->alloc_offset = 1;
   vmm_create_pagedir(context);
+  vmm_map_page(context, 0, context);
+  
+//   int i;
+//   for(i = 0; i < PD_SIZE; i++) {
+//     if(kernel_context->pagedir[i] & VMM_PRESENT) {
+//       context->pagedir[i] = kernel_context->pagedir[i];
+//     }
+//   }
   
   return context;
 }
@@ -128,7 +147,7 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
   uint32_t page_index = PAGE_INDEX(vaddr);
   uint32_t pd_index = PD_INDEX(page_index);
   uint32_t pt_index = PT_INDEX(page_index);
-  uint32_t *pagetable;
+  vmm_pt_t pagetable;
   
   if( (vaddr & 0xfff) || (paddr & 0xfff) ) {
     char msg[70];
@@ -137,12 +156,12 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
     return -1;
   } else {
     if(context->pagedir[pd_index] & VMM_PRESENT) {
-      pagetable = (vmm_pt_t*) (context->pagedir[pd_index] & ~0xfff);
+      pagetable = vmm_get_pagetable(context, pd_index);
     } else {
       pagetable = vmm_create_pagetable(context, pd_index);
     }
-    
-    pagetable[pt_index] = paddr | context->flags;
+    debug("vmm_map_page(): map now 0x%x to 0x%x\n", vaddr, paddr);
+    pagetable[pt_index] = paddr | context->flags | VMM_PRESENT;
     vmm_flush_tlb(vaddr);
     
     return 0;
@@ -151,9 +170,10 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
 
 void *vmm_alloc(void) {
   uintptr_t paddr = (uintptr_t) pmm_alloc();
-  uintptr_t vaddr = current_context->alloc_offset;
+  uintptr_t vaddr = current_context->alloc_offset * PAGE_SIZE;
+  debug("vmm_alloc(): vaddr = 0x%x, paddr = 0x%x\n", vaddr, paddr);
   vmm_map_page(current_context, vaddr, paddr);
-  current_context->alloc_offset += PAGE_SIZE;
+  current_context->alloc_offset ++;
   
   return (void*) vaddr;
 }

@@ -27,8 +27,6 @@
 #include <proc/proc.h>
 
 static proc_t *current_proc = NULL;
-extern proc_t *first_proc;
-extern uint32_t tss[TSS_SIZE];
 
 void init_scheduler(void) {
   set_irq_handler(0x0, schedule);
@@ -39,10 +37,10 @@ void activate_proc(proc_t *proc) {
   cpu_state_t *new_cpu = proc->cpu;
   if(cpu != new_cpu) {
     set_cpu_state(new_cpu);
-    tss[1] = (uint32_t) (new_cpu + 1);
-    if(proc->context != NULL) {
-      vmm_activate_context(proc->context);
-    }
+//     tss[1] = (uint32_t) (new_cpu + 1);
+//     if(proc->context != NULL) {
+//       vmm_activate_context(proc->context);
+//     }
   }
 }
 

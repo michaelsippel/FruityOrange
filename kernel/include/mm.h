@@ -39,11 +39,11 @@
 #define VMM_KERNEL_FLAGS VMM_PRESENT | VMM_WRITE
 #define VMM_USER_FLAGS   VMM_PRESENT | VMM_WRITE | VMM_USER
 
-typedef uint32_t vmm_pd_t;
-typedef uint32_t vmm_pt_t;
+typedef uint32_t* vmm_pd_t;
+typedef uint32_t* vmm_pt_t;
 
 typedef struct vmm_context {
-  vmm_pd_t *pagedir;
+  vmm_pd_t pagedir;
   uintptr_t pagedir_paddr;
   uintptr_t alloc_offset;
   uint8_t flags;
@@ -65,14 +65,18 @@ void pmm_mark_used(void *ptr);
 void init_vmm(void);
 void vmm_enable(void);
 void vmm_disable(void);
-void vmm_create_pagedir(vmm_context_t *context);
-vmm_pt_t *vmm_create_pagetable(vmm_context_t *context, int index);
-vmm_context_t *vmm_create_context(void);
+vmm_pd_t vmm_create_pagedir(vmm_context_t *context);
+vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index);
+vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index);
+vmm_context_t *vmm_create_context(uint8_t flags);
 int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
 void *vmm_alloc(void);
 void *vmm_alloc_area(size_t num);
 inline void vmm_activate_context(vmm_context_t *context);
 inline void vmm_flush_tld(uintptr_t vaddr);
+#ifndef _VMM_C
+extern vmm_context_t* current_context;
+#endif
 
 // heap
 void init_heap(void);

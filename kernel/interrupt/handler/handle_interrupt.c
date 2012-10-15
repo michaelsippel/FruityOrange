@@ -81,6 +81,10 @@ static cpu_state_t *new_cpu;
 cpu_state_t* handle_interrupt(cpu_state_t *cpu) {
   new_cpu = cpu;
   if(cpu->intr <= 0x1f) {
+    uint32_t cr0, cr2, cr3;
+    asm volatile("mov %%cr0, %0" : "=r" (cr0));
+    asm volatile("mov %%cr2, %0" : "=r" (cr2));
+    asm volatile("mov %%cr3, %0" : "=r" (cr3));
     setColor(0xf4);
     printf("Exception occured: #%s!\n",exception_msg[cpu->intr]);
     printf("CPU-Dump:\n"
@@ -88,12 +92,14 @@ cpu_state_t* handle_interrupt(cpu_state_t *cpu) {
 	   "ESI = 0x%x  EDI = 0x%x  EBP = 0x%x  ESP = 0x%x\n"
 	   "EIP = 0x%x   CS = 0x%x   SS = 0x%x\n"
 	   " DS = 0x%x   ES = 0x%x   FS = 0x%x   GS = 0x%x\n"
+	   "CR0 = 0x%x  CR2 = 0x%x  CR3 = 0x%x\n"
 	   "EFLAGS = 0x%x  INTR = 0x%4x  ERRORCODE = 0x%x\n"
 	   "Kernel stopped.",
 	   cpu->eax, cpu->ebx, cpu->ecx, cpu->edx,
 	   cpu->esi, cpu->edi, cpu->ebp, cpu->esp,
 	   cpu->eip, cpu->cs,  cpu->ss,
 	   cpu->ds,  cpu->es,  cpu->fs,  cpu->gs,
+	   cr0, cr2, cr3,
 	   cpu->eflags, cpu->intr, cpu->error_code);
 	   
     while(1) {

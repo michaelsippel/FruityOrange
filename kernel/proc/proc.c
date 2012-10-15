@@ -16,12 +16,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#define _PROC_C
+
 #include <sys/types.h>
 #include <string.h>
 #include <stdint.h>
 
 #include <cpu.h>
 #include <mm.h>
+#include <init/gdt.h>
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 
@@ -31,35 +34,33 @@ static size_t stack_size = 0x1000;
 proc_t *first_proc = NULL;
 
 proc_t *create_proc(void *entry, char *name, dpl_t dpl) {
-  uint8_t *kern_stack = pmm_alloc();
-  uint8_t *user_stack;
-  if(dpl == 0) 	user_stack = kern_stack;
-  else		user_stack = pmm_alloc();
+  uint8_t *kern_stack = vmm_alloc();
+//   uint8_t *user_stack;
+//   if(dpl == 0) 	user_stack = kern_stack;
+//   else		user_stack = vmm_alloc();
   
   cpu_state_t *proc_cpu_state = (void*) (kern_stack + stack_size - sizeof(cpu_state_t));
+  vmm_map_page(current_context, kern_stack, kern_stack);
   *proc_cpu_state = (cpu_state_t) {
     .eax = 0, .ebx = 0, .ecx = 0, .edx = 0,
     .esi = 0, .edi = 0, .ebp = 0,
     
-    .esp = (uint32_t) user_stack + stack_size,
+    .esp = (uint32_t) kern_stack + stack_size,
     .eip = (uint32_t) entry,
     
-    .cs = 0x08 | (dpl&2) | (dpl&1)*0x10,
-    .ss = 0x10 | (dpl&2) | (dpl&1)*0x10,
-    
-    .eflags = 0x200,
+    .cs = 0x8,
+    .eflags = 0x202,
   };
   
-  proc_t *proc = pmm_alloc();
+  proc_t *proc = vmm_alloc();
   
-  strcpy(proc->name, name);
+//   strcpy(proc->name, name);
   proc->pid = proc_count++;
-  proc->uid = 0;
-//   proc->dpl = dpl;
-  proc->ticks = 3;
+//   proc->uid = 0;
+//   proc->ticks = 3;
   proc->cpu = proc_cpu_state;
-  proc->context = vmm_create_context();
-  proc->used_mem_pages = 2;
+//   proc->context = vmm_create_context();
+//   proc->used_mem_pages = 2;
   
   if(proc_count == 1) {
     proc->next = proc;
