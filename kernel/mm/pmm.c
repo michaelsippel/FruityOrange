@@ -23,6 +23,8 @@
 #include <multiboot.h>
 #include <mm.h>
 
+#define PMM_DEBUG 1
+
 #define BITMAP_SIZE 0x8000
 uint32_t bitmap[BITMAP_SIZE];
 uintptr_t last_free_ptr;
@@ -74,6 +76,8 @@ void init_pmm(struct multiboot_info *mb_info) {
       addr += 0x1000;
     }
   }
+  
+  pmm_mark_used(0);
 }
 
 void* pmm_alloc(void) {
@@ -96,6 +100,7 @@ void* pmm_alloc(void) {
       }
     }
   }
+  debug(PMM_DEBUG, "pmm_alloc(): insufficient physical memory\n");
   return NULL;
 }
 

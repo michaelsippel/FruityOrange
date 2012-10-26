@@ -31,8 +31,8 @@
 #define GDT_ENTRIES 6
 #define TSS_SIZE 32
 
-#define _KERNEL_CS 0x10
-#define _KERNEL_DS 0x18
+#define _KERNEL_CS 0x08
+#define _KERNEL_DS 0x10
 #define _USER_CS 0x23
 #define _USER_DS 0x2b
 

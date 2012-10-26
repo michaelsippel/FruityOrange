@@ -24,7 +24,7 @@
 #define DEBUG_PRINT 1
 #define INI_PRINT 1
 
-void debug(const char *fmt, ...);
+void debug(int print, const char *fmt, ...);
 
 void kinip(char *str);
 void endini(void);

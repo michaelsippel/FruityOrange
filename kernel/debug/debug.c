@@ -23,8 +23,9 @@
 #include <driver/console.h>
 #include <debug/debug.h>
 
-void debug(const char *fmt, ...) {
+void debug(int print, const char *fmt, ...) {
   #if DEBUG_PRINT
+  if(print) {
     va_list args;
     char t[1024];
     char *buffer = (char*) t;
@@ -34,6 +35,7 @@ void debug(const char *fmt, ...) {
     va_end(args);
     
     puts(buffer);
+  }
   #endif
 }
 

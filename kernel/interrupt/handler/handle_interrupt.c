@@ -115,7 +115,9 @@ cpu_state_t* handle_interrupt(cpu_state_t *cpu) {
 }
 
 void set_cpu_state(cpu_state_t *cpu) {
-  new_cpu = cpu;
+  if(cpu != new_cpu) {
+    new_cpu = cpu;
+  }
 }
 
 cpu_state_t *get_cpu_state(void) {

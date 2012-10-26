@@ -6,7 +6,7 @@ lib:
 	$(MAKE) -C lib
 
 qemu: all
-	qemu -kernel kernel/kernel
+	qemu-system-i386 -kernel kernel/kernel
 
 clean:
 	$(MAKE) -C kernel clean

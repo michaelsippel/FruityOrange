@@ -24,6 +24,8 @@
 extern const void kernel_start;
 extern const void kernel_end;
 
+#define KERNEL_SIZE (&kernel_end - &kernel_start)
+
 struct multiboot_info {
   uint32_t mbs_flags;
   
