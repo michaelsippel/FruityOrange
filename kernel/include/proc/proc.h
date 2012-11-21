@@ -26,7 +26,7 @@
 #include <mm.h>
 
 typedef struct proc {
-//   char *name;
+  char *name;
   pid_t pid;
   uid_t uid;
   int ticks;
@@ -42,7 +42,7 @@ typedef struct proc {
 extern proc_t *first_proc;
 #endif
 
-proc_t *create_proc(void *entry, size_t size, char *name, uint8_t dpl);
+proc_t *create_proc(void *entry, size_t size, const char *name, uint8_t dpl);
 int exit_proc(proc_t *proc, int status);
 int kill_proc(proc_t *proc);
 

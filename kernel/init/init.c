@@ -80,12 +80,12 @@ void init(struct multiboot_info *mb_info) {
     init_pmm(mb_info);endini();
   kinip("Initalizing paging... ");
     init_vmm();endini();
-  kinip("Initalizing kernel-heap... ");
-    init_heap();endini();
   kinip("Initalizing GDT... ");
     init_gdt();endini();
   kinip("Initalizing interrupts... ");
     init_idt();init_pic();sti();endini();
+//   kinip("Initalizing kernel-heap... ");
+//     init_heap();endini();
   kinip("Initalizing scheduler... ");
     init_scheduler();endini();
   kinip("Initalizing keyboard... ");
@@ -96,7 +96,7 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
   
   cli();
-//   proc_t *p0 = create_proc(proc_a, 0x1000, "process A", 3);
+//   proc_t *p0 = create_proc(proc_a, 0x1000, "process A", 0);
 //   proc_t *p1 = create_proc(proc_b, 0x1000, "process B", 0);
 //   proc_t *p2 = create_proc(proc_c, 0x1000, "process C", 0);
 //   proc_t *p3 = create_proc(proc_d, 0x1000, "process D", 0);

@@ -33,31 +33,32 @@ static size_t stack_size = 0x1000;
 
 proc_t *first_proc = NULL;
 
-proc_t *create_proc(void *entry, size_t size, char *name, dpl_t dpl) {
+proc_t *create_proc(void *entry, size_t size, const char *name, dpl_t dpl) {
   // Process structure
   proc_t *proc = vmm_alloc();
-//   proc->name = name;
+  proc->name = name;
   proc->pid = proc_count++;
   proc->uid = 0;
   proc->ticks = 3;
 
   if(dpl == 0) proc->context = kernel_context;
-  else         proc->context = vmm_create_context(VMM_KERNEL_FLAGS);
+  else         proc->context = vmm_create_context(VMM_USER_FLAGS);
   proc->used_mem_pages = 2;
   
   // Stack
-  uint8_t *kern_stack_paddr = pmm_alloc();
-  uint8_t *kern_stack_this = vmm_find_free_page(current_context);
+  uint8_t *kern_stack_phys = pmm_alloc();
+  uint8_t *kern_stack_virt = vmm_find_free_page(current_context);
   uint8_t *kern_stack = vmm_find_free_page(proc->context);
-  vmm_map_page(current_context, kern_stack_this, kern_stack_paddr);
-  vmm_map_page(proc->context, kern_stack, kern_stack_paddr);
+  vmm_map_page(current_context, kern_stack_virt, kern_stack_phys);
+  vmm_map_page(proc->context,   kern_stack,      kern_stack_phys);
   
   uint8_t *user_stack = kern_stack;
 //   if(dpl == 0) 	user_stack = kern_stack;
 //   else		user_stack = vmm_alloc();
   
   // CPU-Status
-  vmm_map_page(proc->context, (int)entry&PAGE_MASK, (int)entry&PAGE_MASK);
+//   // TODO
+//   vmm_map_page(proc->context, (int)entry&PAGE_MASK, (int)entry&PAGE_MASK);
   
   cpu_state_t *proc_cpu_state = (void*) (kern_stack + stack_size - sizeof(cpu_state_t));
   *proc_cpu_state = (cpu_state_t) {
@@ -68,7 +69,7 @@ proc_t *create_proc(void *entry, size_t size, char *name, dpl_t dpl) {
     .eip = (uint32_t) entry,
     
     .cs = _KERNEL_CS,
-//     .ds = _KERNEL_DS,
+    .ds = _KERNEL_DS,
     .es = _KERNEL_DS,
     .fs = _KERNEL_DS,
     .gs = _KERNEL_DS,
@@ -92,6 +93,6 @@ proc_t *create_proc(void *entry, size_t size, char *name, dpl_t dpl) {
     first_proc->prev = proc;
   }
   first_proc = proc;
-  
+  printf("first_proc = 0x%x\n", first_proc);
   return proc;
 }
