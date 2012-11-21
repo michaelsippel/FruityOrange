@@ -53,8 +53,8 @@ proc_t *create_proc(void *entry, size_t size, char *name, dpl_t dpl) {
   vmm_map_page(proc->context, kern_stack, kern_stack_paddr);
   
   uint8_t *user_stack = kern_stack;
-  if(dpl == 0) 	user_stack = kern_stack;
-  else		user_stack = vmm_alloc();
+//   if(dpl == 0) 	user_stack = kern_stack;
+//   else		user_stack = vmm_alloc();
   
   // CPU-Status
   vmm_map_page(proc->context, (int)entry&PAGE_MASK, (int)entry&PAGE_MASK);
@@ -68,6 +68,11 @@ proc_t *create_proc(void *entry, size_t size, char *name, dpl_t dpl) {
     .eip = (uint32_t) entry,
     
     .cs = _KERNEL_CS,
+//     .ds = _KERNEL_DS,
+    .es = _KERNEL_DS,
+    .fs = _KERNEL_DS,
+    .gs = _KERNEL_DS,
+    
     .eflags = 0x202,
   };
 //   if(dpl != 0) {

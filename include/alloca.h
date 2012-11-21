@@ -1,6 +1,5 @@
 /**
  *  include/alloca.h
- *  alloca
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -22,5 +21,4 @@
 
 #define alloca(n)   __builtin_alloca(n)
 
-/* ----- ENDE --- alloca.h --- */
 #endif

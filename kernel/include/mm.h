@@ -41,11 +41,16 @@
 #define VMM_KERNEL_FLAGS VMM_PRESENT | VMM_WRITE
 #define VMM_USER_FLAGS   VMM_PRESENT | VMM_WRITE | VMM_USER
 
-
 #define VADDR_KERNEL_START 0xc0000000
-#define VADDR_KERNEL_END   0xefffffff/*(VADDR_KERNEL_START+KERNEL_SIZE)*/
+#define VADDR_KERNEL_END   0xcf000000/*(VADDR_KERNEL_START+KERNEL_SIZE)*/
 #define VADDR_USER_START 0x00001000
 #define VADDR_USER_END   0xbfffffff
+#define VADDR_CONTEXT  0xc2000000
+#define VADDR_PD       0xc2001000
+#define VADDR_PT_START 0xc2002000
+
+#define PT_PADDR(c, i) (c->pagedir[index] & PAGE_MASK)
+#define PT_VADDR(i) (VADDR_PT_START + PT_SIZE * sizeof(uint32_t) * i )
 
 #define FOR_KERNEL_PTS(i) \
   for(i = PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START)); \
@@ -75,8 +80,8 @@ void pmm_mark_used(void *ptr);
 
 // vmm
 void init_vmm(void);
-void vmm_enable(void);
-void vmm_disable(void);
+inline void vmm_enable(void);
+inline void vmm_disable(void);
 void vmm_entry_kernelmapping(vmm_context_t *context);
 vmm_pd_t vmm_create_pagedir(vmm_context_t *context);
 vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index);

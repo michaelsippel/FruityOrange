@@ -7,7 +7,7 @@ LD = ld
 INC = -Iinclude -I../include
 
 ASFLAGS = -m32
-CFLAGS = -m32 -Wall -O3 -fno-stack-protector -fno-builtin -nostdinc $(INC)
+CFLAGS = -m32 -Wall -g -fno-stack-protector -fno-builtin -nostdinc $(INC)
 LDFLAGS = -melf_i386 -Tkernel.ld
 
 KERNEL = kernel

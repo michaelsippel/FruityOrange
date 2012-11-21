@@ -98,19 +98,9 @@ common_intr_handler:
   push %ebx
   push %eax
   
-  // load kernel-data-segments
-  mov $0x10, %ax
-  mov %ax, %ds
-  mov %ax, %es
-  
   push %esp
   call handle_interrupt
   mov %eax, %esp
-  
-  // load user-data-segments
-  mov $0x23, %ax
-  mov %ax, %ds
-  mov %ax, %es
   
   pop %eax
   pop %ebx
