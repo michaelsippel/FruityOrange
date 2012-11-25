@@ -38,8 +38,8 @@
 #define VMM_PRESENT 0x01
 #define VMM_WRITE   0x02
 #define VMM_USER    0x04
-#define VMM_KERNEL_FLAGS VMM_PRESENT | VMM_WRITE
-#define VMM_USER_FLAGS   VMM_PRESENT | VMM_WRITE | VMM_USER
+#define VMM_KERNEL_FLAGS (VMM_PRESENT | VMM_WRITE)
+#define VMM_USER_FLAGS   (VMM_PRESENT | VMM_WRITE | VMM_USER)
 
 #define VADDR_KERNEL_START 0xc0000000
 #define VADDR_KERNEL_END   0xffffffff/*(VADDR_KERNEL_START+KERNEL_SIZE)*/
@@ -49,8 +49,8 @@
 #define VADDR_PD       0xc2002000
 #define VADDR_PT_START 0xc2003000
 
-#define PT_PADDR(c, i) (c->pagedir[index] & PAGE_MASK)
-#define PT_VADDR(i) (VADDR_PT_START + PT_SIZE * sizeof(uint32_t) * i )
+#define PT_PADDR(c, i) (c->pagedir[i] & PAGE_MASK)
+#define PT_VADDR(i) (VADDR_PT_START + PAGE_SIZE*i)
 
 #define FOR_KERNEL_PTS(i) \
   for(i = PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START)); \
@@ -92,7 +92,7 @@ void *vmm_find_free_page(vmm_context_t *context);
 void *vmm_alloc(void);
 void *vmm_alloc_area(size_t num);
 inline void vmm_activate_context(vmm_context_t *context);
-inline void vmm_flush_tld(uintptr_t vaddr);
+inline void vmm_flush_tlb(uintptr_t vaddr);
 #ifndef _VMM_C
 extern vmm_context_t *current_context;
 extern vmm_context_t *kernel_context;
