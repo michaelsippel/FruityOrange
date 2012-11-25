@@ -96,7 +96,7 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
   
   cli();
-  proc_t *p0 = create_proc(proc_a, 0x1000, "process A", 0);
+  proc_t *p0 = create_proc(proc_a, 0x1000, "process A", 3);
   proc_t *p1 = create_proc(proc_b, 0x1000, "process B", 0);
   proc_t *p2 = create_proc(proc_c, 0x1000, "process C", 0);
   proc_t *p3 = create_proc(proc_d, 0x1000, "process D", 0);

@@ -40,9 +40,9 @@ proc_t *create_proc(void *entry, size_t size, const char *name, dpl_t dpl) {
   proc->pid = proc_count++;
   proc->uid = 0;
   proc->ticks = 3;
-
-  if(dpl == 0) proc->context = kernel_context;
-  else         proc->context = vmm_create_context(VMM_USER_FLAGS);
+  
+/*  if(dpl == 0)*/ proc->context = kernel_context;
+//   else         proc->context = vmm_create_context(VMM_USER_FLAGS);
   proc->used_mem_pages = 2;
   
   // Stack
@@ -50,7 +50,7 @@ proc_t *create_proc(void *entry, size_t size, const char *name, dpl_t dpl) {
   uint8_t *kern_stack_virt = vmm_find_free_page(current_context);
   uint8_t *kern_stack = vmm_find_free_page(proc->context);
   vmm_map_page(current_context, kern_stack_virt, kern_stack_phys);
-  vmm_map_page(proc->context,   kern_stack,      kern_stack_phys);
+  if(dpl) vmm_map_page(proc->context,   kern_stack,      kern_stack_phys);
   
   uint8_t *user_stack = kern_stack;
 //   if(dpl == 0) 	user_stack = kern_stack;
@@ -76,10 +76,14 @@ proc_t *create_proc(void *entry, size_t size, const char *name, dpl_t dpl) {
     
     .eflags = 0x202,
   };
-//   if(dpl != 0) {
-//     proc_cpu_state->cs = _USER_CS;
-//     proc_cpu_state->ss = _USER_DS;
-//   }
+  if(dpl) {
+    proc_cpu_state->cs = _USER_CS;
+    proc_cpu_state->ss = _USER_SS;
+//     proc_cpu_state->ds = _USER_DS;
+//     proc_cpu_state->es = _USER_DS;
+//     proc_cpu_state->fs = _USER_DS;
+//     proc_cpu_state->gs = _USER_DS;
+  }
   
   proc->cpu = proc_cpu_state;
   
@@ -93,6 +97,6 @@ proc_t *create_proc(void *entry, size_t size, const char *name, dpl_t dpl) {
     first_proc->prev = proc;
   }
   first_proc = proc;
-  printf("first_proc = 0x%x\n", first_proc);
+  
   return proc;
 }

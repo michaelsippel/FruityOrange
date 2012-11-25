@@ -33,7 +33,8 @@
 
 #define _KERNEL_CS 0x08
 #define _KERNEL_DS 0x10
-#define _USER_CS 0x23
+#define _USER_CS 0x1b
+#define _USER_SS 0x23
 #define _USER_DS 0x2b
 
 #ifndef _GDT_C

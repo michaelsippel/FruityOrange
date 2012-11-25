@@ -44,7 +44,7 @@ void init_vmm(void) {
   
   vmm_pd_t pagedir = pmm_alloc();
   memclr(pagedir, PAGE_SIZE);
-  pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pagedir | VMM_KERNEL_FLAGS | VMM_PRESENT;
+//   pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pagedir | VMM_KERNEL_FLAGS | VMM_PRESENT;
   kernel_context->pagedir = pagedir;
   kernel_context->pagedir_paddr = (uintptr_t) pagedir;
   

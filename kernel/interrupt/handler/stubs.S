@@ -27,7 +27,6 @@ int_handler\nr:
 .macro int_stub_err nr
 .global int_handler\nr
 int_handler\nr:
-    push $0
     push $\nr
     jmp common_intr_handler
 .endm
@@ -97,11 +96,18 @@ common_intr_handler:
   push %ecx
   push %ebx
   push %eax
-  
+
+  // load  kernel-datasegments
+  mov $0x10, %ax
+  mov %ax, %ds
+  mov %ax, %es
+  mov %ax, %fs
+  mov %ax, %gs
+
   push %esp
   call handle_interrupt
   mov %eax, %esp
-  
+
   pop %eax
   pop %ebx
   pop %ecx
