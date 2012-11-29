@@ -90,6 +90,7 @@ vmm_context_t *vmm_create_context(uint8_t flags);
 int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
 int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t bytes);
 void *vmm_find_free_page(vmm_context_t *context);
+void *vmm_find_free_area(vmm_context_t *context);
 void *vmm_alloc(void);
 void *vmm_alloc_area(size_t num);
 inline void vmm_activate_context(vmm_context_t *context);

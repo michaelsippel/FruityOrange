@@ -214,8 +214,8 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
   return 0;
 }
 
-int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t bytes) {
-  while(bytes--) {
+int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages) {
+  while(pages--) {
     if(vmm_map_page(context, vaddr, paddr)) {
       return -1;
     } else {
@@ -235,10 +235,29 @@ void *vmm_find_free_page(vmm_context_t *context) {
   return (void*) vaddr;
 }
 
+void *vmm_find_free_area(vmm_context_t *context, size_t pages) {
+  uintptr_t vaddr;
+  vaddr = (uintptr_t) context->alloc_offset * PAGE_SIZE;
+  context->alloc_offset += pages;
+
+  return (void*) vaddr;
+}
+
 void *vmm_alloc(void) {
   uintptr_t paddr = (uintptr_t) pmm_alloc();
   uintptr_t vaddr = (uintptr_t) vmm_find_free_page(current_context);
   vmm_map_page(current_context, vaddr, paddr);
+  
+  return (void*) vaddr;
+}
+
+void *vmm_alloc_area(size_t pages) {
+  uintptr_t paddr;
+  uintptr_t vaddr = (uintptr_t) vmm_find_free_area(current_context, pages);
+  while(pages--) {
+    paddr = (uintptr_t) pmm_alloc();
+    vmm_map_page(current_context, vaddr, paddr);
+  }
   
   return (void*) vaddr;
 }

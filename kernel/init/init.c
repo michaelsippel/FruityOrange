@@ -95,6 +95,12 @@ void init(struct multiboot_info *mb_info) {
   printf("The kernel is successful started!\n");
   setColor(0x0f);
   
+  char *a = malloc(0x1000-0xc);
+  char *b = malloc(30);
+  printf("heap-test:\n");
+  printf("a = 0x%x\n", a);
+  printf("b = 0x%x\n", b);
+  
 //   cli();
 //   proc_t *p0 = create_proc(proc_a, 0x1000, "process A", 0);
 //   proc_t *p1 = create_proc(proc_b, 0x1000, "process B", 0);
