@@ -25,10 +25,14 @@
 #include <cpu.h>
 #include <mm.h>
 
+#define VADDR_STACK 0xbffff
+#define VADDR_CPU_STATUS_STACK 0xbffff
+
 typedef struct proc {
   char *name;
   pid_t pid;
   uid_t uid;
+  dpl_t dpl;
   int ticks;
   cpu_state_t *cpu;
   vmm_context_t *context;

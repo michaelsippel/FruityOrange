@@ -214,6 +214,19 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
   return 0;
 }
 
+int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t bytes) {
+  while(bytes--) {
+    if(vmm_map_page(context, vaddr, paddr)) {
+      return -1;
+    } else {
+      vaddr += PAGE_SIZE;
+      paddr += PAGE_SIZE;
+    }
+  }
+  
+  return 0;
+}
+
 void *vmm_find_free_page(vmm_context_t *context) {
   uintptr_t vaddr;
   vaddr = (uintptr_t) context->alloc_offset * PAGE_SIZE;
