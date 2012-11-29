@@ -88,11 +88,11 @@ vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index);
 vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index);
 vmm_context_t *vmm_create_context(uint8_t flags);
 int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
-int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t bytes);
+int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages);
 void *vmm_find_free_page(vmm_context_t *context);
-void *vmm_find_free_area(vmm_context_t *context);
+void *vmm_find_free_area(vmm_context_t *context, size_t pages);
 void *vmm_alloc(void);
-void *vmm_alloc_area(size_t num);
+void *vmm_alloc_area(size_t pages);
 inline void vmm_activate_context(vmm_context_t *context);
 inline void vmm_flush_tlb(uintptr_t vaddr);
 #ifndef _VMM_C
