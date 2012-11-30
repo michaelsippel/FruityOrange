@@ -67,7 +67,7 @@ typedef struct vmm_context {
 } vmm_context_t;
 
 typedef struct alloc_nd {
-  int bytes;
+  size_t bytes;
   struct alloc_nd *prev_nd;
   struct alloc_nd *next_nd;
 } alloc_nd_t;
@@ -102,7 +102,8 @@ extern vmm_context_t *kernel_context;
 
 // heap
 void init_heap(void);
-alloc_nd_t *mk_nd(uintptr_t addr, size_t bytes, alloc_nd_t *next, alloc_nd_t *prev);
+void insert_node(alloc_nd_t *node);
+void remove_node(alloc_nd_t *node);
 void *malloc(size_t bytes);
 void *calloc(size_t num, size_t size);
 void *realloc(void *ptr, size_t bytes);
