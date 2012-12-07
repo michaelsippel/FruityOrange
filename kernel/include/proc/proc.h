@@ -25,8 +25,10 @@
 #include <cpu.h>
 #include <mm.h>
 
-#define VADDR_STACK 0xbffff
-#define VADDR_CPU_STATUS_STACK 0xbffff
+#define VADDR_STACK 0xcff000
+
+#define DPL_KERNELMODE 0
+#define DPL_USERMODE   3
 
 typedef struct proc {
   char *name;

@@ -35,11 +35,10 @@ void init_scheduler(void) {
 void activate_proc(proc_t *proc) {
   set_cpu_state(proc->cpu);
   tss[1] = (uint32_t) (proc->cpu + 1);
-//   vmm_activate_context(proc->context);
+  vmm_activate_context(proc->context);
 }
 
 void schedule(void) {
-//   printf("current_proc = 0x%x\n", current_proc);
   if(current_proc != NULL) {
     current_proc->cpu = get_cpu_state();
     current_proc = current_proc->next;

@@ -77,6 +77,12 @@ void init_vmm(void) {
     vmm_map_page(kernel_context, paddr, paddr);
     paddr += PAGE_SIZE;
   }
+  /* TODO: let this work: 
+   vmm_map_area(kernel_context, 0x0, 0x0, KERNEL_PAGES);// until kernel_end 1:1 mapping
+   vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) &kernel_start, KERNEL_PAGES);// kernel
+   vmm_map_area(kernel_context, VIDEOMEM_START, VIDEOMEM_START, VIDEOMEM_PAGES);// videomemory (0xB8000 - 0xBFFFF)
+  */
+  
   vmm_activate_context(kernel_context);
   
   vmm_map_page(kernel_context, VADDR_PD, (uintptr_t) kernel_context->pagedir);
@@ -102,11 +108,8 @@ inline void vmm_disable(void) {
   paging_enabled = FALSE;
 }
 
-void vmm_entry_kernelmapping(vmm_context_t *context) {
-  int i;
-  FOR_KERNEL_PTS(i) {
-    context->pagedir[i] = kernel_context->pagedir[i];
-  }
+inline void vmm_entry_kernelmapping(vmm_context_t *context) {
+  memcpy(context->pagedir, current_context->pagedir, PD_SIZE<<2);
 }
 
 vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
@@ -121,6 +124,8 @@ vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
 }
 
 vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
+  static uintptr_t vaddr = 0;
+  
   vmm_pt_t pagetable;
   
   if(! context->pagedir[index] & VMM_PRESENT) {
@@ -129,8 +134,9 @@ vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
   
   if(paging_enabled) {
     if(context != current_context) {
+      if(vaddr == 0) vaddr = vmm_find_free_page(current_context);
+      else           vmm_unmap_page(current_context, vaddr);
       pagetable = (vmm_pt_t) PT_PADDR(context, index);
-      uintptr_t vaddr = (uintptr_t) vmm_find_free_page(current_context);
       vmm_map_page(current_context, vaddr, (uintptr_t) pagetable);
       pagetable = (vmm_pt_t) vaddr;
     } else {
@@ -148,7 +154,7 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
   uintptr_t paddr = (uintptr_t) pmm_alloc();
   uintptr_t vaddr = (uintptr_t) vmm_find_free_page(current_context);
   
-  vmm_map_page(current_context, vaddr, (uintptr_t) paddr);
+  vmm_map_page(current_context, vaddr, paddr);
   context = (vmm_context_t*) vaddr;
   
   memclr(context, PAGE_SIZE);
@@ -164,7 +170,7 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
   
   memclr(pagedir, PAGE_SIZE);
   vmm_map_page(context, VADDR_PD, pd_paddr);
-  pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | context->flags | VMM_PRESENT;
+//   pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | context->flags | VMM_PRESENT;
   
   context->pagedir = pagedir;
   context->pagedir_paddr = pd_paddr;
@@ -180,8 +186,8 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 
 inline void vmm_activate_context(vmm_context_t *context) {
   if(current_context != context || current_context == NULL) {
-    current_context = context;
     asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));
+    context = VADDR_CONTEXT;
   }
 }
 
@@ -214,16 +220,27 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
   return 0;
 }
 
-int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages) {
-  while(pages--) {
-    if(vmm_map_page(context, vaddr, paddr)) {
-      return -1;
-    } else {
-      vaddr += PAGE_SIZE;
-      paddr += PAGE_SIZE;
-    }
-  }
+int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr) {
+  uint32_t page_index = PAGE_INDEX(vaddr);
+  vmm_pt_t pt = vmm_get_pagetable(context, PD_INDEX(page_index));
+  pt[PT_INDEX(page_index)] = 0;
   
+  return 0;
+}
+
+int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages) {
+  int page;
+  for(page = 0; page < pages; page++) {
+    vmm_map_page(context, vaddr + page*PAGE_SIZE, paddr + page*PAGE_SIZE);
+  }
+  return 0;
+}
+
+int vmm_unmap_area(vmm_context_t *context, uintptr_t vaddr, size_t pages) {
+  int page;
+  for(page = 0; page < pages; page++) {
+    vmm_unmap_page(context, vaddr + page*PAGE_SIZE);
+  }
   return 0;
 }
 
@@ -231,7 +248,7 @@ void *vmm_find_free_page(vmm_context_t *context) {
   uintptr_t vaddr;
   vaddr = (uintptr_t) context->alloc_offset * PAGE_SIZE;
   context->alloc_offset++;
-
+  
   return (void*) vaddr;
 }
 
@@ -239,7 +256,7 @@ void *vmm_find_free_area(vmm_context_t *context, size_t pages) {
   uintptr_t vaddr;
   vaddr = (uintptr_t) context->alloc_offset * PAGE_SIZE;
   context->alloc_offset += pages;
-
+  
   return (void*) vaddr;
 }
 
@@ -253,11 +270,25 @@ void *vmm_alloc(void) {
 
 void *vmm_alloc_area(size_t pages) {
   uintptr_t paddr;
-  uintptr_t vaddr = (uintptr_t) vmm_find_free_area(current_context, pages);
+  uintptr_t vaddr_start = (uintptr_t) vmm_find_free_area(current_context, pages);
+  uintptr_t vaddr = vaddr_start;
   while(pages--) {
     paddr = (uintptr_t) pmm_alloc();
     vmm_map_page(current_context, vaddr, paddr);
+    vaddr += PAGE_SIZE;
   }
   
-  return (void*) vaddr;
+  return (void*) vaddr_start;
+}
+
+uintptr_t vmm_paddr(vmm_context_t *context, uintptr_t vaddr) {
+  uintptr_t paddr;
+  uint32_t page_index = PAGE_INDEX(vaddr);
+  uint32_t pd_index = PD_INDEX(page_index);
+  uint32_t pt_index = PT_INDEX(page_index);
+  
+  vmm_pt_t pt = vmm_get_pagetable(context, pd_index);
+  paddr = (uintptr_t) pt[pt_index] & PAGE_MASK;
+  
+  return paddr;
 }

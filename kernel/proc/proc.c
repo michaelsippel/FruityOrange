@@ -35,7 +35,7 @@ proc_t *first_proc = NULL;
 
 proc_t *create_proc(void *entry, size_t size, const char *name, dpl_t dpl) {
   // Process structure
-  proc_t *proc = vmm_alloc();
+  proc_t *proc = malloc(sizeof(proc_t));
   proc->name = name;
   proc->pid = proc_count++;
   proc->uid = 0;
@@ -48,7 +48,7 @@ proc_t *create_proc(void *entry, size_t size, const char *name, dpl_t dpl) {
   uintptr_t cpu_status_stack_virt = (uintptr_t) vmm_find_free_page(current_context);
   vmm_map_page(current_context, cpu_status_stack_virt, cpu_status_stack_phys);
   
-  cpu_state_t *proc_cpu_state = (void*) (VADDR_CPU_STATUS_STACK + stack_size - sizeof(cpu_state_t));
+  cpu_state_t *proc_cpu_state = (void*) (cpu_status_stack_virt + stack_size - sizeof(cpu_state_t));
   *proc_cpu_state = (cpu_state_t) {
     .eax = 0, .ebx = 0, .ecx = 0, .edx = 0,
     .esi = 0, .edi = 0, .ebp = 0,
@@ -58,13 +58,13 @@ proc_t *create_proc(void *entry, size_t size, const char *name, dpl_t dpl) {
     .eflags = 0x202,
   };
   
-  if(dpl) {
-    proc->context = vmm_create_context(VMM_USER_FLAGS);
+  if(dpl) { // Usermode
+//     proc->context = vmm_create_context(VMM_USER_FLAGS);
+    uintptr_t cpu_status_stack = vmm_find_free_page(proc->context);
+    vmm_map_page(current_context, cpu_status_stack, cpu_status_stack_phys);
     
     uintptr_t stack_phys = (uintptr_t) pmm_alloc();
-    uintptr_t stack_virt = (uintptr_t) vmm_find_free_page(current_context);
-    vmm_map_page(proc->context, (uintptr_t) VADDR_STACK, stack_phys);
-    vmm_map_page(proc->context, (uintptr_t) VADDR_CPU_STATUS_STACK, cpu_status_stack_phys);
+//     vmm_map_page(current_context, (uintptr_t) VADDR_STACK, stack_phys);
     
     proc_cpu_state->esp = VADDR_STACK + stack_size;
     proc_cpu_state->cs = _USER_CS;
@@ -73,14 +73,16 @@ proc_t *create_proc(void *entry, size_t size, const char *name, dpl_t dpl) {
 //     proc_cpu_state->es = _USER_DS;
 //     proc_cpu_state->fs = _USER_DS;
 //     proc_cpu_state->gs = _USER_DS;
-  } else {
+    while(1);
+    proc_cpu_state = cpu_status_stack + stack_size - sizeof(cpu_state_t);
+  } else { // Kernelmode
     proc->context = kernel_context;
     
     proc_cpu_state->cs = _KERNEL_CS;
-    proc_cpu_state->ds = _KERNEL_DS;
-    proc_cpu_state->es = _KERNEL_DS;
-    proc_cpu_state->fs = _KERNEL_DS;
-    proc_cpu_state->gs = _KERNEL_DS;
+//     proc_cpu_state->ds = _KERNEL_DS;
+//     proc_cpu_state->es = _KERNEL_DS;
+//     proc_cpu_state->fs = _KERNEL_DS;
+//     proc_cpu_state->gs = _KERNEL_DS;
   }
   
   proc->cpu = proc_cpu_state;
