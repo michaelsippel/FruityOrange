@@ -27,8 +27,6 @@
 
 #define VADDR_STACK 0xcff000
 
-#define DPL_KERNELMODE 0
-#define DPL_USERMODE   3
 
 typedef struct proc {
   char *name;

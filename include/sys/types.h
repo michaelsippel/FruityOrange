@@ -19,6 +19,9 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
+#define DPL_KERNELMODE 0
+#define DPL_USERMODE   3
+
 typedef unsigned int id_t;
 typedef unsigned int uid_t;
 typedef unsigned int gid_t;
