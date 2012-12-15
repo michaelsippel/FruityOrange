@@ -1,0 +1,6 @@
+#(C) Copyright Michael Sippel
+timeout 0
+
+title FruityOrange
+    kernel /kernel
+    boot

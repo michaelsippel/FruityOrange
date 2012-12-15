@@ -8,4 +8,6 @@ makefile~
 *.ld~
 .swp
 kernel
+cdrom.iso
+floppy.img
 
