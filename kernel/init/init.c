@@ -96,7 +96,7 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
   
   cli();
-  proc_t *p0 = create_proc(proc_a, 0x1000, "process A", DPL_KERNELMODE);
+  proc_t *p0 = create_proc(proc_a, 0x1000, "process A", DPL_USERMODE);
   proc_t *p1 = create_proc(proc_b, 0x1000, "process B", DPL_KERNELMODE);
   proc_t *p2 = create_proc(proc_c, 0x1000, "process C", DPL_KERNELMODE);
   proc_t *p3 = create_proc(proc_d, 0x1000, "process D", DPL_KERNELMODE);
