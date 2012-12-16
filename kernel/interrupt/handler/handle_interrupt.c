@@ -91,14 +91,14 @@ cpu_state_t* handle_interrupt(cpu_state_t *cpu) {
 	   "EAX = 0x%x  EBX = 0x%x  ECX = 0x%x  EDX = 0x%x\n"
 	   "ESI = 0x%x  EDI = 0x%x  EBP = 0x%x  ESP = 0x%x\n"
 	   "EIP = 0x%x   CS = 0x%x   SS = 0x%x\n"
-// 	   " DS = 0x%x   ES = 0x%x   FS = 0x%x   GS = 0x%x\n"
+	   " DS = 0x%x   ES = 0x%x   FS = 0x%x   GS = 0x%x\n"
 	   "CR0 = 0x%x  CR2 = 0x%x  CR3 = 0x%x\n"
 	   "EFLAGS = 0x%x  INTR = 0x%4x  ERRORCODE = 0x%x\n"
 	   "Kernel stopped.",
 	   cpu->eax, cpu->ebx, cpu->ecx, cpu->edx,
 	   cpu->esi, cpu->edi, cpu->ebp, cpu->esp,
 	   cpu->eip, cpu->cs,  cpu->ss,
-// 	   cpu->ds,  cpu->es,  cpu->fs,  cpu->gs,
+	   cpu->ds,  cpu->es,  cpu->fs,  cpu->gs,
 	   cr0, cr2, cr3,
 	   cpu->eflags, cpu->intr, cpu->error_code);
 	   

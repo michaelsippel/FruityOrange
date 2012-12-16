@@ -46,6 +46,7 @@ typedef struct proc {
 extern proc_t *first_proc;
 #endif
 
+void load_elf32(void *image);
 proc_t *create_proc(void *entry, size_t size, const char *name, uint8_t dpl);
 int exit_proc(proc_t *proc, int status);
 int kill_proc(proc_t *proc);

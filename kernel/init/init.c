@@ -18,6 +18,7 @@
  */
 #include <sys/types.h>
 #include <alloca.h>
+#include <elf.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -40,34 +41,6 @@
 #include <mm.h>
 #include <multiboot.h>
 #include <portio.h>
-
-void proc_a(void) {
-  while(1) {
-    printf("A");
-    pow(12345,55555);
-  }
-}
-
-void proc_b(void) {
-  while(1) {
-    printf("B");
-    pow(12345,55555);
-  }
-}
-
-void proc_c(void) {
-  while(1) {
-    printf("C");
-    pow(12345,55555);
-  }
-}
-
-void proc_d(void) {
-  while(1) {
-    printf("D");
-    pow(12345,55555);
-  }
-}
 
 void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
@@ -94,13 +67,6 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x06);
   printf("The kernel is successful started!\n");
   setColor(0x0f);
-  
-  cli();
-  proc_t *p0 = create_proc(proc_a, 0x1000, "process A", DPL_USERMODE);
-  proc_t *p1 = create_proc(proc_b, 0x1000, "process B", DPL_KERNELMODE);
-  proc_t *p2 = create_proc(proc_c, 0x1000, "process C", DPL_KERNELMODE);
-  proc_t *p3 = create_proc(proc_d, 0x1000, "process D", DPL_KERNELMODE);
-  sti();
   
   while(1) {
     printf("%c", getch());
