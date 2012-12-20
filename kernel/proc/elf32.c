@@ -69,7 +69,8 @@ void load_elf32(void *image) {
   ph = (struct elf_program_header*) (((char*) image) + header->ph_offset);
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
-      proc_t *proc = create_proc((void*) header->entry, 0x1000, "elf-proc", DPL_USERMODE);
+      // TODO!!!!!
+      proc_t *proc = create_proc((void*) header->entry, 0x1000, "elf-proc", DPL_KERNELMODE);
       
       pages = 1 + ((ph->offset + ph->mem_size) / PAGE_SIZE) - (ph->offset / PAGE_SIZE);
       for(j = 0; j < pages; j++) {

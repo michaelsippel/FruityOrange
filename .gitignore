@@ -5,9 +5,15 @@
 *.S~
 .gitignore~
 makefile~
+Makefile~
 *.ld~
 .swp
-kernel
-cdrom.iso
-floppy.img
+*.iso
+*.img
+*.elf
+*.bin
+*.txt~
+kernel.txt
+build/image/kernel
+kernel/kernel
 

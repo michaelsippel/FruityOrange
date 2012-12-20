@@ -40,6 +40,7 @@
 #include <interrupt.h>
 #include <mm.h>
 #include <multiboot.h>
+#include <syscall.h>
 #include <portio.h>
 
 void init(struct multiboot_info *mb_info) {
@@ -61,6 +62,8 @@ void init(struct multiboot_info *mb_info) {
     init_heap();endini();
   kinip("Initalizing scheduler... ");
     init_scheduler();endini();
+  kinip("Initalizing syscalltable... ");
+    init_syscalltable();endini();
   kinip("Initalizing keyboard... ");
     init_keyboard();endini();
   
