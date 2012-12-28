@@ -1,5 +1,5 @@
 /**
- *  kernel/interrupt/syscall.c
+ *  kernel/interrupt/handler/syscall.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -19,7 +19,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <cpu.h>
+#include <driver/console.h>
 #include <mm.h>
+#include <interrupt.h>
 #include <syscall.h>
 
 static unsigned int num_syscalls = 0;
@@ -41,3 +44,15 @@ void setup_syscall(uint32_t id, const char *name, SYSCALL_HANDLER) {
     syscall_table[id] = syscall;
   }
 }
+
+cpu_state_t *handle_syscall(cpu_state_t *cpu) {
+  new_cpu = cpu;
+  if(syscall_table[cpu->eax] == NULL) {
+    printf("Undefined Syscall on %x\n", cpu->eax);
+  } else {
+    syscall_table[cpu->eax]->handler(&cpu->ebx, &cpu->ecx, &cpu->edx);
+  }
+  
+  return new_cpu;
+}
+

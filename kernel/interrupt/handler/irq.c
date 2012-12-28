@@ -1,5 +1,5 @@
 /**
- *  kernel/include/interrupt.h
+ *  kernel/interrupt/handler/irq.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,40 +16,38 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _INTERRUPT_H
-#define _INTERRUPT_H
-
 #include <stdint.h>
+#include <stddef.h>
+
+#include <interrupt.h>
+#include <debug/panic.h>
+#include <driver/console.h>
 #include <cpu.h>
 
-#define INTERRUPT_GATE	0x06
-#define TRAP_GATE	0x07
-#define TASK_GATE	0x05
+static void (*irq_handler[16])(void) = {
+  NULL, NULL,
+  NULL, NULL,
+  NULL, NULL,
+  NULL, NULL,
+  NULL, NULL,
+  NULL, NULL,
+  NULL, NULL,
+  NULL, NULL
+};
 
-#define FIRST_EXEPTION 0x00
-#define EXEPTION_NUM   0x1F
-#define LAST_EXEPTION  (FIRST_EXEPTION + EXEPTION_NUM)
+int set_irq_handler(int irq, void (*handler)(void)) {
+  if(irq_handler[irq] == NULL) {
+    irq_handler[irq] = handler;
+    return 0;
+  }
+  return 1;
+}
 
-#define IRQ_NUM   0xF
-#define FIRST_IRQ 0x20
-#define LAST_IRQ  (FIRST_IRQ + IRQ_NUM)
-
-void init_idt(void);
-void load_idt(void);
-
-void init_pic(void);
-void send_eoi(uint8_t irq);
-void common_eoi(uint32_t intrpt);
-
-int set_irq_handler(int irq, void (*handler)(void));
-void set_cpu_state(cpu_state_t *cpu);
-cpu_state_t *get_cpu_state(void);
-
-#ifndef _NEW_CPU_STRUCT
-extern cpu_state_t *new_cpu;
-#endif
-
-#define sti() asm volatile("sti");
-#define cli() asm volatile("cli");
-
-#endif
+cpu_state_t* handle_irq(cpu_state_t *cpu) {
+  new_cpu = cpu;
+  if(irq_handler[cpu->intr - 0x20] != NULL) {
+    irq_handler[cpu->intr - 0x20]();
+  }
+  
+  return new_cpu;
+}

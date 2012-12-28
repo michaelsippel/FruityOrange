@@ -69,4 +69,6 @@ extern void int_handler0x2D(void);
 extern void int_handler0x2E(void);
 extern void int_handler0x2F(void);
 
+extern void int_handler0x30(void);
+
 #endif

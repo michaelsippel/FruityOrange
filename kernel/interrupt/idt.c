@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define _NEW_CPU_STRUCT
 #include <interrupt.h>
 #include "handler.h"
 
@@ -43,6 +44,7 @@ typedef union {
 
 
 static uint64_t idt[IDT_ENTRIES];
+cpu_state_t *new_cpu;
 
 static void set_interrupt(int i, uint32_t offset, uint16_t selector, uint8_t type, int dpl) {
   IDT_ENTRY ent;
@@ -125,6 +127,15 @@ void init_idt(void) {
   set_interrupt(0x2E, (uint32_t)&int_handler0x2E,0x08,INTERRUPT_GATE, 0  );//IRQ
   set_interrupt(0x2F, (uint32_t)&int_handler0x2F,0x08,INTERRUPT_GATE, 0  );//IRQ
   
+  set_interrupt(0x30, (uint32_t)&int_handler0x30,0x08,INTERRUPT_GATE, 0  );//Syscall
+  
   load_idt();
 }
 
+void set_cpu_state(cpu_state_t *cpu) {
+  new_cpu = cpu;
+}
+
+cpu_state_t *get_cpu_state(void) {
+  return new_cpu;
+}
