@@ -28,7 +28,7 @@ void load_elf32(void *image) {
   struct elf32_program_header *ph;
   int i, j;
   size_t pages;
-
+  
   // check ELF-Magic
   if(header->ident[EI_MAG0] == ELF_MAG0 &&
      header->ident[EI_MAG1] == ELF_MAG1 &&
@@ -69,21 +69,8 @@ void load_elf32(void *image) {
   ph = (struct elf_program_header*) (((char*) image) + header->ph_offset);
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
-      // TODO!!!!!
-      proc_t *proc = create_proc((void*) header->entry, 0x1000, "elf-proc", DPL_KERNELMODE);
-      
-      pages = 1 + ((ph->offset + ph->mem_size) / PAGE_SIZE) - (ph->offset / PAGE_SIZE);
-      for(j = 0; j < pages; j++) {
-	uintptr_t paddr = pmm_alloc();
-	uintptr_t vaddr = (ph->virt_addr & PAGE_MASK) + PAGE_SIZE * j;
-	vmm_map_page(proc->context, vaddr, paddr);
-      }
-      
-      void *dest = (void*) ph->virt_addr;
-      void *src = ((char*) image) + ph->offset;
-      
-      memclr(dest, ph->mem_size);
-      memcpy(dest, src, ph->file_size);
+      vmm_map_area(current_context, ph->virt_addr, image + ph->offset, ph->file_size / PAGE_SIZE +1);
     }
   }
+  proc_t *proc = create_proc((void*) header->entry, 0x1000, "elf-proc", DPL_KERNELMODE);
 }

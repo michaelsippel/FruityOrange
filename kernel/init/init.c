@@ -73,19 +73,18 @@ void init(struct multiboot_info *mb_info) {
     init_keyboard();endini();
   
   setup_syscall(0, "putchar", &syscall_putc);// TODO: move!
-    
+  
   setColor(0x06);
   printf("The kernel is successful started!\n");
   setColor(0x0f);
-  
-  // TODO!!!!
+  cli();
   struct multiboot_module *modules = mb_info->mbs_mods_addr;
-  size_t length = modules[0].mod_end - modules[0].mod_start;
-  void *load_addr = (void*) 0x200000;
   
-  vmm_map_page(current_context, load_addr, modules[0].mod_start);
-  create_proc(load_addr, length,"", DPL_KERNELMODE);
+  size_t pages = (modules[0].mod_end - modules[0].mod_start) / PAGE_SIZE + 1;
+  vmm_map_area(current_context, modules[0].mod_start, modules[0].mod_start, pages);
   
+  load_elf32((void*) modules[0].mod_start);
+  sti();
   while(1) {
     printf("%c", getch());
   }
