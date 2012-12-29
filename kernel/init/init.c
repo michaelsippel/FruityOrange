@@ -43,6 +43,11 @@
 #include <syscall.h>
 #include <portio.h>
 
+// TODO: move!
+void syscall_putc(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  printf("%c", *ebx);
+}
+
 void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
   clearscreen();
@@ -67,9 +72,19 @@ void init(struct multiboot_info *mb_info) {
   kinip("Initalizing keyboard... ");
     init_keyboard();endini();
   
+  setup_syscall(0, "putchar", &syscall_putc);// TODO: move!
+    
   setColor(0x06);
   printf("The kernel is successful started!\n");
   setColor(0x0f);
+  
+  // TODO!!!!
+  struct multiboot_module *modules = mb_info->mbs_mods_addr;
+  size_t length = modules[0].mod_end - modules[0].mod_start;
+  void *load_addr = (void*) 0x200000;
+  
+  vmm_map_page(current_context, load_addr, modules[0].mod_start);
+  create_proc(load_addr, length,"", DPL_KERNELMODE);
   
   while(1) {
     printf("%c", getch());

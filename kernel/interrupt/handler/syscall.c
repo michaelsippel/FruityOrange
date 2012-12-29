@@ -48,7 +48,7 @@ void setup_syscall(uint32_t id, const char *name, SYSCALL_HANDLER) {
 cpu_state_t *handle_syscall(cpu_state_t *cpu) {
   new_cpu = cpu;
   if(syscall_table[cpu->eax] == NULL) {
-    printf("Undefined Syscall on %x\n", cpu->eax);
+    printf("Undefined Syscall on 0x%x\n", cpu->eax);
   } else {
     syscall_table[cpu->eax]->handler(&cpu->ebx, &cpu->ecx, &cpu->edx);
   }

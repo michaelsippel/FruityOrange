@@ -27,3 +27,4 @@ SECTIONS
       }
       kernel_end = .;
 }
+

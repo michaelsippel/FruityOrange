@@ -77,6 +77,7 @@ void init_vmm(void) {
     vmm_map_page(kernel_context, paddr, paddr);
     paddr += PAGE_SIZE;
   }
+  
   /* TODO: let this work: 
    vmm_map_area(kernel_context, 0x0, 0x0, KERNEL_PAGES);// until kernel_end 1:1 mapping
    vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) &kernel_start, KERNEL_PAGES);// kernel

@@ -1,11 +1,14 @@
 KERNEL = ./kernel/kernel
 IMAGE = ./build/image
 
-all: lib kernel
+all: lib kernel mods
 
 kernel:
 	$(MAKE) -C kernel
 	cp $(KERNEL) $(IMAGE)/kernel
+
+mods:
+	$(MAKE) -C test
 
 lib:
 	$(MAKE) -C lib
