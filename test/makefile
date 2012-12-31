@@ -5,7 +5,7 @@ OBJS = $(addsuffix .o,$(basename $(SRCS)))
 
 LIBSRC = ../lib
 IMGSRC = ../build/image
-SRC = test.bin
+SRC = test
 DEST = $(IMGSRC)/$(NAME)
 
 INC = -I ../include

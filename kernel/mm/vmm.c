@@ -110,7 +110,7 @@ inline void vmm_disable(void) {
 }
 
 inline void vmm_entry_kernelmapping(vmm_context_t *context) {
-  memcpy(context->pagedir, current_context->pagedir, PD_SIZE<<2);
+  memcpy(context->pagedir, kernel_context->pagedir, PD_SIZE<<2);
 }
 
 vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
@@ -171,7 +171,7 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
   
   memclr(pagedir, PAGE_SIZE);
   vmm_map_page(context, VADDR_PD, pd_paddr);
-//   pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | context->flags | VMM_PRESENT;
+  pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | context->flags | VMM_PRESENT;
   
   context->pagedir = pagedir;
   context->pagedir_paddr = pd_paddr;

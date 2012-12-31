@@ -23,7 +23,7 @@
 #include <driver/console.h>
 #include <proc/proc.h>
 
-void load_elf32(void *image) {
+void load_elf32(void *image, vmm_context_t *context, const char *name) {
   struct elf32_header *header = image;
   struct elf32_program_header *ph;
   int i, j;
@@ -42,35 +42,39 @@ void load_elf32(void *image) {
 	    if(header->version == ELF_VERSION_CURRENT) {
 	      // ELF o.k.!
 	    } else {
-	      printf("Invalid ELF-version!\n");
+	      printf("[elf32] Invalid ELF-version!\n");
 	      return;
 	    }
 	  } else {
-	    printf("ELF-Type isn't executable!\n");
+	    printf("[elf32] ELF-Type isn't executable!\n");
 	    return;
 	  }
 	} else {
-	  printf("Invalid machine!\n");
+	  printf("[elf32] Invalid machine!\n");
 	  return;
 	}
       } else {
-	printf("Invalid byte-encoding!\n");
+	printf("[elf32] Invalid byte-encoding!\n");
 	return;
       }
     } else {
-      printf("Invalid architecture!\n");
+      printf("[elf32] Invalid architecture!\n");
       return;
     }
   } else {
-    printf("Invalid ELF-Magic!\n");
+    printf("[elf32] Invalid ELF-Magic!\n");
+    printf("[elf32] image at 0x%x\n", image);
     return;
   }
   
   ph = (struct elf_program_header*) (((char*) image) + header->ph_offset);
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
-      vmm_map_area(current_context, ph->virt_addr, image + ph->offset, ph->file_size / PAGE_SIZE +1);
+      vmm_map_area(context, ph->virt_addr, image + ph->offset, ph->file_size / PAGE_SIZE +1);
     }
   }
-  proc_t *proc = create_proc((void*) header->entry, 0x1000, "elf-proc", DPL_KERNELMODE);
+  
+  vmm_map_area(context, header->entry, header->entry, ph->file_size);
+  proc_t *proc = create_proc((void*) header->entry, name, context, DPL_KERNELMODE);
+  
 }
