@@ -16,9 +16,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <sys/elf.h>
+#include <sys/syscalls.h>
 #include <sys/types.h>
 #include <alloca.h>
-#include <elf.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -43,11 +44,6 @@
 #include <syscall.h>
 #include <portio.h>
 
-// TODO: move!
-void syscall_putc(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  printf("%c", *ebx);
-}
-
 void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
   clearscreen();
@@ -69,10 +65,10 @@ void init(struct multiboot_info *mb_info) {
     init_scheduler();endini();
   kinip("Initalizing syscalltable... ");
     init_syscalltable();endini();
-  kinip("Initalizing keyboard... ");
+  dinip("Initalizing terminal... ");
+    init_console();endini();
+  dinip("Initalizing keyboard... ");
     init_keyboard();endini();
-  
-  setup_syscall(0, "putchar", &syscall_putc);// TODO: move!
   
   setColor(0x06);
   printf("The kernel is successful started!\n");

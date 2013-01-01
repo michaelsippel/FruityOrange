@@ -27,7 +27,7 @@
 void debug(int print, const char *fmt, ...);
 
 void kinip(char *str);
+void dinip(char *str);
 void endini(void);
 
 #endif
-

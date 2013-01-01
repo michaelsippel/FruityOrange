@@ -16,12 +16,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <sys/syscalls.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
 
 #include <portio.h>
 #include <interrupt.h>
+#include <syscall.h>
 
 #include <driver/console.h>
 #include <driver/kbc.h>
@@ -30,11 +32,11 @@
 static volatile char buffer = 0;
 static int modus;
 
-void init_keyboard(void){
+void init_keyboard(void) {
   set_irq_handler(0x1, keyboard_irq_handler);
   
   while(! (inb(KBC_PORT_KBCREGISTER) & 0x4) );
-  while (inb(KBC_PORT_KBCREGISTER) & 0x1){
+  while (inb(KBC_PORT_KBCREGISTER) & 0x1) {
     inb(KBC_PORT_KBCDATA);
   }
   
@@ -45,9 +47,12 @@ void init_keyboard(void){
   outb(KBC_PORT_KBCDATA, 0);
   
   send_kbd_command(KBD_COMM_ACTV);
+  
+  setup_syscall(SYSCALL_GETC, "getch", &getc_syscall_wrapper);
+  setup_syscall(SYSCALL_GETS, "gets",  &gets_syscall_wrapper);
 }
 
-void keyboard_irq_handler(void){
+void keyboard_irq_handler(void) {
     uint8_t scancode;
     uint8_t keycode = 0;
     bool break_code = 1;
@@ -72,7 +77,7 @@ void keyboard_irq_handler(void){
     
     if(e0_code) {
 	e0_code = 1;
-	// catch fakeschift
+	// catch fakeshift
 	if((scancode == 0x2A) || (scancode == 0x36)){
 	    return;
 	}
@@ -100,7 +105,7 @@ void keyboard_irq_handler(void){
     send_key_event(keycode, break_code);
 }
 
-void send_key_event(uint8_t data, bool breaked){
+void send_key_event(uint8_t data, bool breaked) {
     if(! breaked) {
       switch(data) {
 	case 53:

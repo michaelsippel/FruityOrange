@@ -1,5 +1,5 @@
 /**
- *  kernel/debug.c
+ *  kernel/driver/console/syscall_wrapper.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,43 +16,22 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <sys/syscalls.h>
 #include <stdint.h>
-#include <stdarg.h>
-#include <string.h>
-
 #include <driver/console.h>
-#include <debug/debug.h>
 
-void debug(int print, const char *fmt, ...) {
-  #if DEBUG_PRINT
-  if(print) {
-    va_list args;
-    char t[1024];
-    char *buffer = (char*) t;
-    
-    va_start(args, fmt);
-    vsprintf(buffer, fmt, args);
-    va_end(args);
-    
-    puts(buffer);
+void init_console(void) {
+  setup_syscall(SYSCALL_PUTC, "putc", &putc_syscall_wrapper);
+  setup_syscall(SYSCALL_PUTS, "puts", &puts_syscall_wrapper);
+}
+
+void putc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  printf("%c", *ebx);
+}
+
+void puts_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  int len = *ecx;
+  while(len--) {
+    printf("%c", *ebx++);
   }
-  #endif
-}
-
-void kinip(char *str) {
-  #if INI_PRINT == 1
-  printf("[kernelinit] %s", str);
-  #endif
-}
-
-void dinip(char *str) {
-  #if INI_PRINT == 1
-  printf("[driverinit] %s", str);
-  #endif
-}
-
-void endini(void) {
-  #if INI_PRINT == 1
-  printf("(done)\n");
-  #endif
 }

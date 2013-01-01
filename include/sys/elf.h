@@ -1,5 +1,5 @@
 /**
- *  include/elf.h
+ *  include/sys/elf.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *

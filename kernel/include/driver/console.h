@@ -35,6 +35,8 @@ typedef struct vterm {
   iostream_t *iostream;
 } vterm_t;
 
+void init_console(void);
+
 int putchar(char chr);
 int puts(const char *str);
 int printf(const char *format, ...);
@@ -44,5 +46,8 @@ void setColor(uint8_t ncolor);
 void setForegroundColor(uint8_t fcolor);
 void setBackgroundcolor(uint8_t bcolor);
 void clearscreen(void);
+
+void putc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void puts_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 #endif

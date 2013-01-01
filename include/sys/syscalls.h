@@ -1,5 +1,5 @@
 /**
- *  kernel/debug.c
+ *  include/sys/syscalls.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,43 +16,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdint.h>
-#include <stdarg.h>
-#include <string.h>
+#ifndef _SYSCALLS_H
+#define _SYSCALLS_H
 
-#include <driver/console.h>
-#include <debug/debug.h>
+#define SYSCALL_PUTC 0x00 /* put char   */
+#define SYSCALL_PUTS 0x01 /* put string */
+#define SYSCALL_GETC 0x02 /* get char   */
+#define SYSCALL_GETS 0x03 /* get string */
 
-void debug(int print, const char *fmt, ...) {
-  #if DEBUG_PRINT
-  if(print) {
-    va_list args;
-    char t[1024];
-    char *buffer = (char*) t;
-    
-    va_start(args, fmt);
-    vsprintf(buffer, fmt, args);
-    va_end(args);
-    
-    puts(buffer);
-  }
-  #endif
-}
-
-void kinip(char *str) {
-  #if INI_PRINT == 1
-  printf("[kernelinit] %s", str);
-  #endif
-}
-
-void dinip(char *str) {
-  #if INI_PRINT == 1
-  printf("[driverinit] %s", str);
-  #endif
-}
-
-void endini(void) {
-  #if INI_PRINT == 1
-  printf("(done)\n");
-  #endif
-}
+#endif
