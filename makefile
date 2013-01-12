@@ -20,7 +20,7 @@ cdrom-img: all
 	mkisofs -R -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o cdrom.iso $(IMAGE)
 
 qemu: cdrom-img
-	qemu-system-i386 -cdrom cdrom.iso
+	qemu-system-i386 -d int,cpu_reset -cdrom cdrom.iso
 
 clean:
 	$(MAKE) -C kernel clean

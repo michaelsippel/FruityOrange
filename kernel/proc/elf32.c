@@ -62,7 +62,7 @@ void load_elf32(void *image, vmm_context_t *context, const char *name) {
       return;
     }
   } else {
-    printf("[elf32] Invalid ELF-Magic!\n");
+    printf("[elf32] Invalid ELF-Magic! (0x%4x)\n", *header);
     printf("[elf32] image at 0x%x\n", image);
     return;
   }
@@ -70,11 +70,30 @@ void load_elf32(void *image, vmm_context_t *context, const char *name) {
   ph = (struct elf_program_header*) (((char*) image) + header->ph_offset);
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
-      vmm_map_area(context, ph->virt_addr, image + ph->offset, ph->file_size / PAGE_SIZE +1);
+      
+      int pages = ph->file_size / PAGE_SIZE +1;
+      uintptr_t vaddr_start = ph->virt_addr;
+      uintptr_t cur_vaddr_start = vmm_find_free_area(current_context, pages);
+      uintptr_t cur_img_vaddr_start = vmm_find_free_area(current_context, pages);
+      uintptr_t cur_img_paddr_start = image + ph->offset;
+      
+      for(j = 0; j < pages; j++) {
+	uintptr_t paddr = pmm_alloc();
+	uintptr_t vaddr = vaddr_start + j*PAGE_SIZE;
+	
+	uintptr_t cur_vaddr = cur_vaddr_start + j*PAGE_SIZE;
+	uintptr_t cur_img_vaddr = cur_img_vaddr_start + j*PAGE_SIZE;
+	uintptr_t cur_img_paddr = cur_img_paddr_start + j*PAGE_SIZE;
+	
+	vmm_map_page(context, vaddr, paddr);
+	vmm_map_page(current_context, cur_vaddr, paddr);
+	vmm_map_page(current_context, cur_img_vaddr, cur_img_paddr);
+	
+	memcpy(cur_vaddr, cur_img_vaddr, PAGE_SIZE);
+      }
     }
   }
   
   vmm_map_area(context, header->entry, header->entry, ph->file_size);
   proc_t *proc = create_proc((void*) header->entry, name, context, DPL_KERNELMODE);
-  
 }

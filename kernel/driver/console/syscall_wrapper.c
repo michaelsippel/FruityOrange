@@ -18,6 +18,8 @@
  */
 #include <sys/syscalls.h>
 #include <stdint.h>
+
+#include <syscall.h>
 #include <driver/console.h>
 
 void init_console(void) {

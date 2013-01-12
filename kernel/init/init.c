@@ -82,21 +82,22 @@ void init(struct multiboot_info *mb_info) {
     }
     cli();
     struct multiboot_module *modules = mb_info->mbs_mods_addr;
+    
     int i;
     for(i = 0; i < mb_info->mbs_mods_count; i++)  {
       size_t pages = (modules[i].mod_end - modules[i].mod_start) / PAGE_SIZE +1;
-      void *vaddr = modules[i].mod_start;//vmm_find_free_area(current_context, pages);
-      vmm_map_area(current_context, vaddr, modules[i].mod_start, pages);
-      
-      vmm_context_t *new_context = vmm_create_context(VMM_USER_FLAGS);
-//       void *vaddr_new = vmm_find_free_area(new_context, pages);
-//       vmm_map_area(new_context, vaddr_new, modules[i].mod_start, pages);
-      load_elf32(vaddr, new_context, modules[i].string);
+//       void *mod = vmm_automap_area(current_context, modules[i].mod_start, pages);
+	 void *mod = modules[i].mod_start;
+	 vmm_map_area(current_context, mod, modules[i].mod_start, pages);
+//       vmm_context_t *new_context = vmm_create_context(VMM_USER_FLAGS);
+//       uintptr_t vaddr_new = vmm_automap_area(new_context, modules[i].mod_start, pages);
+      load_elf32(mod, current_context, modules[i].string);
     }
     sti();
   } else {
     printf("error: no modules found!\n");
   }
+  
   while(1) {
     printf("%c", getch());
   }

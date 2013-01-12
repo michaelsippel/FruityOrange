@@ -25,7 +25,6 @@
 #include <interrupt.h>
 #include <syscall.h>
 
-static unsigned int num_syscalls = 0;
 static syscall_t **syscall_table = NULL;
 
 void init_syscalltable(void) {
