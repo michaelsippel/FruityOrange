@@ -1,7 +1,7 @@
 /**
  *  kernel/include/proc/proc.h
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2012-2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ typedef struct proc {
 extern proc_t *first_proc;
 #endif
 
-void load_elf32(void *image, vmm_context_t *context, const char *name);
+proc_t *load_elf32(void *image, void *paddr_img, vmm_context_t *context, const char *name);
 proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t dpl);
 int exit_proc(proc_t *proc, int status);
 int kill_proc(proc_t *proc);

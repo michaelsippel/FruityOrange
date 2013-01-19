@@ -1,7 +1,7 @@
 /**
  *  kernel/proc/elf.c
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2012-2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include <driver/console.h>
 #include <proc/proc.h>
 
-void load_elf32(void *image, vmm_context_t *context, const char *name) {
+proc_t *load_elf32(void *image, void *paddr_img, vmm_context_t *context, const char *name) {
   struct elf32_header *header = image;
   struct elf32_program_header *ph;
   int i, j;
@@ -75,7 +75,7 @@ void load_elf32(void *image, vmm_context_t *context, const char *name) {
       uintptr_t vaddr_start = ph->virt_addr;
       uintptr_t cur_vaddr_start = vmm_find_free_area(current_context, pages);
       uintptr_t cur_img_vaddr_start = vmm_find_free_area(current_context, pages);
-      uintptr_t cur_img_paddr_start = image + ph->offset;
+      uintptr_t cur_img_paddr_start = ((char*) paddr_img) + ph->offset;
       
       for(j = 0; j < pages; j++) {
 	uintptr_t paddr = pmm_alloc();
@@ -96,4 +96,6 @@ void load_elf32(void *image, vmm_context_t *context, const char *name) {
   
   vmm_map_area(context, header->entry, header->entry, ph->file_size);
   proc_t *proc = create_proc((void*) header->entry, name, context, DPL_KERNELMODE);
+  
+  return proc;
 }
