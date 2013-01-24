@@ -87,10 +87,8 @@ void init(struct multiboot_info *mb_info) {
     for(i = 0; i < mb_info->mbs_mods_count; i++)  {
       size_t pages = (modules[i].mod_end - modules[i].mod_start) / PAGE_SIZE +1;
       void *mod = vmm_automap_area(current_context, modules[i].mod_start, pages);
-// 	 vmm_map_area(current_context, mod, modules[i].mod_start, pages);
-//       vmm_context_t *new_context = vmm_create_context(VMM_USER_FLAGS);
-//       uintptr_t vaddr_new = vmm_automap_area(new_context, modules[i].mod_start, pages);
-      load_elf32(mod, modules[i].mod_start, current_context, modules[i].string);
+      vmm_context_t *new_context = vmm_create_context(VMM_USER_FLAGS);
+      load_elf32(mod, modules[i].mod_start, new_context, modules[i].string);
     }
     sti();
   } else {

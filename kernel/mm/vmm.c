@@ -148,6 +148,7 @@ vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
 vmm_context_t *vmm_create_context(uint8_t flags) {
   uintptr_t paddr = pmm_alloc();
   vmm_context_t *context = vmm_automap_page(current_context, paddr);
+  
   memclr(context, PAGE_SIZE);
   context->flags = flags;
   context->alloc_offset = 1;
@@ -161,7 +162,7 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
   context->pagedir_paddr = pd_paddr;
   
   // copy kernelmappings
-  memcpy(context, kernel_context, PD_SIZE);
+  memcpy(context->pagedir, kernel_context->pagedir, 256 * sizeof(uint32_t));
   pagedir[PD_INDEX(PAGE_INDEX(VADDR_PD))] = (uint32_t) pd_paddr | context->flags;
   
   vmm_map_page(context, VADDR_CONTEXT, paddr);
@@ -171,10 +172,10 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
-  if(current_context != context || current_context == NULL) {
+//   if(current_context != context || current_context == NULL) {
     asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));
-    context = VADDR_CONTEXT;
-  }
+//     context = VADDR_CONTEXT;
+//   }
 }
 
 inline void vmm_flush_tlb(uintptr_t vaddr) {

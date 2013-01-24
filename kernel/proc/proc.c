@@ -59,9 +59,8 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
     .eflags = 0x202,
   };
   
+  vmm_map_page(proc->context, VADDR_CPU_STATUS_STACK, cpu_status_stack_phys);
   if(dpl) { // Usermode
-    vmm_map_page(proc->context, VADDR_CPU_STATUS_STACK, cpu_status_stack_phys);
-    
     uintptr_t stack_phys = (uintptr_t) pmm_alloc();
     vmm_map_page(proc->context, (uintptr_t) VADDR_STACK, stack_phys);
     
