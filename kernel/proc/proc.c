@@ -67,10 +67,10 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
     proc_cpu_state->esp = VADDR_STACK + stack_size;
     proc_cpu_state->cs = _USER_CS;
     proc_cpu_state->ss = _USER_SS;
-    proc_cpu_state->ds = _USER_DS;
-    proc_cpu_state->es = _USER_DS;
-    proc_cpu_state->fs = _USER_DS;
-    proc_cpu_state->gs = _USER_DS;
+//     proc_cpu_state->ds = _USER_DS;
+//     proc_cpu_state->es = _USER_DS;
+//     proc_cpu_state->fs = _USER_DS;
+//     proc_cpu_state->gs = _USER_DS;
     
     proc_cpu_state = VADDR_CPU_STATUS_STACK + stack_size - sizeof(cpu_state_t);
   } else { // Kernelmode

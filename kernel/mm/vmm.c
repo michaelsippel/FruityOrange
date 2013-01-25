@@ -120,8 +120,7 @@ vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
 }
 
 vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
-  static uintptr_t vaddr = 0;
-  
+  static uintptr_t vaddr = 0;  
   vmm_pt_t pagetable;
   
   if(! context->pagedir[index] & VMM_PRESENT) {
@@ -131,7 +130,6 @@ vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
   if(paging_enabled) {
     if(context != current_context) {
       if(vaddr == 0) vaddr = vmm_find_free_page(current_context);
-      else           vmm_unmap_page(current_context, vaddr);
       pagetable = (vmm_pt_t) PT_PADDR(context, index);
       vmm_map_page(current_context, vaddr, (uintptr_t) pagetable);
       pagetable = (vmm_pt_t) vaddr;
@@ -172,10 +170,10 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
-//   if(current_context != context || current_context == NULL) {
+  if(current_context != context || current_context == NULL) {
     asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));
-//     context = VADDR_CONTEXT;
-//   }
+    context = VADDR_CONTEXT;
+  }
 }
 
 inline void vmm_flush_tlb(uintptr_t vaddr) {

@@ -70,26 +70,23 @@ proc_t *load_elf32(void *image, void *paddr_img, vmm_context_t *context, const c
   ph = (struct elf_program_header*) (((char*) image) + header->ph_offset);
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
-      
       pages = ph->file_size / PAGE_SIZE +1;
+      uintptr_t paddr_start = paddr_img + ph->offset;
       uintptr_t vaddr_start = ph->virt_addr;
-      uintptr_t cur_vaddr_start = vmm_find_free_area(current_context, pages);
-      uintptr_t cur_img_vaddr_start = vmm_find_free_area(current_context, pages);
-      uintptr_t cur_img_paddr_start = paddr_img + ph->offset;
       
       for(j = 0; j < pages; j++) {
 	uintptr_t paddr = pmm_alloc();
 	uintptr_t vaddr = vaddr_start + j*PAGE_SIZE;
 	
-	uintptr_t cur_vaddr = cur_vaddr_start + j*PAGE_SIZE;
-	uintptr_t cur_img_vaddr = cur_img_vaddr_start + j*PAGE_SIZE;
-	uintptr_t cur_img_paddr = cur_img_paddr_start + j*PAGE_SIZE;
+	uintptr_t src = image + ph->offset + j*PAGE_SIZE;
+	uintptr_t dest = vmm_find_free_page(current_context);
 	
+	vmm_map_page(current_context, dest, paddr);
 	vmm_map_page(context, vaddr, paddr);
-	vmm_map_page(current_context, cur_vaddr, paddr);
-	vmm_map_page(current_context, cur_img_vaddr, cur_img_paddr);
 	
-	memcpy(cur_vaddr, cur_img_vaddr, PAGE_SIZE);
+	memcpy(dest, src, PAGE_SIZE);
+	
+	vmm_unmap_page(current_context, dest);
       }
     }
   }

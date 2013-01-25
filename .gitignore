@@ -16,4 +16,5 @@ Makefile~
 kernel.txt
 build/image/kernel
 kernel/kernel
+test
 *.lst~
