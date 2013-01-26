@@ -23,7 +23,7 @@
 #include <driver/console.h>
 #include <proc/proc.h>
 
-proc_t *load_elf32(void *image, void *paddr_img, vmm_context_t *context, const char *name) {
+proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
   struct elf32_header *header = image;
   struct elf32_program_header *ph;
   int i, j;
@@ -71,7 +71,6 @@ proc_t *load_elf32(void *image, void *paddr_img, vmm_context_t *context, const c
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
       pages = ph->file_size / PAGE_SIZE +1;
-      uintptr_t paddr_start = paddr_img + ph->offset;
       uintptr_t vaddr_start = ph->virt_addr;
       
       for(j = 0; j < pages; j++) {
