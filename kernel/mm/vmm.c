@@ -206,11 +206,7 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
 }
 
 int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr) {
-  uint32_t page_index = PAGE_INDEX(vaddr);
-  vmm_pt_t pt = vmm_get_pagetable(context, PD_INDEX(page_index));
-  pt[PT_INDEX(page_index)] = 0;
-  
-  return 0;
+  return vmm_map_page(context, vaddr, NULL);
 }
 
 int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages) {

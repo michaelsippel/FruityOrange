@@ -1,5 +1,5 @@
 /**
- *  kernel/proc/elf.c
+ *  kernel/proc/elf32.c
  *
  *  (C) Copyright 2012-2013 Michael Sippel
  *
@@ -71,22 +71,20 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
       pages = ph->file_size / PAGE_SIZE +1;
-      uintptr_t vaddr_start = ph->virt_addr;
+      uintptr_t dest = vmm_find_free_page(current_context);
       
       for(j = 0; j < pages; j++) {
 	uintptr_t paddr = pmm_alloc();
-	uintptr_t vaddr = vaddr_start + j*PAGE_SIZE;
-	
+	uintptr_t vaddr = ph->virt_addr + j*PAGE_SIZE;
 	uintptr_t src = image + ph->offset + j*PAGE_SIZE;
-	uintptr_t dest = vmm_find_free_page(current_context);
 	
-	vmm_map_page(current_context, dest, paddr);
 	vmm_map_page(context, vaddr, paddr);
+	vmm_map_page(current_context, dest, paddr);
 	
 	memcpy(dest, src, PAGE_SIZE);
-	
-	vmm_unmap_page(current_context, dest);
       }
+      vmm_unmap_page(context, dest);
+      memclr(ph->virt_addr + ph->file_size, ph->mem_size - ph->file_size);
     }
   }
   proc_t *proc = create_proc((void*) header->entry, name, context, DPL_KERNELMODE);

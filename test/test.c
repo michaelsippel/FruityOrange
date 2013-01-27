@@ -22,8 +22,6 @@
 int i = 0;
 void _start(void) {
     int j = i + 5;
-    asm volatile("int $0x30" : : "a" (SYSCALL_PUTC), "b" ('0' +i));
-    asm volatile("int $0x30" : : "a" (SYSCALL_PUTC), "b" ('\n'));
     for (; i < j; i++) {
         asm volatile("int $0x30" : : "a" (SYSCALL_PUTC), "b" ('0' + i));
     }
