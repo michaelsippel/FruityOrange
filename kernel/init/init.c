@@ -74,6 +74,12 @@ void init(struct multiboot_info *mb_info) {
   printf("The kernel is successful started!\n");
   setColor(0x0f);
   
+  void *a = vmm_find(current_context, 1, VADDR_USER_START, VADDR_USER_END);
+  printf("0x%x\n", a);
+  vmm_map_page(current_context, a, a);
+  printf("0x%x\n", vmm_find(current_context, 1, VADDR_USER_START, VADDR_USER_END));
+  
+  printf("\n---\n");
   if(mb_info->mbs_mods_count > 0) {
     if(mb_info->mbs_mods_count > 1) {
       printf("Load %d modules...\n", mb_info->mbs_mods_count);
@@ -86,7 +92,7 @@ void init(struct multiboot_info *mb_info) {
     int i;
     for(i = 0; i < mb_info->mbs_mods_count; i++)  {
       size_t pages = (modules[i].mod_end - modules[i].mod_start) / PAGE_SIZE +1;
-      void *mod = vmm_automap_area(current_context, modules[i].mod_start, pages);
+      void *mod = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
       vmm_context_t *mod_context = vmm_create_context(VMM_USER_FLAGS);
       load_elf32(mod, mod_context, modules[i].string);
     }

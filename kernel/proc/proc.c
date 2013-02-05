@@ -45,11 +45,12 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->used_mem_pages = 2;
   
   // Stack
-  uintptr_t cpu_status_stack_phys = (uintptr_t) pmm_alloc();
-  uintptr_t cpu_status_stack_virt = (uintptr_t) vmm_find_free_page(current_context);
-  vmm_map_page(current_context, cpu_status_stack_virt, cpu_status_stack_phys);
+  uintptr_t kernel_stack_phys = (uintptr_t) pmm_alloc();
+  uintptr_t kernel_stack_virt = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
+  vmm_map_page(current_context, kernel_stack_virt, kernel_stack_phys);
+  vmm_map_page(proc->context, VADDR_KERNEL_STACK,  kernel_stack_phys);
   
-  cpu_state_t *proc_cpu_state = (void*) (cpu_status_stack_virt + stack_size - sizeof(cpu_state_t));
+  cpu_state_t *proc_cpu_state = (void*) (kernel_stack_virt + stack_size - sizeof(cpu_state_t));
   *proc_cpu_state = (cpu_state_t) {
     .eax = 0, .ebx = 0, .ecx = 0, .edx = 0,
     .esi = 0, .edi = 0, .ebp = 0,
@@ -59,28 +60,26 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
     .eflags = 0x202,
   };
   
-  vmm_map_page(proc->context, VADDR_CPU_STATUS_STACK, cpu_status_stack_phys);
   if(dpl) { // Usermode
-    uintptr_t stack_phys = (uintptr_t) pmm_alloc();
-    vmm_map_page(proc->context, (uintptr_t) VADDR_STACK, stack_phys);
+    uintptr_t user_stack_phys = (uintptr_t) pmm_alloc();
+    vmm_map_page(proc->context, (uintptr_t) VADDR_USER_STACK, user_stack_phys);
     
-    proc_cpu_state->esp = VADDR_STACK + stack_size;
+    proc_cpu_state->esp = VADDR_USER_STACK + stack_size;
     proc_cpu_state->cs = _USER_CS;
     proc_cpu_state->ss = _USER_SS;
 //     proc_cpu_state->ds = _USER_DS;
 //     proc_cpu_state->es = _USER_DS;
 //     proc_cpu_state->fs = _USER_DS;
 //     proc_cpu_state->gs = _USER_DS;
-    
-    proc_cpu_state = VADDR_CPU_STATUS_STACK + stack_size - sizeof(cpu_state_t);
   } else { // Kernelmode
     proc_cpu_state->cs = _KERNEL_CS;
     proc_cpu_state->ds = _KERNEL_DS;
-    proc_cpu_state->es = _KERNEL_DS;
-    proc_cpu_state->fs = _KERNEL_DS;
-    proc_cpu_state->gs = _KERNEL_DS;
+//     proc_cpu_state->es = _KERNEL_DS;
+//     proc_cpu_state->fs = _KERNEL_DS;
+//     proc_cpu_state->gs = _KERNEL_DS;
   }
   
+//   proc_cpu_state = VADDR_CPU_STATUS_STACK + stack_size - sizeof(cpu_state_t);
   proc->cpu = proc_cpu_state;
   
   if(proc_count == 1) {

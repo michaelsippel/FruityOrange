@@ -25,8 +25,8 @@
 #include <cpu.h>
 #include <mm.h>
 
-#define VADDR_STACK            0xcfe000
-#define VADDR_CPU_STATUS_STACK 0xcff000
+#define VADDR_USER_STACK   0xcfe000
+#define VADDR_KERNEL_STACK 0xcff000
 
 typedef struct proc {
   char *name;
@@ -52,3 +52,4 @@ int exit_proc(proc_t *proc, int status);
 int kill_proc(proc_t *proc);
 
 #endif
+

@@ -71,7 +71,7 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
       pages = ph->file_size / PAGE_SIZE +1;
-      uintptr_t dest = vmm_find_free_page(current_context);
+      uintptr_t dest = vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
       
       for(j = 0; j < pages; j++) {
 	uintptr_t paddr = pmm_alloc();
@@ -81,12 +81,13 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
 	vmm_map_page(context, vaddr, paddr);
 	vmm_map_page(current_context, dest, paddr);
 	
+	memclr(dest, PAGE_SIZE);
 	memcpy(dest, src, PAGE_SIZE);
       }
       vmm_unmap_page(context, dest);
-      memclr(ph->virt_addr + ph->file_size, ph->mem_size - ph->file_size);
     }
   }
+  while(1);
   proc_t *proc = create_proc((void*) header->entry, name, context, DPL_KERNELMODE);
   
   return proc;

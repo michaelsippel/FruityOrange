@@ -41,13 +41,13 @@
 #define VMM_KERNEL_FLAGS (VMM_PRESENT | VMM_WRITE)
 #define VMM_USER_FLAGS   (VMM_PRESENT | VMM_WRITE | VMM_USER)
 
-#define VADDR_KERNEL_START 0xc0000000
-#define VADDR_KERNEL_END   0xffffffff/*(VADDR_KERNEL_START+KERNEL_SIZE)*/
-#define VADDR_USER_START 0x00001000
-#define VADDR_USER_END   0xbfffffff
-#define VADDR_CONTEXT  0xc2001000
-#define VADDR_PD       0xc2002000
-#define VADDR_PT_START 0xc2003000
+#define VADDR_KERNEL_START ((uintptr_t) 0xc0000000)
+#define VADDR_KERNEL_END   ((uintptr_t) 0xffffffff)/*(VADDR_KERNEL_START+KERNEL_SIZE)*/
+#define VADDR_USER_START ((uintptr_t) 0x00001000)
+#define VADDR_USER_END   ((uintptr_t) 0xbfffffff)
+#define VADDR_CONTEXT  ((uintptr_t) 0xc2001000)
+#define VADDR_PD       ((uintptr_t) 0xc2002000)
+#define VADDR_PT_START ((uintptr_t) 0xc2003000)
 
 #define PT_PADDR(c, i) (c->pagedir[i] & PAGE_MASK)
 #define PT_VADDR(i) (VADDR_PT_START + PAGE_SIZE*i)
@@ -90,10 +90,11 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
 int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr);
 int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages);
 int vmm_unmap_area(vmm_context_t *context, uintptr_t vaddr, size_t pages);
-void *vmm_find_free_page(vmm_context_t *context);
-void *vmm_find_free_area(vmm_context_t *context, size_t pages);
-void *vmm_automap_page(vmm_context_t *context, uintptr_t paddr);
-void *vmm_automap_area(vmm_context_t *context, uintptr_t paddr, size_t pages);
+void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_t limit_high);
+void *vmm_automap_kernel_page(vmm_context_t *context, uintptr_t paddr);
+void *vmm_automap_kernel_area(vmm_context_t *context, uintptr_t paddr, size_t pages);
+void *vmm_automap_user_page(vmm_context_t *context, uintptr_t paddr);
+void *vmm_automap_user_area(vmm_context_t *context, uintptr_t paddr, size_t pages);
 void *vmm_alloc(void);
 void *vmm_alloc_area(size_t pages);
 uintptr_t vmm_paddr(vmm_context_t *context, uintptr_t vaddr);
