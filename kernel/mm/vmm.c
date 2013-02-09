@@ -235,6 +235,16 @@ int vmm_unmap_area(vmm_context_t *context, uintptr_t vaddr, size_t pages) {
 }
 
 void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_t limit_high) {
+#define PAGES_FOUND(l) \
+	  if(vaddr == (uintptr_t)NULL) { \
+	    page = pd_index * PT_SIZE + pt_index; \
+	    vaddr = page * PAGE_SIZE; \
+	  } \
+	  pages_found += l; \
+	  if(pages_found >= num) { \
+	    return (void*) vaddr; \
+	  }
+  
   uintptr_t vaddr;
   uintptr_t page;
   size_t pages_found = 0;
@@ -249,29 +259,17 @@ void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_
     if(context->pagedir[pd_index] & VMM_PRESENT) {
       pt = vmm_get_pagetable(context, pd_index);
       
-      uint32_t end = (pd_index == pd_index_end) ? pt_index_end : PT_SIZE; // last pd entry
-      while(pt_index < end) {
-	if(! ((uint32_t)pt[pt_index++] & VMM_PRESENT) ) {
-	  if(vaddr != (uintptr_t)NULL) {
-	    page = pd_index * PT_SIZE + pt_index;
-	    vaddr = page * PAGE_SIZE;
-	  }
-	  pages_found ++;
-	  if(pages_found >= num) {
-	    return (void*) vaddr;
-	  }
+      uint32_t pt_end = (pd_index == pd_index_end) ? pt_index_end : PT_SIZE; // last pd entry
+      for(pt_index = 0; pt_index < pt_end; pt_index++) {
+	if(! ((uint32_t)pt[pt_index] & VMM_PRESENT) ) {
+	  PAGES_FOUND(1);
+	} else {
+	  pages_found = 0;
+	  vaddr = (uintptr_t)NULL;
 	}
       }
-      pt_index = 0;
     } else {
-      if(vaddr != (uintptr_t) NULL) {
-	page = pd_index * PT_SIZE + pt_index;
-	vaddr = page * PAGE_SIZE;
-      }
-      pages_found += PT_SIZE;
-      if(pages_found >= num) {
-	return (void*) vaddr;
-      }
+      PAGES_FOUND(PT_SIZE);
     }
     pd_index++;
   }

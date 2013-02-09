@@ -76,7 +76,7 @@ void init(struct multiboot_info *mb_info) {
   
   void *a = vmm_find(current_context, 1, VADDR_USER_START, VADDR_USER_END);
   printf("0x%x\n", a);
-  vmm_map_page(current_context, a, a);
+  vmm_map_page(current_context, a, 0x1000);
   printf("0x%x\n", vmm_find(current_context, 1, VADDR_USER_START, VADDR_USER_END));
   
   printf("\n---\n");
