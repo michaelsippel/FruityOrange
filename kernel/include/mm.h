@@ -1,7 +1,7 @@
 /**
  *  kernel/include/mm.h
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2012-2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,15 +42,17 @@
 #define VMM_USER_FLAGS   (VMM_PRESENT | VMM_WRITE | VMM_USER)
 
 #define VADDR_KERNEL_START ((uintptr_t) 0xc0000000)
-#define VADDR_KERNEL_END   ((uintptr_t) 0xffffffff)/*(VADDR_KERNEL_START+KERNEL_SIZE)*/
+#define VADDR_KERNEL_END   ((uintptr_t) 0xffffffff)
 #define VADDR_USER_START ((uintptr_t) 0x00001000)
 #define VADDR_USER_END   ((uintptr_t) 0xbfffffff)
 #define VADDR_CONTEXT  ((uintptr_t) 0xc2001000)
 #define VADDR_PD       ((uintptr_t) 0xc2002000)
 #define VADDR_PT_START ((uintptr_t) 0xc2003000)
 
-#define PT_PADDR(c, i) (c->pagedir[i] & PAGE_MASK)
+#define PD_PT_PADDR(p, i) (p[i] & PAGE_MASK)
+#define CT_PT_PADDR(c, i) (c->pagedir[i] & PAGE_MASK)
 #define PT_VADDR(i) (VADDR_PT_START + PAGE_SIZE*i)
+
 
 #define FOR_KERNEL_PTS(i) \
   for(i = PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START)); \
@@ -90,6 +92,7 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
 int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr);
 int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages);
 int vmm_unmap_area(vmm_context_t *context, uintptr_t vaddr, size_t pages);
+void *vmm_map_temp(uintptr_t paddr, size_t pages);
 void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_t limit_high);
 void *vmm_automap_kernel_page(vmm_context_t *context, uintptr_t paddr);
 void *vmm_automap_kernel_area(vmm_context_t *context, uintptr_t paddr, size_t pages);

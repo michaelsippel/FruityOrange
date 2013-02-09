@@ -74,12 +74,6 @@ void init(struct multiboot_info *mb_info) {
   printf("The kernel is successful started!\n");
   setColor(0x0f);
   
-  void *a = vmm_find(current_context, 1, VADDR_USER_START, VADDR_USER_END);
-  printf("0x%x\n", a);
-  vmm_map_page(current_context, a, 0x1000);
-  printf("0x%x\n", vmm_find(current_context, 1, VADDR_USER_START, VADDR_USER_END));
-  
-  printf("\n---\n");
   if(mb_info->mbs_mods_count > 0) {
     if(mb_info->mbs_mods_count > 1) {
       printf("Load %d modules...\n", mb_info->mbs_mods_count);

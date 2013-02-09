@@ -1,7 +1,7 @@
 /**
  *  kernel/mm/vmm.c
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2012-2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@
 
 vmm_context_t *current_context;
 vmm_context_t *kernel_context;
+uint32_t temp_mapped[100];
+uint32_t temp_mapped_size;
 static bool paging_enabled = FALSE;
 static uint32_t cr0;
 
@@ -83,7 +85,7 @@ void init_vmm(void) {
    vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) &kernel_start, KERNEL_PAGES);// kernel
    vmm_map_area(kernel_context, VIDEOMEM_START, VIDEOMEM_START, VIDEOMEM_PAGES);// videomemory (0xB8000 - 0xBFFFF)
   */
-  vmm_activate_context(kernel_context);
+  asm volatile("mov %0, %%cr3" : : "r" (pagedir));
   
   vmm_map_page(kernel_context, VADDR_PD, (uintptr_t) kernel_context->pagedir);
   vmm_map_page(kernel_context, VADDR_CONTEXT, (uintptr_t) kernel_context);
@@ -120,33 +122,22 @@ vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
 }
 
 vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
-  static uintptr_t vaddr_pt = 0;
-  static uintptr_t vaddr_pd = 0;
   vmm_pt_t pagetable;
-  
-  // TODO (waiting for vmm_map_temp())
-//   if(! context->pagedir[index] & VMM_PRESENT) {
-//     return NULL;
-//   }
+  vmm_pd_t pagedir;
   
   if(paging_enabled) {
     if(context != current_context) {
-      if(vaddr_pd == 0)
-	vaddr_pd = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
-      if(vaddr_pt == 0)
-	vaddr_pt = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
+      pagedir = (vmm_pd_t) vmm_map_temp(context->pagedir_paddr, 1);
+      if(! pagedir[index] & VMM_PRESENT) {
+	return NULL;
+      }
       
-      printf("vaddr_pd = 0x%x\n", context->pagedir_paddr);
-      vmm_map_page(current_context, vaddr_pd, context->pagedir_paddr);
-      context->pagedir = vaddr_pd;
-      
-      vmm_map_page(current_context, vaddr_pt, (uintptr_t) PT_PADDR(context, index));
-      pagetable = (vmm_pt_t) vaddr_pt;
+      pagetable = (vmm_pt_t) vmm_map_temp((uintptr_t) PD_PT_PADDR(pagedir, index), 1);
     } else {
       pagetable = (vmm_pt_t) PT_VADDR(index);
     }
   } else {
-    pagetable = (vmm_pt_t) PT_PADDR(context, index);
+    pagetable = (vmm_pt_t) CT_PT_PADDR(context, index);
   }
   
   return pagetable;
@@ -169,9 +160,9 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
   context->pagedir_paddr = pd_paddr;
   
   // copy kernelmappings
-//   memcpy(context->pagedir, kernel_context->pagedir, 0xff * sizeof(uint32_t));
+  memcpy(context->pagedir, kernel_context->pagedir, 0xff * sizeof(uint32_t));
   pagedir[PD_INDEX(PAGE_INDEX(VADDR_PD))] = (uint32_t) pd_paddr | context->flags;
-  printf("0x%x\n", context->pagedir_paddr);
+  
   vmm_map_page(context, VADDR_CONTEXT, paddr);
   vmm_map_page(context, VADDR_PD, pd_paddr);
   
@@ -179,9 +170,13 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
-  if(current_context != context || current_context == NULL) {
+  if(current_context != context) {
+    int i;
+    for(i = 0; i < temp_mapped_size; i++) {
+      vmm_unmap_page(current_context, temp_mapped[i]);
+    }
     asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));
-    context = VADDR_CONTEXT;
+    current_context = VADDR_CONTEXT;
   }
 }
 
@@ -232,6 +227,18 @@ int vmm_unmap_area(vmm_context_t *context, uintptr_t vaddr, size_t pages) {
     vmm_unmap_page(context, vaddr + page*PAGE_SIZE);
   }
   return 0;
+}
+
+void *vmm_map_temp(uintptr_t paddr, size_t pages) {
+  uintptr_t vaddr = vmm_find(current_context, pages, VADDR_KERNEL_START, VADDR_KERNEL_END);
+  vmm_map_area(current_context, vaddr, paddr, pages);
+  
+  int i;
+  for(i = 0; i < pages; i++) {
+    temp_mapped[temp_mapped_size++] = vaddr + i*PAGE_SIZE;
+  }
+  
+  return (void*) vaddr;
 }
 
 void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_t limit_high) {
