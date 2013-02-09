@@ -79,7 +79,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
 //     proc_cpu_state->gs = _KERNEL_DS;
   }
   
-//   proc_cpu_state = VADDR_CPU_STATUS_STACK + stack_size - sizeof(cpu_state_t);
+  proc_cpu_state = VADDR_KERNEL_STACK + stack_size - sizeof(cpu_state_t);
   proc->cpu = proc_cpu_state;
   
   if(proc_count == 1) {
