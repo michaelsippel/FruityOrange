@@ -36,6 +36,7 @@ typedef struct proc {
   int ticks;
   cpu_state_t *cpu;
   vmm_context_t *context;
+  uintptr_t context_paddr;
   size_t used_mem_pages;
   
   struct proc *next;

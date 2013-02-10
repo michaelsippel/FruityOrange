@@ -67,7 +67,7 @@ void init_vmm(void) {
   }
   // kernel
   vaddr = VADDR_KERNEL_START;
-  paddr = (uintptr_t) &kernel_start;
+  paddr = (uintptr_t) 0;
   while(paddr < (uintptr_t) &kernel_end) {
     vmm_map_page(kernel_context, vaddr, paddr);
     vaddr += PAGE_SIZE;
@@ -82,7 +82,7 @@ void init_vmm(void) {
 /*    
    //TODO: let this work: 
    vmm_map_area(kernel_context, 0x0, 0x0, KERNEL_PAGES);// until kernel_end 1:1 mapping
-   vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) &kernel_start, KERNEL_PAGES);// kernel
+   vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) 0, KERNEL_PAGES);// kernel
    vmm_map_area(kernel_context, VIDEOMEM_START, VIDEOMEM_START, VIDEOMEM_PAGES);// videomemory (0xB8000 - 0xBFFFF)
   */
   asm volatile("mov %0, %%cr3" : : "r" (pagedir));
@@ -174,7 +174,10 @@ inline void vmm_activate_context(vmm_context_t *context) {
     int i;
     for(i = 0; i < temp_mapped_size; i++) {
       vmm_unmap_page(current_context, temp_mapped[i]);
+      temp_mapped[i] = 0;
     }
+    temp_mapped_size = 0;
+    
     asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));
     current_context = VADDR_CONTEXT;
   }

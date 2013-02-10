@@ -25,7 +25,7 @@
 static alloc_nd_t *first_nd = NULL;
 
 void init_heap(void) {
-  first_nd = (alloc_nd_t*) vmm_alloc();
+  first_nd = (alloc_nd_t*) vmm_automap_kernel_page(kernel_context, pmm_alloc());
   first_nd->bytes = PAGE_SIZE;
   first_nd->next_nd = NULL;
   first_nd->prev_nd = NULL;
@@ -45,7 +45,7 @@ void remove_node(alloc_nd_t *node) {
 
 void *malloc(size_t bytes) {
   if( bytes <= PAGE_SIZE && bytes > (PAGE_SIZE - sizeof(alloc_nd_t)) ) {
-    return vmm_alloc();
+    return vmm_automap_kernel_page(kernel_context, pmm_alloc());
   }
   
   bytes += sizeof(alloc_nd_t)-1;
@@ -64,8 +64,17 @@ void *malloc(size_t bytes) {
   
   // nothing avaiable - create new node
   if(!node_found) {
-    node = (alloc_nd_t*) vmm_alloc_area(bytes / PAGE_SIZE + 1);
-    node->bytes = PAGE_SIZE * ( (size_t) bytes / PAGE_SIZE );
+    size_t pages = bytes / PAGE_SIZE + 1;
+    uintptr_t vaddr = (uintptr_t) vmm_find(kernel_context, pages, VADDR_KERNEL_START, VADDR_KERNEL_END);
+    node = (alloc_nd_t*) vaddr;
+    
+    int i;
+    for(i = 0; i < pages; i++, vaddr += PAGE_SIZE) {
+      uintptr_t paddr = (uintptr_t) pmm_alloc();
+      vmm_map_page(kernel_context, vaddr, paddr);
+    }
+    
+    node->bytes = PAGE_SIZE * pages;
   }
   
   // is there some space for more?
