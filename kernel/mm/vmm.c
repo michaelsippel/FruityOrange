@@ -50,12 +50,6 @@ void init_vmm(void) {
   kernel_context->pagedir = pagedir;
   kernel_context->pagedir_paddr = (uintptr_t) pagedir;
   
-  //create kernel pagetables
-//   int i;
-//   FOR_KERNEL_PTS(i) {
-//     vmm_create_pagetable(kernel_context, i);
-//   }
-  
   // create kernel-mapping
   uintptr_t vaddr = 0;
   uintptr_t paddr = 0;
@@ -112,7 +106,7 @@ inline void vmm_disable(void) {
 
 vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
   vmm_pt_t pagetable = pmm_alloc();
-  context->pagedir[index] = (uint32_t) pagetable | VMM_WRITE | VMM_PRESENT;
+  context->pagedir[index] = (uint32_t) pagetable | VMM_WRITE | VMM_PRESENT | context->flags;
   vmm_map_page(context, PT_VADDR(index), (uintptr_t)pagetable);
   
   pagetable = vmm_get_pagetable(context, index);
@@ -123,21 +117,15 @@ vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
 
 vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
   vmm_pt_t pagetable;
-  vmm_pd_t pagedir;
   
   if(paging_enabled) {
     if(context != current_context) {
-      pagedir = (vmm_pd_t) vmm_map_temp(context->pagedir_paddr, 1);
-      if(! pagedir[index] & VMM_PRESENT) {
-	return NULL;
-      }
-      
-      pagetable = (vmm_pt_t) vmm_map_temp((uintptr_t) PD_PT_PADDR(pagedir, index), 1);
+      pagetable = (vmm_pt_t) vmm_map_temp((uintptr_t) PT_PADDR(context, index), 1);
     } else {
       pagetable = (vmm_pt_t) PT_VADDR(index);
     }
   } else {
-    pagetable = (vmm_pt_t) CT_PT_PADDR(context, index);
+    pagetable = (vmm_pt_t) PT_PADDR(context, index);
   }
   
   return pagetable;
@@ -160,13 +148,17 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
   context->pagedir_paddr = pd_paddr;
   
   // copy kernelmappings
-  memcpy(context->pagedir, kernel_context->pagedir, 0xff * sizeof(uint32_t));
+  vmm_update_context(context);
   pagedir[PD_INDEX(PAGE_INDEX(VADDR_PD))] = (uint32_t) pd_paddr | context->flags;
   
   vmm_map_page(context, VADDR_CONTEXT, paddr);
   vmm_map_page(context, VADDR_PD, pd_paddr);
   
   return context;
+}
+
+inline void vmm_update_context(vmm_context_t *context) {
+  memcpy(context->pagedir, current_context->pagedir, 0xff * sizeof(uint32_t));
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
@@ -178,8 +170,9 @@ inline void vmm_activate_context(vmm_context_t *context) {
     }
     temp_mapped_size = 0;
     
+    vmm_update_context(context);
     asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));
-    current_context = VADDR_CONTEXT;
+    current_context = context;
   }
 }
 

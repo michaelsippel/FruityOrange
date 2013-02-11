@@ -49,10 +49,8 @@
 #define VADDR_PD       ((uintptr_t) 0xc2002000)
 #define VADDR_PT_START ((uintptr_t) 0xc2003000)
 
-#define PD_PT_PADDR(p, i) (p[i] & PAGE_MASK)
-#define CT_PT_PADDR(c, i) (c->pagedir[i] & PAGE_MASK)
+#define PT_PADDR(c, i) (c->pagedir[i] & PAGE_MASK)
 #define PT_VADDR(i) (VADDR_PT_START + PAGE_SIZE*i)
-
 
 #define FOR_KERNEL_PTS(i) \
   for(i = PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START)); \
@@ -101,6 +99,7 @@ void *vmm_automap_user_area(vmm_context_t *context, uintptr_t paddr, size_t page
 void *vmm_alloc(void);
 void *vmm_alloc_area(size_t pages);
 uintptr_t vmm_paddr(vmm_context_t *context, uintptr_t vaddr);
+inline void vmm_update_context(vmm_context_t *context);
 inline void vmm_activate_context(vmm_context_t *context);
 inline void vmm_flush_tlb(uintptr_t vaddr);
 #ifndef _VMM_C
