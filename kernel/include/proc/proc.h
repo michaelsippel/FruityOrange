@@ -25,9 +25,6 @@
 #include <cpu.h>
 #include <mm.h>
 
-#define VADDR_USER_STACK   0xcfe000
-#define VADDR_KERNEL_STACK 0xcff000
-
 typedef struct proc {
   char *name;
   pid_t pid;

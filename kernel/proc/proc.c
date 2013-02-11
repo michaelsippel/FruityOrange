@@ -48,7 +48,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   uintptr_t kernel_stack_phys = (uintptr_t) pmm_alloc();
   uintptr_t kernel_stack_virt = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
   vmm_map_page(current_context, kernel_stack_virt, kernel_stack_phys);
-  vmm_map_page(proc->context, VADDR_KERNEL_STACK,  kernel_stack_phys);
+  uintptr_t kernel_stack = vmm_automap_kernel_page(context, kernel_stack_phys);
   
   cpu_state_t *proc_cpu_state = (void*) (kernel_stack_virt + stack_size - sizeof(cpu_state_t));
   *proc_cpu_state = (cpu_state_t) {
@@ -61,10 +61,9 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   };
   
   if(dpl) { // Usermode
-    uintptr_t user_stack_phys = (uintptr_t) pmm_alloc();
-    vmm_map_page(proc->context, (uintptr_t) VADDR_USER_STACK, user_stack_phys);
+    uintptr_t user_stack = vmm_automap_kernel_page(context, (uintptr_t) pmm_alloc());
     
-    proc_cpu_state->esp = VADDR_USER_STACK + stack_size;
+    proc_cpu_state->esp = user_stack + stack_size;
     proc_cpu_state->cs = _USER_CS;
     proc_cpu_state->ss = _USER_SS;
 //     proc_cpu_state->ds = _USER_DS;
@@ -79,7 +78,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
 //     proc_cpu_state->gs = _KERNEL_DS;
   }
   
-  proc_cpu_state = VADDR_KERNEL_STACK + stack_size - sizeof(cpu_state_t);
+  proc_cpu_state = kernel_stack + stack_size - sizeof(cpu_state_t);
   proc->cpu = proc_cpu_state;
   
   if(proc_count == 1) {
