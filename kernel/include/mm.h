@@ -45,9 +45,7 @@
 #define VADDR_KERNEL_END   ((uintptr_t) 0xffffffff)
 #define VADDR_USER_START ((uintptr_t) 0x00001000)
 #define VADDR_USER_END   ((uintptr_t) 0xbfffffff)
-#define VADDR_CONTEXT  ((uintptr_t) 0xc2001000)
-#define VADDR_PD       ((uintptr_t) 0xc2002000)
-#define VADDR_PT_START ((uintptr_t) 0xc2003000)
+#define VADDR_PT_START ((uintptr_t) 0xc2000000)
 
 #define PT_PADDR(c, i) (c->pagedir[i] & PAGE_MASK)
 #define PT_VADDR(i) (VADDR_PT_START + PAGE_SIZE*i)
