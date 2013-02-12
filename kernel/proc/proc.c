@@ -46,8 +46,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   
   // Stack
   uintptr_t kernel_stack_phys = (uintptr_t) pmm_alloc();
-  uintptr_t kernel_stack_virt = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
-  vmm_map_page(current_context, kernel_stack_virt, kernel_stack_phys);
+  uintptr_t kernel_stack_virt = (uintptr_t) vmm_automap_kernel_page(current_context, kernel_stack_phys);
   uintptr_t kernel_stack = vmm_automap_kernel_page(context, kernel_stack_phys);
   
   cpu_state_t *proc_cpu_state = (void*) (kernel_stack_virt + stack_size - sizeof(cpu_state_t));

@@ -24,7 +24,7 @@
 extern const void kernel_start;
 extern const void kernel_end;
 
-#define KERNEL_SIZE (&kernel_end - &kernel_start)
+#define KERNEL_SIZE ((uintptr_t) &kernel_end)
 #define KERNEL_PAGES (KERNEL_SIZE / PAGE_SIZE +1)
 
 struct multiboot_info {
