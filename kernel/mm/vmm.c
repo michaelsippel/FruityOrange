@@ -82,11 +82,11 @@ vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
   context->pagedir[index] = (uint32_t) pagetable | VMM_WRITE | VMM_PRESENT | context->flags;
   uintptr_t vaddr;
   
-//   if(index > PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START)) || !paging_enabled) {
+  if(index > PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START)) || !paging_enabled) {
     vaddr = PT_VADDR(index);
-//   } else {
-//     vaddr = vmm_find(context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
-//   }
+  } else {
+    vaddr = vmm_find(context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
+  }
   
   vmm_map_page(context, vaddr, (uintptr_t)pagetable);
   
@@ -136,8 +136,8 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 }
 
 inline void vmm_update_context(vmm_context_t *context) {
-  memcpy(context->pagedir + PD_SIZE*3, current_context->pagedir+ PD_SIZE*3, PD_SIZE);
-  memcpy(context->pagedir + PD_SIZE, current_context->pagedir+ PD_SIZE, PD_SIZE);
+//   memcpy(context->pagedir + PD_SIZE*3, current_context->pagedir+ PD_SIZE*3, PD_SIZE);
+//   memcpy(context->pagedir + PD_SIZE, current_context->pagedir+ PD_SIZE, PD_SIZE);
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
@@ -185,7 +185,11 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
 }
 
 int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr) {
-  return vmm_map_page(context, vaddr, (uintptr_t) NULL);
+  uint32_t page_index = PAGE_INDEX(vaddr);
+  vmm_pt_t pt = vmm_get_pagetable(context, PD_INDEX(page_index));
+  pt[PT_INDEX(page_index)] = 0;
+  
+  return 0;
 }
 
 int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages) {

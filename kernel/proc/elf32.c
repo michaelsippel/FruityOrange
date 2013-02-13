@@ -72,7 +72,7 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
     if(ph->type == EPT_LOAD) {
       pages = ph->file_size / PAGE_SIZE +1;
       uintptr_t dest = vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
-      
+      printf("dest = 0x%x\n", dest);
       for(j = 0; j < pages; j++) {
 	uintptr_t paddr = pmm_alloc();
 	uintptr_t vaddr = ph->virt_addr + j*PAGE_SIZE;
