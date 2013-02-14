@@ -49,8 +49,9 @@ void init_vmm(void) {
   pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pagedir | VMM_KERNEL_FLAGS;
   kernel_context->pagedir = pagedir;
   kernel_context->pagedir_paddr = (uintptr_t) pagedir;
-
-  vmm_map_area(kernel_context, 0x0, 0x0, KERNEL_PAGES);// until kernel_end 1:1 mapping
+  
+  vmm_map_area(kernel_context, 0, 0, KERNEL_PAGES);// until kernel_end 1:1 mapping
+  vmm_map_area(kernel_context, 0, 0, KERNEL_PAGES);// FIXME: why does it work, if it's mapped twice?
   vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) 0, KERNEL_PAGES);// kernel
   vmm_map_area(kernel_context, VIDEOMEM_START, VIDEOMEM_START, VIDEOMEM_PAGES);// videomemory (0xB8000 - 0xBFFFF)
   
@@ -137,7 +138,7 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 
 inline void vmm_update_context(vmm_context_t *context) {
 //   memcpy(context->pagedir + PD_SIZE*3, current_context->pagedir+ PD_SIZE*3, PD_SIZE);
-//   memcpy(context->pagedir + PD_SIZE, current_context->pagedir+ PD_SIZE, PD_SIZE);
+  memcpy(context->pagedir, current_context->pagedir, PAGE_SIZE);
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
@@ -195,7 +196,7 @@ int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr) {
 int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages) {
   int page;
   for(page = 0; page < pages; page++) {
-    vmm_map_page(context, vaddr + page*PAGE_SIZE, paddr +page*PAGE_SIZE);
+    vmm_map_page(context, vaddr + page*PAGE_SIZE, paddr + page*PAGE_SIZE);
   }
   return 0;
 }
