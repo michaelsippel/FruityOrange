@@ -27,7 +27,7 @@
 
 #define BITMAP_SIZE 0x8000
 uint32_t bitmap[BITMAP_SIZE];
-uintptr_t last_free_ptr;
+uintptr_t last_free_ptr = NULL;
 bool can_do_fast_alloc = FALSE;
 
 void init_pmm(struct multiboot_info *mb_info) {
@@ -80,7 +80,7 @@ void init_pmm(struct multiboot_info *mb_info) {
   pmm_mark_used(0);
 }
 
-void* pmm_alloc(void) {
+void *pmm_alloc(void) {
   int i, j, k=0;
   uintptr_t addr;
   if(can_do_fast_alloc) {
@@ -111,7 +111,7 @@ void pmm_free(void *ptr) {
   int j = page % (sizeof(uint32_t) * 8);
 
   last_free_ptr = (uintptr_t) ptr;
-//   can_do_fast_alloc = TRUE;
+  can_do_fast_alloc = TRUE;
   
   bitmap[i] |= (1 << j);
 }
