@@ -51,13 +51,13 @@ void init_vmm(void) {
   kernel_context->pagedir_paddr = (uintptr_t) pagedir;
   
   vmm_map_area(kernel_context, 0, 0, KERNEL_PAGES);// until kernel_end 1:1 mapping
-  vmm_map_area(kernel_context, 0, 0, KERNEL_PAGES);// FIXME: why does it work, if it's mapped twice?
   vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) 0, KERNEL_PAGES);// kernel
   vmm_map_area(kernel_context, VIDEOMEM_START, VIDEOMEM_START, VIDEOMEM_PAGES);// videomemory (0xB8000 - 0xBFFFF)
   
   void *pd = vmm_automap_kernel_page(kernel_context, kernel_context->pagedir_paddr);
-  kernel_context = vmm_automap_kernel_page(kernel_context, kernel_context);
+  void *new = vmm_automap_kernel_page(kernel_context, kernel_context);
   kernel_context->pagedir = pd;
+  kernel_context = new;
   
   asm volatile("mov %0, %%cr3" : : "r" (pagedir));
   current_context = kernel_context;
@@ -81,15 +81,6 @@ inline void vmm_disable(void) {
 vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index) {
   vmm_pt_t pagetable = pmm_alloc();
   context->pagedir[index] = (uint32_t) pagetable | VMM_WRITE | VMM_PRESENT | context->flags;
-  uintptr_t vaddr;
-  
-  if(index > PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START)) || !paging_enabled) {
-    vaddr = PT_VADDR(index);
-  } else {
-    vaddr = vmm_find(context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
-  }
-  
-  vmm_map_page(context, vaddr, (uintptr_t)pagetable);
   
   pagetable = vmm_get_pagetable(context, index);
   memclr(pagetable, PAGE_SIZE);
@@ -109,7 +100,7 @@ vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
   } else {
     pagetable = (vmm_pt_t) PT_PADDR(context, index);
   }
-  
+
   return pagetable;
 }
 
@@ -137,7 +128,6 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 }
 
 inline void vmm_update_context(vmm_context_t *context) {
-//   memcpy(context->pagedir + PD_SIZE*3, current_context->pagedir+ PD_SIZE*3, PD_SIZE);
   memcpy(context->pagedir, current_context->pagedir, PAGE_SIZE);
 }
 
@@ -150,7 +140,7 @@ inline void vmm_activate_context(vmm_context_t *context) {
     }
     temp_mapped_size = 0;
     
-    vmm_update_context(context);
+//     vmm_update_context(context);
     current_context = context;
     asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));
   }
@@ -189,6 +179,8 @@ int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr) {
   uint32_t page_index = PAGE_INDEX(vaddr);
   vmm_pt_t pt = vmm_get_pagetable(context, PD_INDEX(page_index));
   pt[PT_INDEX(page_index)] = 0;
+  
+  //TODO: if the pagetable is emtpy, remove it.
   
   return 0;
 }
@@ -232,8 +224,8 @@ void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_
 	    return (void*) vaddr; \
 	  }
   
-  uintptr_t vaddr;
-  uintptr_t page;
+  uintptr_t vaddr = NULL;
+  uintptr_t page = 0;
   size_t pages_found = 0;
   
   uint32_t pd_index = PD_INDEX(PAGE_INDEX(limit_low));
