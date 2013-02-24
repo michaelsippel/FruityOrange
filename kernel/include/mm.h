@@ -88,7 +88,6 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr);
 int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr);
 int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages);
 int vmm_unmap_area(vmm_context_t *context, uintptr_t vaddr, size_t pages);
-void *vmm_map_temp(uintptr_t paddr, size_t pages);
 void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_t limit_high);
 void *vmm_automap_kernel_page(vmm_context_t *context, uintptr_t paddr);
 void *vmm_automap_kernel_area(vmm_context_t *context, uintptr_t paddr, size_t pages);
