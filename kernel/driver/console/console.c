@@ -28,7 +28,7 @@
 static int videotext_width  = 80;
 static int videotext_height = 25;
 
-static uint16_t *video_mem = (uint16_t*) 0xB8000;
+static uint16_t *video_mem = (uint16_t*) 0xC00B8000;
 static uint8_t color = 0x07;
 static int x = 0, y = 0;
 

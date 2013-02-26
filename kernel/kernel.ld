@@ -1,30 +1,29 @@
 ENTRY(_start)
+OUTPUT_FORMAT(elf32-i386)
 
 SECTIONS
 {
-     /*
-      * . ist die aktuelle Position in der Datei. Wir wollen den Kernel wie gehabt
-      *   an 1 MB laden, also muessen wir dort die erste Sektion hinlegen
-      */
-     . = 0x100000;
-     kernel_start = .;
-     /*
-      * Der Multiboot-Header muss zuerst kommen (in den ersten 8 kB).
-      * Die Standardsektionen einfach hintereinander weg einbinden.
-      */
-     .text : {
-          *(multiboot)
+      . = 0x100000;
+      kernel_start_phys = .;
+
+      . += 0xC0000000;
+      kernel_start_virt = .;
+
+     .text :  AT(ADDR(.text) - 0xC0000000) {
+          *(multiboot*)
           *(.text)
       }
-      .data ALIGN(4096) : {
-          *(.data)
-      }
-      .rodata ALIGN(4096) : {
-          *(.rodata)
-      }
-      .bss ALIGN(4096) : {
-	  *(.bss)
-      }
-      kernel_end = .;
-}
 
+      .data ALIGN(4096) : AT(ADDR(.data) - 0xC0000000) {
+          *(.data)
+	  *(.rodata*)
+      }
+
+      .bss ALIGN(4096) : AT(ADDR(.bss) - 0xC0000000) {
+	  *(COMMON*)
+	  *(.bss*)
+      }
+
+      kernel_end_virt = .;
+      kernel_end_phys = . - 0xC0000000;
+}

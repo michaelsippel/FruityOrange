@@ -41,6 +41,14 @@
 #define VMM_KERNEL_FLAGS (VMM_PRESENT | VMM_WRITE)
 #define VMM_USER_FLAGS   (VMM_PRESENT | VMM_WRITE | VMM_USER)
 
+extern const void kernel_start_phys;
+extern const void kernel_start_virt;
+extern const void kernel_end_phys;
+extern const void kernel_end_virt;
+
+#define KERNEL_SIZE ((uintptr_t) &kernel_end_phys)
+#define KERNEL_PAGES (KERNEL_SIZE / PAGE_SIZE +1)
+
 #define VADDR_KERNEL_START ((uintptr_t) 0xc0000000)
 #define VADDR_KERNEL_END   ((uintptr_t) 0xffffffff)
 #define VADDR_USER_START ((uintptr_t) 0x00001000)

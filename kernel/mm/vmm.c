@@ -48,7 +48,6 @@ void init_vmm(void) {
   kernel_context->pagedir = pagedir;
   kernel_context->pagedir_paddr = (uintptr_t) pagedir;
   
-  vmm_map_area(kernel_context, 0, 0, KERNEL_PAGES);// until kernel_end 1:1 mapping
   vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) 0, KERNEL_PAGES);// kernel
   vmm_map_area(kernel_context, VIDEOMEM_START, VIDEOMEM_START, VIDEOMEM_PAGES);// videomemory (0xB8000 - 0xBFFFF)
   
@@ -131,7 +130,7 @@ inline void vmm_update_context(vmm_context_t *context) {
 
 inline void vmm_activate_context(vmm_context_t *context) {
   if(current_context != context) {
-//     vmm_update_context(context);
+    vmm_update_context(context);
     current_context = context;
     asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));
   }

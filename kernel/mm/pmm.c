@@ -57,8 +57,8 @@ void init_pmm(struct multiboot_info *mb_info) {
   }
   
   // 3. occupy the kernel
-  addr = (uintptr_t) &kernel_start;
-  while(addr < (uintptr_t) &kernel_end) {
+  addr = (uintptr_t) &kernel_start_phys;
+  while(addr < (uintptr_t) &kernel_end_phys) {
     pmm_mark_used((void*) addr);
     addr += PAGE_SIZE;
   }

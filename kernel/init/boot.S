@@ -31,6 +31,16 @@
 
 .global _start
 _start:
+  lgdt (_first_gdt) - 0xC0000000
+  mov $0x10, %ax
+  mov %ax, %ds
+  mov %ax, %es
+  mov %ax, %fs
+  mov %ax, %gs
+  mov %ax, %ss
+  ljmp $0x08, $_higherhalf
+
+_higherhalf:
     mov $kernel_stack, %esp
     push %ebx
     call init
@@ -40,6 +50,18 @@ _stop:
     cli
     hlt
     jmp _stop
+
+_first_gdt:
+    .short _first_gdt_end - _first_gdt_start - 1
+    .long _first_gdt_start - 0xC0000000
+
+_first_gdt_start:
+    .long 0, 0
+    .byte 0xFF, 0xFF, 0, 0, 0, 0b10011010, 0b11001111, 0x40
+    .byte 0xFF, 0xFF, 0, 0, 0, 0b10010010, 0b11001111, 0x40
+
+_first_gdt_end:
+
 
 .section .bss
 .space 8192

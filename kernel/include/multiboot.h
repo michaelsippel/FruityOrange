@@ -21,12 +21,6 @@
 
 #include <stdint.h>
 
-extern const void kernel_start;
-extern const void kernel_end;
-
-#define KERNEL_SIZE ((uintptr_t) &kernel_end)
-#define KERNEL_PAGES (KERNEL_SIZE / PAGE_SIZE +1)
-
 struct multiboot_info {
   uint32_t mbs_flags;
   
