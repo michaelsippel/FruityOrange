@@ -34,15 +34,16 @@ void init_pmm(struct multiboot_info *mb_info) {
   int i;
   uintptr_t addr;
   
-  // 1. occupy complete memory
+  // 1. clear complete bitmap
   for(i = 0;i < BITMAP_SIZE; i++) {
     bitmap[i] = 0;
   }
   
   // 2. release the pages, which are marked in BIOS as free
-  struct multiboot_mmap *mmap = (void*) mb_info->mbs_mmap_addr;
+  struct multiboot_mmap *mmap = (void*) mb_info->mbs_mmap_addr + VADDR_KERNEL_START;
   struct multiboot_mmap *mmap_end = (void*) ((uintptr_t) mb_info->mbs_mmap_addr +
-                                                         mb_info->mbs_mmap_length);
+							 mb_info->mbs_mmap_length +
+							 VADDR_KERNEL_START);
   while(mmap < mmap_end) {
     if(mmap->type == PMM_FREE) {
       addr = mmap->base;
@@ -64,11 +65,11 @@ void init_pmm(struct multiboot_info *mb_info) {
   }
   
   // 4. occupy the multiboot-struct
-  struct multiboot_module *modules = (void*) mb_info->mbs_mods_addr;
   pmm_mark_used(mb_info);
-  pmm_mark_used(modules);
+  pmm_mark_used(mb_info->mbs_mods_addr);
   
   // 5. the multiboot-modules too.
+  struct multiboot_module *modules = (void*) mb_info->mbs_mods_addr + VADDR_KERNEL_START;
   for(i = 0; i < mb_info->mbs_mods_count; i++) {
     addr = modules[i].mod_start;
     while(addr < modules[i].mod_end) {
@@ -100,7 +101,7 @@ void *pmm_alloc(void) {
       }
     }
   }
-  debug(PMM_DEBUG, "pmm_alloc(): insufficient physical memory\n");
+  debug(PMM_DEBUG, "pmm_alloc(): insufficient physical memory!\n");
   return NULL;
 }
 

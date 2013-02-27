@@ -36,28 +36,30 @@ static bool paging_enabled = FALSE;
 static uint32_t cr0;
 
 void init_vmm(void) {
-  kernel_context = pmm_alloc();
+  uintptr_t kernel_context_paddr = pmm_alloc();
+  kernel_context = kernel_context_paddr + VADDR_KERNEL_START;
   memclr(kernel_context, PAGE_SIZE);
-  
   kernel_context->flags = VMM_KERNEL_FLAGS;
   kernel_context->alloc_offset = 1;
   
-  vmm_pd_t pagedir = pmm_alloc();
+  uintptr_t pagedir_paddr = pmm_alloc();
+  vmm_pd_t pagedir = pagedir_paddr + VADDR_KERNEL_START;
   memclr(pagedir, PAGE_SIZE);
-  pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pagedir | VMM_KERNEL_FLAGS;
+  pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pagedir_paddr | VMM_KERNEL_FLAGS;
   kernel_context->pagedir = pagedir;
-  kernel_context->pagedir_paddr = (uintptr_t) pagedir;
+  kernel_context->pagedir_paddr = pagedir_paddr;
   
+  vmm_map_area(kernel_context, 0, (uintptr_t) 0, KERNEL_PAGES);// kernel
   vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) 0, KERNEL_PAGES);// kernel
   vmm_map_area(kernel_context, VIDEOMEM_START, VIDEOMEM_START, VIDEOMEM_PAGES);// videomemory (0xB8000 - 0xBFFFF)
   
-  void *pd = vmm_automap_kernel_page(kernel_context, kernel_context->pagedir_paddr);
-  void *ct = vmm_automap_kernel_page(kernel_context, kernel_context);
+  void *pd = vmm_automap_kernel_page(kernel_context, pagedir_paddr);
+  void *ct = vmm_automap_kernel_page(kernel_context, kernel_context_paddr);
   kernel_context->pagedir = pd;
   kernel_context = ct;
   
-  asm volatile("mov %0, %%cr3" : : "r" (pagedir));
   current_context = kernel_context;
+  asm volatile("mov %0, %%cr3" : : "r" (pagedir_paddr));
   vmm_enable();
 }
 
@@ -95,7 +97,7 @@ vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
       pagetable = (vmm_pt_t) PT_VADDR(index);
     }
   } else {
-    pagetable = (vmm_pt_t) PT_PADDR(context, index);
+    pagetable = (uint32_t) PT_PADDR(context, index) + (uint32_t) VADDR_KERNEL_START;
   }
 
   return pagetable;

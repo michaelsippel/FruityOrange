@@ -51,7 +51,6 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x06);
   printf("The Fruity-kernel is starting now...\n");
   setColor(0x07);
-  while(1);
   kinip("Initalizing pmm... ");
     init_pmm(mb_info);endini();
   kinip("Initalizing paging... ");

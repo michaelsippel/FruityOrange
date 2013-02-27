@@ -15,6 +15,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#define VADDR_KERNEL_START 0xC0000000
 
 .section multiboot
 #define MB_MAGIC 0x1BADB002
@@ -31,7 +32,7 @@
 
 .global _start
 _start:
-  lgdt (_first_gdt) - 0xC0000000
+  lgdt (_first_gdt) - VADDR_KERNEL_START
   mov $0x10, %ax
   mov %ax, %ds
   mov %ax, %es
@@ -42,6 +43,7 @@ _start:
 
 _higherhalf:
     mov $kernel_stack, %esp
+    add $VADDR_KERNEL_START, %ebx
     push %ebx
     call init
     jmp _stop
@@ -53,7 +55,7 @@ _stop:
 
 _first_gdt:
     .short _first_gdt_end - _first_gdt_start - 1
-    .long _first_gdt_start - 0xC0000000
+    .long _first_gdt_start - VADDR_KERNEL_START
 
 _first_gdt_start:
     .long 0, 0
