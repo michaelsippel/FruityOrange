@@ -135,6 +135,10 @@ char read_kbd_buffer(void) {
   return buffer;
 }
 
+int read_kbd_modus(void) {
+  return modus;
+}
+
 char getch(void) {
   buffer = 0;
   while(! buffer);

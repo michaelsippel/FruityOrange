@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 void _start(void) {
-  asm volatile("int $0x30" : : "a" (SYSCALL_GETC));
-  while(1);
+  while(1) {
+    asm volatile("int $0x30" : : "a" (SYSCALL_GETC));
+  }
 }

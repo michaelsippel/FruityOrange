@@ -37,7 +37,7 @@ void getc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 void getc_syscall_end(void) {
   if(syscall_used) {
     char buf = read_kbd_buffer();
-    printf("%c", buf);
+    printf("%c", translate_keycode(buf, read_kbd_modus()));
     proc->cpu->ebx = buf;
     proc_wake(proc);
     

@@ -1,5 +1,5 @@
 /**
- *  include/proc/scheduler.h
+ *  kernel/proc/idle.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,16 +16,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _SCHEDULER_H
-#define _SCHEDULER_H
-
 #include <stdint.h>
-#include <cpu.h>
-#include <proc/proc.h>
 
-void init_scheduler(void);
-void schedule(void);
-void idle(void);
-proc_t *get_current_proc(void);
-
-#endif
+void idle(void) {
+  while(1);
+}

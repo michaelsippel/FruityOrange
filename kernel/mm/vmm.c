@@ -132,13 +132,13 @@ inline void vmm_update_context(vmm_context_t *context) {
   #define START PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START))
   #define END   PD_INDEX(PAGE_INDEX(VADDR_KERNEL_END))
   uintptr_t upd = context->pagedir + START;
-  uintptr_t kpd = kernel_context->pagedir + START;
+  uintptr_t kpd = current_context->pagedir + START;
   size_t len =  END - START;
   memcpy(upd, kpd, len*4);
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
-  if(current_context != context) {
+  if(current_context != context && context != NULL) {
     vmm_update_context(context);
     current_context = context;
     asm volatile("mov %0, %%cr3" : : "r" (context->pagedir_paddr));

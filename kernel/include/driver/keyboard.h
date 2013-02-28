@@ -50,6 +50,7 @@ char getch(void);
 int gets(char *buf);
 
 char read_kbd_buffer(void);
+int read_kbd_modus(void);
 
 void getc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void gets_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
