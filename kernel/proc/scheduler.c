@@ -57,3 +57,7 @@ void schedule(void) {
   }
   common_eoi(0x20);
 }
+
+proc_t *get_current_proc(void) {
+  return current_proc;
+}

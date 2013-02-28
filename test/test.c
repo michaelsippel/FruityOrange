@@ -19,11 +19,7 @@
 #include <sys/syscalls.h>
 #include <stdint.h>
 
-int i = 0;
 void _start(void) {
-    int j = i + 5;
-    for (; i < j; i++) {
-        asm volatile("int $0x30" : : "a" (SYSCALL_PUTC), "b" ('0' + i));
-    }
-    while(1);
+  asm volatile("int $0x30" : : "a" (SYSCALL_GETC));
+  while(1);
 }

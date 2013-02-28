@@ -21,8 +21,10 @@
 
 #include <stdint.h>
 #include <cpu.h>
+#include <proc/proc.h>
 
 void init_scheduler(void);
 void schedule(void);
+proc_t *get_current_proc(void);
 
 #endif

@@ -18,11 +18,32 @@
  */
 #include <sys/syscalls.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <driver/keyboard.h>
+#include <proc/proc.h>
+
+static bool syscall_used = FALSE;
+static proc_t *proc = NULL;
 
 void getc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  *ebx = (uint32_t) getch();
+  if(! syscall_used) {
+    syscall_used = TRUE;
+    proc = get_current_proc();
+    proc_sleep(proc);
+  }
+}
+
+void getc_syscall_end(void) {
+  if(syscall_used) {
+    char buf = read_kbd_buffer();
+    printf("%c", buf);
+    proc->cpu->ebx = buf;
+    proc_wake(proc);
+    
+    proc = NULL;
+    syscall_used = FALSE;
+  }
 }
 
 void gets_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {

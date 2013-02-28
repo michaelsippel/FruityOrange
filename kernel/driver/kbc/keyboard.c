@@ -124,9 +124,15 @@ void send_key_event(uint8_t data, bool breaked) {
 	  modus = 1;break;
 	case 56:
 	  modus = 2;break;
-	default: buffer = data;
+	default: 
+	  buffer = data;
+	  getc_syscall_end();
       }
     }
+}
+
+char read_kbd_buffer(void) {
+  return buffer;
 }
 
 char getch(void) {

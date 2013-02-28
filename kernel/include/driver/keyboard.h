@@ -49,8 +49,11 @@ void set_kbd_assignment(int id);
 char getch(void);
 int gets(char *buf);
 
+char read_kbd_buffer(void);
+
 void getc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void gets_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void getc_syscall_end(void);
 
 static inline void send_kbd_command(uint8_t command) {
    send_kbc_command(KBC_PORT_KBDCOMMAND,command);
