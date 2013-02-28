@@ -30,6 +30,8 @@
 #include <multiboot.h>
 #include <mm.h>
 
+#define VMM_DEBUG 1
+
 vmm_context_t *current_context;
 vmm_context_t *kernel_context;
 static bool paging_enabled = FALSE;
@@ -127,9 +129,11 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 }
 
 inline void vmm_update_context(vmm_context_t *context) {
-  uintptr_t upd = context->pagedir + PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START));
-  uintptr_t kpd = kernel_context->pagedir + PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START));
-  size_t len = PD_INDEX(PAGE_INDEX(VADDR_KERNEL_END)) - PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START));
+  #define START PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START))
+  #define END   PD_INDEX(PAGE_INDEX(VADDR_KERNEL_END))
+  uintptr_t upd = context->pagedir + START;
+  uintptr_t kpd = kernel_context->pagedir + START;
+  size_t len =  END - START;
   memcpy(upd, kpd, len*4);
 }
 
@@ -154,7 +158,7 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
   if( (vaddr & ~PAGE_MASK) || (paddr & ~PAGE_MASK) ) {
     char msg[70];
     sprintf(msg, "vmm_map_page(0x%x): Can't map 0x%x to 0x%x! No 4k alignment!", context, vaddr, paddr);
-    panic(msg);
+    debug(VMM_DEBUG, msg);
     return -1;
   } else {
     if(context->pagedir[pd_index] & VMM_PRESENT) {
@@ -163,8 +167,15 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
       pagetable = vmm_create_pagetable(context, pd_index);
     }
     
-    pagetable[pt_index] = (uint32_t) paddr | context->flags | VMM_PRESENT;
-    vmm_flush_tlb(vaddr);
+    pagetable[pt_index] = (uint32_t) paddr | context->flags | VMM_PRESENT; // entry mapping
+    
+    if(context == current_context) {
+      vmm_flush_tlb(vaddr);
+    } else {
+      if(paging_enabled) {
+	vmm_unmap_page(current_context, pagetable);
+      }
+    }
   }
   
   return 0;
@@ -175,7 +186,19 @@ int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr) {
   vmm_pt_t pt = vmm_get_pagetable(context, PD_INDEX(page_index));
   pt[PT_INDEX(page_index)] = 0;
   
-  //TODO: if the pagetable is emtpy, remove it.
+  int i = 0;
+  while(i < PT_SIZE) {
+    if(pt[i] != 0) {
+      break;
+    } else {
+      if(i == PT_SIZE-1) {
+	context->pagedir[PD_INDEX(page_index)] = 0;
+	pmm_free(pt);
+      } else {
+	i++;
+      }
+    }
+  }
   
   return 0;
 }
@@ -197,7 +220,7 @@ int vmm_unmap_area(vmm_context_t *context, uintptr_t vaddr, size_t pages) {
 }
 
 void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_t limit_high) {
-#define PAGES_FOUND(l) \
+  #define PAGES_FOUND(l) \
 	  if(vaddr == (uintptr_t)NULL) { \
 	    page = pd_index * PT_SIZE + pt_index; \
 	    vaddr = page * PAGE_SIZE; \

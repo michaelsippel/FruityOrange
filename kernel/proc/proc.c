@@ -43,7 +43,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->uid = 0;
   proc->ticks = 3;
   proc->dpl = dpl;
-  proc->used_mem_pages = 2;
+  proc->used_mem_pages = 0;
   
   // Stack
   uintptr_t kernel_stack = malloc(kernel_stack_size);
@@ -72,9 +72,9 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   } else { // Kernelmode
     proc_cpu_state->cs = _KERNEL_CS;
     proc_cpu_state->ds = _KERNEL_DS;
-//     proc_cpu_state->es = _KERNEL_DS;
-//     proc_cpu_state->fs = _KERNEL_DS;
-//     proc_cpu_state->gs = _KERNEL_DS;
+    proc_cpu_state->es = _KERNEL_DS;
+    proc_cpu_state->fs = _KERNEL_DS;
+    proc_cpu_state->gs = _KERNEL_DS;
   }
   
   if(proc_count == 1) {
