@@ -127,7 +127,10 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 }
 
 inline void vmm_update_context(vmm_context_t *context) {
-  memcpy(context->pagedir, kernel_context->pagedir, PAGE_SIZE);
+  uintptr_t upd = context->pagedir + PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START));
+  uintptr_t kpd = kernel_context->pagedir + PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START));
+  size_t len = PD_INDEX(PAGE_INDEX(VADDR_KERNEL_END)) - PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START));
+  memcpy(upd, kpd, len*4);
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
