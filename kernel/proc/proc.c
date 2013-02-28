@@ -28,6 +28,8 @@
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 
+#define PROC_DEBUG 1
+
 static pid_t proc_count = 0;
 static size_t kernel_stack_size = 0x1000;
 static size_t user_stack_size   = 0x1000;
@@ -39,11 +41,14 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc_t *proc = malloc(sizeof(proc_t));
   proc->name = name;
   proc->context = context;
+  proc->used_mem_pages = 0;
+  
   proc->pid = proc_count++;
   proc->uid = 0;
-  proc->ticks = 3;
   proc->dpl = dpl;
-  proc->used_mem_pages = 0;
+  
+  proc->ticks = 3;
+  proc->status = ACTIVE;
   
   // Stack
   uintptr_t kernel_stack = malloc(kernel_stack_size);
@@ -89,4 +94,26 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   first_proc = proc;
   
   return proc;
+}
+
+int proc_sleep(proc_t *proc) {
+  if(proc->status != SLEEP) {
+    proc->status = SLEEP;
+  } else {
+    debug(PROC_DEBUG, "proc_sleep(): process %d is already asleep!\n", proc->pid);
+    return -1;
+  }
+  
+  return 0;
+}
+
+int proc_wake(proc_t *proc) {
+  if(proc->status != ACTIVE) {
+    proc->status = ACTIVE;
+  } else {
+    debug(PROC_DEBUG, "proc_wake(): process %d is already wake!\n", proc->pid);
+    return -1;
+  }
+  
+  return 0;
 }

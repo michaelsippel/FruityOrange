@@ -39,13 +39,19 @@ void activate_proc(proc_t *proc) {
 }
 
 void schedule(void) {
+#define LOOK_FOR_ACTIVE_PROC() \
+  do { \
+    current_proc = current_proc->next; \
+  } while(current_proc->status != ACTIVE);
+  
   if(current_proc != NULL) {
     current_proc->cpu = get_cpu_state();
-    current_proc = current_proc->next;
+    LOOK_FOR_ACTIVE_PROC();
     activate_proc(current_proc);
   } else {
     if(first_proc != NULL) {
       current_proc = first_proc;
+      LOOK_FOR_ACTIVE_PROC();
       activate_proc(current_proc);
     }
   }
