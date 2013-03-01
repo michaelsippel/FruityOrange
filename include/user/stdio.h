@@ -1,5 +1,5 @@
 /**
- *  test/test.c
+ *  include/user/stdio.h
  *
  *  (C) Copyright 2013 Michael Sippel
  *
@@ -16,11 +16,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdio.h>
+#ifndef _STDIO_H
+#define _STDIO_H
 
-void _start(void) {
-  putchar('0');
-  getch();
-  
-  while(1);
-}
+inline int putchar(const char ch);
+inline int puts(const char *string);
+
+inline char getch(void);
+inline char *gets(void);
+
+#endif

@@ -4,16 +4,16 @@ OBJS = $(addsuffix .o,$(basename $(SRCS)))
 CC = gcc
 LD = ld
 
-INC = -Iinclude -I../include
+INC = -I../../include -I../../include/user
 
-ASFLAGS = -m32 $(INC)
-CFLAGS = -m32 -Wall -g -fno-stack-protector -fno-builtin -nostdinc $(INC)
+ASFLAGS = -m32
+CFLAGS = -m32 -Wall -O3 -fno-stack-protector -fno-builtin -nostdinc $(INC)
 LDFLAGS = -melf_i386 -Tkernel.ld
 
-KERNEL = kernel
+LIB = userlibc.a
 
-$(KERNEL): $(OBJS) ../lib/common/commonlibc.a
-	$(LD) $(LDFLAGS) -o $@ $^
+$(LIB): $(OBJS)
+	ar -rcs $@ $^
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $^
@@ -23,6 +23,6 @@ $(KERNEL): $(OBJS) ../lib/common/commonlibc.a
 
 clean:
 	rm $(OBJS)
-	rm $(KERNEL)
+	rm $(LIB)
 
 .PHONY: clean

@@ -1,5 +1,5 @@
 /**
- *  test/test.c
+ *  lib/user/stdio.c
  *
  *  (C) Copyright 2013 Michael Sippel
  *
@@ -16,11 +16,23 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <sys/syscalls.h>
 #include <stdio.h>
 
-void _start(void) {
-  putchar('0');
-  getch();
+inline int putchar(const char c) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_PUTC), "b" (c));
+}
+
+inline int puts(const char *string) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_PUTS), "b" (string));
+}
+
+inline char getch(void) {
+  char ret;
+  asm volatile("int $0x30" : : "a" (SYSCALL_GETC), "b" (ret));
+  return ret;
+}
+
+inline char *gets(void) {
   
-  while(1);
 }

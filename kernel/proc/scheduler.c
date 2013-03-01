@@ -35,7 +35,7 @@ void init_scheduler(void) {
 
 void activate_proc(proc_t *proc) {
   set_cpu_state(proc->cpu);
-  tss[1] = (uint32_t) (proc->cpu + 1);
+//   tss[1] = (uint32_t) (proc->cpu + 1);
   vmm_activate_context(proc->context);
 }
 

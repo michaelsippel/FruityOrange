@@ -59,7 +59,7 @@ void init(struct multiboot_info *mb_info) {
   kinip("Initalizing GDT... ");
     init_gdt();endini();
   kinip("Initalizing interrupts... ");
-    init_idt();init_pic();sti();endini();
+    init_idt();init_pic();endini();
   kinip("Initalizing kernel-heap... ");
     init_heap();endini();
   kinip("Initalizing scheduler... ");
@@ -67,12 +67,14 @@ void init(struct multiboot_info *mb_info) {
   kinip("Initalizing syscalltable... ");
     init_syscalltable();endini();
   
+  sti();
   dinip("Initalizing terminal... ");
     init_console();endini();
   dinip("Initalizing pit... ");
     init_pit(PIT_FREQ);endini();
   dinip("Initalizing keyboard... ");
     init_keyboard();endini();
+  cli();
   
   setColor(0x06);
   printf("The kernel is successful started!\n");
@@ -84,7 +86,7 @@ void init(struct multiboot_info *mb_info) {
     } else {
       printf("Load the one module...\n");
     }
-    cli();
+    
     struct multiboot_module *modules = mb_info->mbs_mods_addr;
     
     int i;
@@ -93,12 +95,13 @@ void init(struct multiboot_info *mb_info) {
       void *mod = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
       vmm_context_t *mod_context = vmm_create_context(VMM_USER_FLAGS);
       load_elf32(mod, mod_context, modules[i].string);
+      vmm_unmap_area(current_context, mod, pages);
     }
-    sti();
   } else {
     printf("error: no modules found!\n");
   }
   
+  sti();
   while(1) {
     printf("%c", getch());
   }
