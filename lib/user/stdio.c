@@ -24,7 +24,9 @@ inline int putchar(const char c) {
 }
 
 inline int puts(const char *string) {
-  asm volatile("int $0x30" : : "a" (SYSCALL_PUTS), "b" (string));
+  int len = 0;
+  while(string[len++] != '\0');
+  asm volatile("int $0x30" : : "a" (SYSCALL_PUTS), "b" (string), "c" (len));
 }
 
 inline char getch(void) {

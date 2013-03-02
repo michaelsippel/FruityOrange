@@ -32,8 +32,9 @@ void putc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 }
 
 void puts_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  int len = *ecx;
-  while(len--) {
-    printf("%c", *ebx++);
+  int i;
+  char *string = (char*) *ebx;
+  for(i = 0; i < *ecx; i++) {
+    printf("%c", string[i]);
   }
 }
