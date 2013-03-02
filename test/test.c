@@ -18,9 +18,8 @@
  */
 #include <stdio.h>
 
-void _start(void) {
+int main(void) {
   putchar('0');
-  getch();
   
-  while(1);
+  return 0;
 }

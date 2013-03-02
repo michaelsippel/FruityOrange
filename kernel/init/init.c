@@ -62,10 +62,10 @@ void init(struct multiboot_info *mb_info) {
     init_idt();init_pic();endini();
   kinip("Initalizing kernel-heap... ");
     init_heap();endini();
-  kinip("Initalizing scheduler... ");
-    init_scheduler();endini();
   kinip("Initalizing syscalltable... ");
     init_syscalltable();endini();
+  kinip("Initalizing scheduler... ");
+    init_scheduler();endini();
   
   sti();
   dinip("Initalizing terminal... ");

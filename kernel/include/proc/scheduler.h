@@ -24,6 +24,7 @@
 #include <proc/proc.h>
 
 void init_scheduler(void);
+void scheduler_init_syscalls(void);
 void schedule(void);
 void idle(void);
 proc_t *get_current_proc(void);

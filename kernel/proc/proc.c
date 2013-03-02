@@ -117,3 +117,24 @@ int proc_wake(proc_t *proc) {
   
   return 0;
 }
+
+int proc_exit(proc_t *proc, int status) {
+  proc_sleep(proc);
+  
+  // TODO
+  proc_kill(proc);
+  
+  return status;
+}
+
+int proc_kill(proc_t *proc) {
+  // remove from list
+  proc->prev->next = proc->next;
+  proc->next->prev = proc->prev;
+  
+  // free data
+//   free(proc->cpu);
+//   free(proc);
+  
+  return 0;
+}

@@ -58,7 +58,9 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name);
 proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t dpl);
 int proc_sleep(proc_t *proc);
 int proc_wake(proc_t *proc);
-int exit_proc(proc_t *proc, int status);
-int kill_proc(proc_t *proc);
+int proc_exit(proc_t *proc, int status);
+int proc_kill(proc_t *proc);
+
+void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 #endif

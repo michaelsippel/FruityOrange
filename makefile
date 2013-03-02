@@ -3,15 +3,15 @@ IMAGE = ./build/image
 
 all: lib kernel mods
 
+lib:
+	$(MAKE) -C lib
+
 kernel:
 	$(MAKE) -C kernel
 	cp $(KERNEL) $(IMAGE)/kernel
 
 mods:
 	$(MAKE) -C test
-
-lib:
-	$(MAKE) -C lib
 
 floppy-img: all
 	#TODO

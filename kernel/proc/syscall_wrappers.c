@@ -1,7 +1,7 @@
 /**
- *  include/sys/syscalls.h
+ *  kernel/proc/syscall_wrappers.c
  *
- *  (C) Copyright 2012-2013 Michael Sippel
+ *  (C) Copyright 2012 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,13 +16,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _SYSCALLS_H
-#define _SYSCALLS_H
+#include <stdint.h>
+#include <sys/syscalls.h>
 
-#define SYSCALL_EXIT 0x00 /* exit */
-#define SYSCALL_PUTC 0x01 /* put char   */
-#define SYSCALL_PUTS 0x02 /* put string */
-#define SYSCALL_GETC 0x03 /* get char   */
-#define SYSCALL_GETS 0x04 /* get string */
+#include <proc/scheduler.h>
+#include <proc/proc.h>
+#include <syscall.h>
 
-#endif
+void scheduler_init_syscalls(void) {
+  setup_syscall(SYSCALL_EXIT, "exit", &syscall_exit);
+}
+
+void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  proc_exit(get_current_proc(), *ebx);
+}

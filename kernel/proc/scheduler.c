@@ -31,6 +31,8 @@ static proc_t *current_proc = NULL;
 void init_scheduler(void) {
   set_irq_handler(0x0, schedule);
   proc_t *idle_proc = create_proc(&idle, "idle", NULL, DPL_KERNELMODE);
+  
+  scheduler_init_syscalls();
 }
 
 void activate_proc(proc_t *proc) {
