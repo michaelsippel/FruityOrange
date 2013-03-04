@@ -17,9 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdio.h>
+#include <string.h>
 
 int main(void) {
-  puts("Hello World!\n");
+  printf("Hello World!\n%d\n", 1234);
   
   return 0;
 }

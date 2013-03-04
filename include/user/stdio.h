@@ -21,6 +21,7 @@
 
 inline int putchar(const char ch);
 inline int puts(const char *string);
+int printf(char *format, ...);
 
 inline char getch(void);
 inline char *gets(void);
