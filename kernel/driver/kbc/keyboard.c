@@ -126,7 +126,7 @@ void send_key_event(uint8_t data, bool breaked) {
 	  modus = 2;break;
 	default: 
 	  buffer = data;
-	  getc_syscall_end();
+	  syscall_step();
       }
     }
 }

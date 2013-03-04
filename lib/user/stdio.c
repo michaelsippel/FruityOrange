@@ -23,15 +23,15 @@
 
 inline int putchar(const char c) {
   asm volatile("int $0x30" : : "a" (SYSCALL_PUTC), "b" (c));
-
+  
   return 0;
 }
 
-inline int puts(const char *string) {
+inline int puts(const char *s) {
   int len = 0;
-  while(string[len++] != '\0');
-  asm volatile("int $0x30" : : "a" (SYSCALL_PUTS), "b" (string), "c" (len));
-
+  while(s[len++] != '\0');
+  asm volatile("int $0x30" : : "a" (SYSCALL_PUTS), "b" (s), "c" (len));
+  
   return len;
 }
 
@@ -59,6 +59,8 @@ inline char getch(void) {
   return ret;
 }
 
-inline char *gets(void) {
-  return 0;
+inline char *gets(char *s) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_GETS), "b" (s));
+  
+  return s;
 }

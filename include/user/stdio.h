@@ -20,10 +20,10 @@
 #define _STDIO_H
 
 inline int putchar(const char ch);
-inline int puts(const char *string);
+inline int puts(const char *s);
 int printf(char *format, ...);
 
 inline char getch(void);
-inline char *gets(void);
+inline char *gets(char *s);
 
 #endif

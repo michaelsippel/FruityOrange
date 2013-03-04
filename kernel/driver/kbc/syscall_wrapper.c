@@ -23,29 +23,56 @@
 #include <driver/keyboard.h>
 #include <proc/proc.h>
 
-static bool syscall_used = FALSE;
+#define NONE 0x0
+#define GETC 0x1
+#define GETS 0x2
+
+static int use = NONE;
 static proc_t *proc = NULL;
 
 void getc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  if(! syscall_used) {
-    syscall_used = TRUE;
+  if(use == NONE) {
+    use = GETC;
     proc = get_current_proc();
     proc_sleep(proc);
   }
 }
 
-void getc_syscall_end(void) {
-  if(syscall_used) {
-    char buf = read_kbd_buffer();
-    printf("%c", translate_keycode(buf, read_kbd_modus()));
-    proc->cpu->ebx = buf;
-    proc_wake(proc);
-    
-    proc = NULL;
-    syscall_used = FALSE;
+void gets_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  if(use == NONE) {
+    use = GETS;
+    proc = get_current_proc();
+    proc_sleep(proc);
   }
 }
 
-void gets_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  *ecx = gets(ebx);
+void syscall_step(void) {
+  char buf = read_kbd_buffer();
+  char mod = read_kbd_modus();
+  
+  static int i = 0;
+  
+  switch(use) {
+    case GETC:
+      proc->cpu->ebx = buf;
+      proc->cpu->ecx = mod;
+      proc_wake(proc);
+      
+      proc = NULL;
+      use = NONE;
+      break;
+    case GETS:
+      if(buf == 66) {
+	use = NONE;
+	proc_wake(proc);
+	proc = NULL;
+      } else {
+	char *s = proc->cpu->ebx;
+	s[i++] = buf;
+	printf("%c %d\n", translate_keycode(buf, mod), buf);
+      }
+      break;
+      
+    default: break;
+  }
 }
