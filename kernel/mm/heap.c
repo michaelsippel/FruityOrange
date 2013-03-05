@@ -25,7 +25,7 @@
 static alloc_nd_t *first_nd = NULL;
 
 void init_heap(void) {
-  first_nd = (alloc_nd_t*) vmm_automap_kernel_page(current_context, pmm_alloc());
+  first_nd = (alloc_nd_t*) vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
   first_nd->bytes = PAGE_SIZE;
   first_nd->next_nd = NULL;
   first_nd->prev_nd = NULL;
@@ -45,7 +45,7 @@ void remove_node(alloc_nd_t *node) {
 
 void *malloc(size_t bytes) {
   if( bytes <= PAGE_SIZE && bytes > (PAGE_SIZE - sizeof(alloc_nd_t)) ) {
-    return vmm_automap_kernel_page(current_context, pmm_alloc());
+    return vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
   }
   
   bytes += sizeof(alloc_nd_t)-1;

@@ -25,6 +25,7 @@
 #include <cpu.h>
 #include <mm.h>
 #include <init/gdt.h>
+#include <debug/debug.h>
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 
@@ -51,7 +52,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->status = ACTIVE;
   
   // Stack
-  uintptr_t kernel_stack = malloc(kernel_stack_size);
+  uintptr_t kernel_stack = (uintptr_t) malloc(kernel_stack_size);
   
   cpu_state_t *proc_cpu_state = (void*) (kernel_stack + kernel_stack_size - sizeof(cpu_state_t));
   *proc_cpu_state = (cpu_state_t) {
@@ -65,7 +66,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->cpu = proc_cpu_state;
   
   if(dpl) { // Usermode
-    uintptr_t user_stack = malloc(user_stack_size);
+    uintptr_t user_stack = (uintptr_t) malloc(user_stack_size);
     
     proc_cpu_state->esp = user_stack + user_stack_size;
     proc_cpu_state->cs = _USER_CS;

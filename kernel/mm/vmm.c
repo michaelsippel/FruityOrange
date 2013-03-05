@@ -38,14 +38,14 @@ static bool paging_enabled = FALSE;
 static uint32_t cr0;
 
 void init_vmm(void) {
-  uintptr_t kernel_context_paddr = pmm_alloc();
-  kernel_context = kernel_context_paddr + VADDR_KERNEL_START;
+  uintptr_t kernel_context_paddr = (uintptr_t) pmm_alloc();
+  kernel_context = (void*) kernel_context_paddr + VADDR_KERNEL_START;
   memclr(kernel_context, PAGE_SIZE);
   kernel_context->flags = VMM_KERNEL_FLAGS;
   kernel_context->alloc_offset = 1;
   
-  uintptr_t pagedir_paddr = pmm_alloc();
-  vmm_pd_t pagedir = pagedir_paddr + VADDR_KERNEL_START;
+  uintptr_t pagedir_paddr = (uintptr_t) pmm_alloc();
+  vmm_pd_t pagedir = (void*) pagedir_paddr + VADDR_KERNEL_START;
   memclr(pagedir, PAGE_SIZE);
   pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pagedir_paddr | VMM_KERNEL_FLAGS;
   kernel_context->pagedir = pagedir;
@@ -99,7 +99,7 @@ vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index) {
       pagetable = (vmm_pt_t) PT_VADDR(index);
     }
   } else {
-    pagetable = (uint32_t) PT_PADDR(context, index) + (uint32_t) VADDR_KERNEL_START;
+    pagetable = (vmm_pt_t) (PT_PADDR(context, index) + (uintptr_t) VADDR_KERNEL_START);
   }
 
   return pagetable;
@@ -131,10 +131,10 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
 inline void vmm_update_context(vmm_context_t *context) {
   #define START PD_INDEX(PAGE_INDEX(VADDR_KERNEL_START))
   #define END   PD_INDEX(PAGE_INDEX(VADDR_KERNEL_END))
-  uintptr_t upd = context->pagedir + START;
-  uintptr_t kpd = current_context->pagedir + START;
-  size_t len =  END - START;
-  memcpy(upd, kpd, len*4);
+  uintptr_t upd = (uintptr_t) (context->pagedir + START);
+  uintptr_t kpd = (uintptr_t) (current_context->pagedir + START);
+  size_t len = END - START;
+  memcpy((void*) upd, (void*) kpd, len * sizeof(vmm_pt_t));
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
@@ -173,7 +173,7 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr) {
       vmm_flush_tlb(vaddr);
     } else {
       if(paging_enabled) {
-	vmm_unmap_page(current_context, pagetable);
+	vmm_unmap_page(current_context, (uintptr_t) pagetable);
       }
     }
   }
@@ -230,7 +230,7 @@ void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_
 	    return (void*) vaddr; \
 	  }
   
-  uintptr_t vaddr = NULL;
+  uintptr_t vaddr = (uintptr_t) NULL;
   uintptr_t page = 0;
   size_t pages_found = 0;
   

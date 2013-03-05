@@ -50,6 +50,7 @@ struct multiboot_info {
   uint16_t mbs_vbe_interface_seg;
   uint16_t mbs_vbe_interface_off;
 } __attribute__((packed));
+typedef struct multiboot_info multiboot_info_t;
 
 struct multiboot_mmap {
   uint32_t size;
@@ -57,6 +58,7 @@ struct multiboot_mmap {
   uint64_t length;
   uint32_t type;
 } __attribute__((packed));
+typedef struct multiboot_mmap multiboot_mmap_t;
 
 struct multiboot_module {
   uint32_t mod_start;
@@ -64,5 +66,6 @@ struct multiboot_module {
   uint32_t string;
   uint32_t reserved;
 } __attribute__((packed));
+typedef struct multiboot_module multiboot_module_t;
 
 #endif

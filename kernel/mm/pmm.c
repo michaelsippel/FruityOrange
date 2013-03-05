@@ -22,15 +22,16 @@
 
 #include <multiboot.h>
 #include <mm.h>
+#include <debug/debug.h>
 
 #define PMM_DEBUG 1
 
 #define BITMAP_SIZE 0x8000
 uint32_t bitmap[BITMAP_SIZE];
-uintptr_t last_free_ptr = NULL;
+uintptr_t last_free_ptr = (uintptr_t) NULL;
 bool can_do_fast_alloc = FALSE;
 
-void init_pmm(struct multiboot_info *mb_info) {
+void init_pmm(multiboot_info_t *mb_info) {
   int i;
   uintptr_t addr;
   
@@ -40,8 +41,8 @@ void init_pmm(struct multiboot_info *mb_info) {
   }
   
   // 2. release the pages, which are marked in BIOS as free
-  struct multiboot_mmap *mmap = (void*) mb_info->mbs_mmap_addr + VADDR_KERNEL_START;
-  struct multiboot_mmap *mmap_end = (void*) ((uintptr_t) mb_info->mbs_mmap_addr +
+  multiboot_mmap_t *mmap = (void*) mb_info->mbs_mmap_addr + VADDR_KERNEL_START;
+  multiboot_mmap_t *mmap_end = (void*) ((uintptr_t) mb_info->mbs_mmap_addr +
 							 mb_info->mbs_mmap_length +
 							 VADDR_KERNEL_START);
   while(mmap < mmap_end) {
@@ -66,10 +67,10 @@ void init_pmm(struct multiboot_info *mb_info) {
   
   // 4. occupy the multiboot-struct
   pmm_mark_used(mb_info);
-  pmm_mark_used(mb_info->mbs_mods_addr);
+  pmm_mark_used((void*) mb_info->mbs_mods_addr);
   
   // 5. the multiboot-modules too.
-  struct multiboot_module *modules = (void*) mb_info->mbs_mods_addr + VADDR_KERNEL_START;
+  multiboot_module_t *modules = (void*) mb_info->mbs_mods_addr + VADDR_KERNEL_START;
   for(i = 0; i < mb_info->mbs_mods_count; i++) {
     addr = modules[i].mod_start;
     while(addr < modules[i].mod_end) {

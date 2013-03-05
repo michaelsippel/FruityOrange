@@ -36,7 +36,7 @@ typedef enum proc_status {
 } proc_status_t;
 
 typedef struct proc {
-  char *name;
+  const char *name;
   pid_t pid;
   uid_t uid;
   dpl_t dpl;

@@ -24,8 +24,8 @@
 #include <proc/proc.h>
 
 proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
-  struct elf32_header *header = image;
-  struct elf32_program_header *ph;
+  elf32_header_t *header = image;
+  elf32_program_header_t *ph;
   int i, j;
   size_t pages;
   
@@ -43,46 +43,46 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
 	      // ELF o.k.!
 	    } else {
 	      printf("[elf32] Invalid ELF-version!\n");
-	      return;
+	      return NULL;
 	    }
 	  } else {
 	    printf("[elf32] ELF-Type isn't executable!\n");
-	    return;
+	    return NULL;
 	  }
 	} else {
 	  printf("[elf32] Invalid machine!\n");
-	  return;
+	  return NULL;
 	}
       } else {
 	printf("[elf32] Invalid byte-encoding!\n");
-	return;
+	return NULL;
       }
     } else {
       printf("[elf32] Invalid architecture!\n");
-      return;
+      return NULL;
     }
   } else {
     printf("[elf32] Invalid ELF-Magic! (0x%4x)\n", *header);
     printf("[elf32] image at 0x%x\n", image);
-    return;
+    return NULL;
   }
   
-  ph = (struct elf_program_header*) (((char*) image) + header->ph_offset);
+  ph = (elf32_program_header_t*) (((uintptr_t) image) + header->ph_offset);
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
       pages = ph->file_size / PAGE_SIZE +1;
-      uintptr_t dest = vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
+      uintptr_t dest = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
       
       for(j = 0; j < pages; j++) {
-	uintptr_t paddr = pmm_alloc();
-	uintptr_t vaddr = ph->virt_addr + j*PAGE_SIZE;
-	uintptr_t src = image + ph->offset + j*PAGE_SIZE;
+	uintptr_t paddr = (uintptr_t) pmm_alloc();
+	uintptr_t vaddr = (uintptr_t) ph->virt_addr + j*PAGE_SIZE;
+	uintptr_t src   = (uintptr_t) image + ph->offset + j*PAGE_SIZE;
 	
 	vmm_map_page(context, vaddr, paddr);
 	vmm_map_page(current_context, dest, paddr);
 	
-	memclr(dest, PAGE_SIZE);
-	memcpy(dest, src, PAGE_SIZE);
+	memclr((void*) dest, PAGE_SIZE);
+	memcpy((void*) dest, (void*) src, PAGE_SIZE);
       }
       vmm_unmap_page(context, dest);
     }

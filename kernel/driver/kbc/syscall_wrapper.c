@@ -20,8 +20,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <driver/console.h>
 #include <driver/keyboard.h>
 #include <proc/proc.h>
+#include <proc/scheduler.h>
 
 #define NONE 0x0
 #define GETC 0x1
@@ -52,7 +54,7 @@ void syscall_step(void) {
     char mod = read_kbd_modus();
     
     char ch = translate_keycode(buf, mod);
-    char *s = proc->cpu->ebx;
+    char *s = (char*) proc->cpu->ebx;
     
     static int i = 0;
     

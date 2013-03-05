@@ -87,15 +87,15 @@ void init(struct multiboot_info *mb_info) {
       printf("Load the one module...\n");
     }
     
-    struct multiboot_module *modules = mb_info->mbs_mods_addr;
+    multiboot_module_t *modules = (multiboot_module_t*) mb_info->mbs_mods_addr;
     
     int i;
     for(i = 0; i < mb_info->mbs_mods_count; i++)  {
       size_t pages = (modules[i].mod_end - modules[i].mod_start) / PAGE_SIZE +1;
       void *mod = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
       vmm_context_t *mod_context = vmm_create_context(VMM_USER_FLAGS);
-      load_elf32(mod, mod_context, modules[i].string);
-      vmm_unmap_area(current_context, mod, pages);
+      load_elf32(mod, mod_context, (char*) modules[i].string);
+      vmm_unmap_area(current_context, (uintptr_t) mod, pages);
     }
   } else {
     printf("error: no modules found!\n");

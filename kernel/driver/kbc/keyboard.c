@@ -53,81 +53,83 @@ void init_keyboard(void) {
 }
 
 void keyboard_irq_handler(void) {
-    uint8_t scancode;
-    uint8_t keycode = 0;
-    bool break_code = 1;
-    
-    static int e0_code = 0;
-    static int e1_code = 0;
-    static uint16_t e1_prev = 0;
-    
-    scancode = inb(KBC_PORT_KBCDATA);
-    
-    // Breakcode?
-    if((scancode & 0x80) &&
-       (e1_code || (scancode != 0xE1)) &&
-       (e0_code || (scancode != 0xE0)))
-    {
-	break_code = 0;
-	scancode &= ~0x80;
-	keycode = translate_scancode(SNC_TYPE_STD, scancode);
-	send_key_event(keycode, break_code);
-	return;
-    }
-    
-    if(e0_code) {
-	e0_code = 1;
-	// catch fakeshift
-	if((scancode == 0x2A) || (scancode == 0x36)){
-	    return;
-	}
-	keycode = translate_scancode(SNC_TYPE_E0, scancode);
-    } else if(e1_code == 2) {
-	// full E1-scancode
-	// shift twice scancode into higher byte
-	e1_prev |= ((uint16_t) scancode << 8);
-	keycode = translate_scancode(SNC_TYPE_E1, e1_prev);
-	e1_code = 0;
-    } else if(e1_code == 1) {
-	// first byte for E1-scancode
-	e1_prev = scancode;
-	e1_code++;
-    } else if(scancode == 0xE0) {
-	// E0-Code
-	e0_code = 0;
-    } else if(scancode == 0xE1) {
-	// E1-Code
-	e1_code = 1;
-    } else {
-	// standard scancode
-	keycode = translate_scancode(SNC_TYPE_STD, scancode);
-    }
+  uint8_t scancode;
+  uint8_t keycode = 0;
+  bool break_code = 1;
+  
+  static int e0_code = 0;
+  static int e1_code = 0;
+  static uint16_t e1_prev = 0;
+  
+  scancode = inb(KBC_PORT_KBCDATA);
+  
+  // Breakcode?
+  if((scancode & 0x80) &&
+     (e1_code || (scancode != 0xE1)) &&
+     (e0_code || (scancode != 0xE0)))
+  {
+    break_code = 0;
+    scancode &= ~0x80;
+    keycode = translate_scancode(SNC_TYPE_STD, scancode);
     send_key_event(keycode, break_code);
+    return;
+  }
+  
+  if(e0_code) {
+    e0_code = 1;
+    // catch fakeshift
+    if((scancode == 0x2A) || (scancode == 0x36)){
+      return;
+    }
+    
+    keycode = translate_scancode(SNC_TYPE_E0, scancode);
+  } else if(e1_code == 2) {
+    // full E1-scancode
+    // shift twice scancode into higher byte
+    e1_prev |= ((uint16_t) scancode << 8);
+    keycode = translate_scancode(SNC_TYPE_E1, e1_prev);
+    e1_code = 0;
+  } else if(e1_code == 1) {
+    // first byte for E1-scancode
+    e1_prev = scancode;
+    e1_code++;
+  } else if(scancode == 0xE0) {
+    // E0-Code
+    e0_code = 0;
+  } else if(scancode == 0xE1) {
+    // E1-Code
+    e1_code = 1;
+  } else {
+    // standard scancode
+    keycode = translate_scancode(SNC_TYPE_STD, scancode);
+  }
+  send_key_event(keycode, break_code);
 }
 
 void send_key_event(uint8_t data, bool breaked) {
-    if(! breaked) {
-      switch(data) {
-	case 53:
-	case 67:
-	case 56:
-	  modus = 0;
-      }
-    } else {
-      switch(data) {
-	case 40:
-	  modus = (modus == 1) ? 0 : 1;break;
-	case 53:
-	case 67:
-	  modus = 1;break;
-	case 56:
-	  modus = 2;break;
-	default: 
+  if(! breaked) {
+    switch(data) {
+      case 53:
+      case 67:
+      case 56:
+      modus = 0;
+    }
+  } else {
+    switch(data) {
+      case 40:
+	modus = (modus == 1) ? 0 : 1;break;
+      case 53:
+      case 67:
+	modus = 1;break;
+      case 56:
+	modus = 2;break;
+      
+      default: 
 	  buffer = data;
 	  syscall_step();
 	  break;
-      }
     }
+  }
 }
 
 char read_kbd_buffer(void) {

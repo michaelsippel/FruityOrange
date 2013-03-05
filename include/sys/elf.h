@@ -79,6 +79,7 @@ struct elf32_header {
   uint16_t sh_entry_count;
   uint16_t sh_str_table_index;
 } __attribute__((packed));
+typedef struct elf32_header elf32_header_t;
 
 // Program types
 #define EPT_NULL   0x0 /* Invalid segment      */
@@ -104,5 +105,6 @@ struct elf32_program_header {
   uint32_t flags;
   uint32_t alignment;
 } __attribute__((packed));
+typedef struct elf32_program_header elf32_program_header_t;
 
 #endif
