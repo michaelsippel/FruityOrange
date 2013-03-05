@@ -21,6 +21,8 @@
 
 int main(void) {
   printf("Hello World!\n%d\n", 1234);
+  char s[100];
+  gets(s);
   
   return 0;
 }

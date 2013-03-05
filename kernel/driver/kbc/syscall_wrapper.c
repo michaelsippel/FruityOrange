@@ -63,13 +63,14 @@ void syscall_step(void) {
       break;
     case GETS:
       if(buf == 66) {
+	printf("\n");
 	use = NONE;
 	proc_wake(proc);
 	proc = NULL;
       } else {
 	char *s = proc->cpu->ebx;
 	s[i++] = buf;
-	printf("%c %d\n", translate_keycode(buf, mod), buf);
+	printf("%c", translate_keycode(buf, mod));
       }
       break;
       

@@ -99,6 +99,11 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
 int proc_sleep(proc_t *proc) {
   if(proc->status != SLEEP) {
     proc->status = SLEEP;
+    
+    if(proc == get_current_proc()) {
+      schedule();
+    }
+    
   } else {
     debug(PROC_DEBUG, "proc_sleep(): process %d is already asleep!\n", proc->pid);
     return -1;
@@ -119,7 +124,8 @@ int proc_wake(proc_t *proc) {
 }
 
 int proc_exit(proc_t *proc, int status) {
-  proc_sleep(proc);
+  debug(PROC_DEBUG, "proc_exit(): exit process %d with status %d.\n",proc->pid, status);
+  proc->status = ZOMBIE;
   
   // TODO
   proc_kill(proc);
@@ -128,6 +134,11 @@ int proc_exit(proc_t *proc, int status) {
 }
 
 int proc_kill(proc_t *proc) {
+  debug(PROC_DEBUG, "proc_kill(): kill process %d.\n",proc->pid);
+  if(proc == get_current_proc()) {
+    schedule();
+  }
+  
   // remove from list
   proc->prev->next = proc->next;
   proc->next->prev = proc->prev;

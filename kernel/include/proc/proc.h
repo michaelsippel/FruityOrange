@@ -27,10 +27,12 @@
 
 #define PROC_STATUS_ACTIVE 0x0
 #define PROC_STATUS_SLEEP  0x1
+#define PROC_STATUS_ZOMBIE 0x2
 
 typedef enum proc_status {
   ACTIVE = PROC_STATUS_ACTIVE,
   SLEEP = PROC_STATUS_SLEEP,
+  ZOMBIE = PROC_STATUS_ZOMBIE
 } proc_status_t;
 
 typedef struct proc {
