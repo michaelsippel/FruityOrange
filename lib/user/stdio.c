@@ -55,7 +55,7 @@ int printf(char *format, ...) {
 
 inline char getch(void) {
   char ret = 0;
-  asm volatile("int $0x30" : : "a" (SYSCALL_GETC), "b" (ret));
+  asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_GETC));
   return ret;
 }
 
