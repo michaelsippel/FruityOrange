@@ -26,6 +26,9 @@
 void debug(int print, const char *fmt, ...) {
   #if DEBUG_PRINT
   if(print) {
+    char color = getColor();
+    setForegroundColor(0x8);
+    
     va_list args;
     char t[1024];
     char *buffer = (char*) t;
@@ -35,6 +38,8 @@ void debug(int print, const char *fmt, ...) {
     va_end(args);
     
     puts(buffer);
+    
+    setColor(color);
   }
   #endif
 }

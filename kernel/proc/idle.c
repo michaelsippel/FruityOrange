@@ -19,5 +19,7 @@
 #include <stdint.h>
 
 void idle(void) {
-  while(1);
+  while(1) {
+    asm volatile("hlt");
+  }
 }

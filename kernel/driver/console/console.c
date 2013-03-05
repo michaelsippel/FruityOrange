@@ -132,6 +132,10 @@ void setColor(uint8_t ncolor) {
   color = ncolor;
 }
 
+uint8_t getColor(void) {
+  return color;
+}
+
 void setForegroundColor(uint8_t fcolor) {
   color = ( (color&0xf0) | fcolor );
 }

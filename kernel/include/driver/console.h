@@ -43,6 +43,7 @@ int printf(const char *format, ...);
 void scroll(void);
 void setCursor(int x, int y);
 void setColor(uint8_t ncolor);
+uint8_t getColor(void);
 void setForegroundColor(uint8_t fcolor);
 void setBackgroundcolor(uint8_t bcolor);
 void clearscreen(void);
