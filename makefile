@@ -25,5 +25,6 @@ qemu: cdrom-img
 clean:
 	$(MAKE) -C kernel clean
 	$(MAKE) -C lib clean
+	$(MAKE) -C test clean
 
 .PHONY: all kernel lib clean qemu

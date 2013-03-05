@@ -1,5 +1,5 @@
 /**
- *  include/stdlib.h
+ *  include/user/stdlib.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -16,33 +16,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STDLIB_H
-#define _STDLIB_H
+#ifndef _USER_STDLIB_H
+#define _USER_STDLIB_H
 
 #include <stdint.h>
+#include <stdlib.h>
 
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
-
-typedef struct div {
-  int quot;
-  int rem;
-} div_t;
-
-typedef struct ldiv {
-  long int quot;
-  long int rem;
-} ldiv_t;
-
-long int labs(long int j);
-int abs(int j);
-int atoi(const char *string);
-long int atol(const char *string);
-div_t div(int count, int deniminator);
-ldiv_t ldiv(long int count, long int deniminator);
-
-#ifndef _NO_USER_INC
-#include "user/stdlib.h"
-#endif
+void exit(int status);
 
 #endif

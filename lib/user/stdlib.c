@@ -1,7 +1,7 @@
 /**
- *  include/stdlib.h
+ *  lib/user/stdlib.c
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,33 +16,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STDLIB_H
-#define _STDLIB_H
+#include <sys/syscalls.h>
+#include <stdlib.h>
 
-#include <stdint.h>
-
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
-
-typedef struct div {
-  int quot;
-  int rem;
-} div_t;
-
-typedef struct ldiv {
-  long int quot;
-  long int rem;
-} ldiv_t;
-
-long int labs(long int j);
-int abs(int j);
-int atoi(const char *string);
-long int atol(const char *string);
-div_t div(int count, int deniminator);
-ldiv_t ldiv(long int count, long int deniminator);
-
-#ifndef _NO_USER_INC
-#include "user/stdlib.h"
-#endif
-
-#endif
+void exit(int status) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_EXIT), "b" (status));
+}

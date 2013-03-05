@@ -16,6 +16,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#define _NO_USER_INC
 #include <sys/elf.h>
 #include <sys/syscalls.h>
 #include <sys/types.h>
