@@ -47,33 +47,43 @@ void gets_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 }
 
 void syscall_step(void) {
-  char buf = read_kbd_buffer();
-  char mod = read_kbd_modus();
-  
-  static int i = 0;
-  
-  switch(use) {
-    case GETC:
-      proc->cpu->ebx = buf;
-      proc->cpu->ecx = mod;
-      proc_wake(proc);
-      
-      proc = NULL;
-      use = NONE;
-      break;
-    case GETS:
-      if(buf == 66) {
-	printf("\n");
-	use = NONE;
+  if(use != NONE) {
+    char buf = read_kbd_buffer();
+    char mod = read_kbd_modus();
+    
+    char ch = translate_keycode(buf, mod);
+    char *s = proc->cpu->ebx;
+    
+    static int i = 0;
+    
+    switch(use) {
+      case GETC:
+	proc->cpu->ebx = ch;
 	proc_wake(proc);
+	
 	proc = NULL;
-      } else {
-	char *s = proc->cpu->ebx;
-	s[i++] = buf;
-	printf("%c", translate_keycode(buf, mod));
-      }
-      break;
+	use = NONE;
+	break;
+      case GETS:
+	if(buf == 66) {
+	  s[i] = '\0';
+	  i = 0;
+	  printf("\n");
+	  use = NONE;
+	  proc_wake(proc);
+	  proc = NULL;
+	} else {
+	  if(buf == 65) {
+	    printf("\r");
+	    i--;
+	  } else {
+	    s[i++] = ch;
+	    printf("%c", ch);
+	  }
+	}
+	break;
       
-    default: break;
+      default: break;
+    }
   }
 }

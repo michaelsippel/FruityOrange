@@ -18,11 +18,19 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 int main(void) {
-  printf("Hello World!\n%d\n", 1234);
-  char s[100];
-  gets(s);
+  char name[100];
+  char s_alter[3];
+  unsigned int alter;
+  printf("Wie heisst du?\n\t");
+  gets(name);
+  printf("Angenehm!\nWie alt bist du?\n\t");
+  gets(s_alter);
+  alter = atoi(s_alter);
+  
+  printf("\nDu heisst %s und bist %u Jahre Alt!\n", name, alter);
   
   return 0;
 }

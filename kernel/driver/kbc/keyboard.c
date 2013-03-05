@@ -115,8 +115,6 @@ void send_key_event(uint8_t data, bool breaked) {
       }
     } else {
       switch(data) {
-	case 65:
-	  puts("\r");break;
 	case 40:
 	  modus = (modus == 1) ? 0 : 1;break;
 	case 53:
@@ -127,6 +125,7 @@ void send_key_event(uint8_t data, bool breaked) {
 	default: 
 	  buffer = data;
 	  syscall_step();
+	  break;
       }
     }
 }
