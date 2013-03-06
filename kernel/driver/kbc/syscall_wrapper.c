@@ -76,8 +76,10 @@ void syscall_step(void) {
 	  proc = NULL;
 	} else {
 	  if(buf == 65) {
-	    printf("\r");
-	    i--;
+	    if(i > 0) {
+	      printf("\r");
+	      i--;
+	    }
 	  } else {
 	    s[i++] = ch;
 	    printf("%c", ch);

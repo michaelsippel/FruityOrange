@@ -55,7 +55,7 @@ void general_uintformat(char *buf, unsigned long value, int base, int num_chr) {
 }
 
 void hex_str(char *buf, unsigned long value, int num_chr) {
-  general_uintformat(buf, value, 16, (num_chr-1) ? num_chr : 6);
+  general_uintformat(buf, value, 16, (num_chr-1) ? num_chr : 8);
 }
 
 void int_dec_str(char *buf, long value, int num_chr, int signd) {

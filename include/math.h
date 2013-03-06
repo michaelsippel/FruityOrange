@@ -24,6 +24,8 @@
 #define pi() PI
 #define e() E
 
+#define BCD_DECODE(x) ((0b1111 & x) + (10 * (((0b1111 << 4) & x) >> 4)))
+
 double ceil(double x);
 double exp(double x);
 double fabs(double x);

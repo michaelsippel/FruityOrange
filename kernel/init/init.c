@@ -31,9 +31,10 @@
 
 #include <debug/debug.h>
 #include <debug/panic.h>
+#include <driver/cmos.h>
+#include <driver/console.h>
 #include <driver/kbc.h>
 #include <driver/keyboard.h>
-#include <driver/console.h>
 #include <driver/pit.h>
 #include <init/gdt.h>
 #include <proc/scheduler.h>
@@ -71,8 +72,10 @@ void init(struct multiboot_info *mb_info) {
   sti();
   dinip("Initalizing terminal... ");
     init_console();endini();
-  dinip("Initalizing pit... ");
+  dinip("Initalizing PIT... ");
     init_pit(PIT_FREQ);endini();
+  dinip("Initalizing CMOS... ");
+    init_cmos();endini();
   dinip("Initalizing keyboard... ");
     init_keyboard();endini();
   cli();

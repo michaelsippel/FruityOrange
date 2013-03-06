@@ -1,5 +1,5 @@
 /**
- *  kernel/include/console.h
+ *  kernel/include/driver/console.h
  *
  *  (C) Copyright 2012 Michael Sippel
  *

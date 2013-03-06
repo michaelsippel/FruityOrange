@@ -94,7 +94,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   }
   first_proc = proc;
   
-  debug(PROC_DEBUG, "create_proc(): created precess with pid %d\n", proc->pid);
+  debug(PROC_DEBUG, "create_proc(): created precess \"%s\" with pid %d\n", proc->name, proc->pid);
   
   return proc;
 }
