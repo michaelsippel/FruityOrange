@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <debug/debug.h>
 #include <debug/panic.h>
@@ -79,6 +80,16 @@ void init(struct multiboot_info *mb_info) {
   dinip("Initalizing keyboard... ");
     init_keyboard();endini();
   cli();
+  
+  cmos_time_t *time = get_cmos_time();
+  tm_t tm = mktm(time);
+  time_t time_stamp = mktime(tm);
+  tm_t new_tm = rdtime(time_stamp);
+  
+  printf("Timestamp: %u\n", time_stamp);
+  
+  printf("Date: %d/%d/%d  ", new_tm.day, new_tm.mon, new_tm.year);
+  printf("Time: %d:%d\n", new_tm.hour, new_tm.min);
   
   setColor(0x06);
   printf("The kernel is successful started!\n");

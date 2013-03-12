@@ -1,7 +1,7 @@
 /**
  *  kernel/include/driver/cmos.h
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #define _CMOS_H
 
 #include <stdint.h>
+#include <time.h>
 
 #define CMOS_REGISTER_A 0x0A
 #define CMOS_REGISTER_B 0x0B
@@ -95,5 +96,8 @@ void update_time(void);
 
 uint8_t cmos_read_byte(uint8_t offset);
 void cmos_write_byte(uint8_t offset, uint8_t value);
+
+tm_t mktm(cmos_time_t *cmos_time);
+void time_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 #endif

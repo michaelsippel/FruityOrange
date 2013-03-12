@@ -1,7 +1,7 @@
 /**
  *  kernel/driver/cmos/rtc.c
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,11 +16,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <sys/syscalls.h>
 #include <stdint.h>
 #include <math.h>
 
 #include <driver/cmos.h>
 #include <mm.h>
+#include <interrupt.h>
 #include <portio.h>
 
 static cmos_data_t *cmos_data;
@@ -28,12 +30,15 @@ static cmos_time_t *cmos_time;
 
 void init_rtc(void) {
   set_irq_handler(0x8, &rtc_irq_handler);
+  setup_syscall(SYSCALL_TIME, "time", &time_syscall_wrapper);
   
   cmos_time = malloc(sizeof(cmos_time_t));
   cmos_data = get_cmos_data();
   
   cmos_write_byte(CMOS_REGISTER_A, (cmos_data->registers.register_a & 0xF0) | 0x0F);
   cmos_write_byte(CMOS_REGISTER_B, cmos_data->registers.register_b | 0x40);
+  
+  update_time();
 }
 
 void rtc_irq_handler(void) {

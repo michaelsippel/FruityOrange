@@ -1,7 +1,7 @@
 /**
- *  include/sys/syscalls.h
+ *  kernel/driver/cmos/mktm.c
  *
- *  (C) Copyright 2012-2013 Michael Sippel
+ *  (C) Copyright 2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,14 +16,19 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _SYSCALLS_H
-#define _SYSCALLS_H
+#include <time.h>
+#include <driver/cmos.h>
 
-#define SYSCALL_EXIT 0x00 /* exit */
-#define SYSCALL_PUTC 0x01 /* put char   */
-#define SYSCALL_PUTS 0x02 /* put string */
-#define SYSCALL_GETC 0x03 /* get char   */
-#define SYSCALL_GETS 0x04 /* get string */
-#define SYSCALL_TIME 0x05 /* get datetime */
-
-#endif
+tm_t mktm(cmos_time_t *cmos_time) {
+  tm_t tm;
+  
+  tm.sec = cmos_time->second;
+  tm.min = cmos_time->minute;
+  tm.hour= cmos_time->hour;
+  
+  tm.day = cmos_time->day_in_month;
+  tm.mon = cmos_time->month;
+  tm.year= cmos_time->year + 2000;
+  
+  return tm;
+}

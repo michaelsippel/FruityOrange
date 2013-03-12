@@ -1,5 +1,5 @@
 /**
- *  lib/string/vsprintf.c
+ *  lib/common/string/vsprintf.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *

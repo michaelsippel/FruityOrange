@@ -1,5 +1,5 @@
 /**
- *  lib/string/mem.c
+ *  lib/common/string/mem.c
  *
  *  (C) Copyright 2012 Michael Sippel
  *
