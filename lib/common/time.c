@@ -18,41 +18,53 @@
  */
 #include <time.h>
 
+static uint16_t begin_days[12] = {0,31,59,90,120,151,181,212,243,273,304,334};
+static uint16_t begin_days_leap_year[12] = {0,31,60,91,121,152,182,213,244,274,305,335};
+
 time_t mktime(tm_t tm) {
-  time_t time;
-  uint16_t year = tm.year - TIME_EPOCH_START;
+  time_t time = 0;
+  uint16_t years = tm.year - TIME_EPOCH_START;
+  uint16_t leaps = LEAP_DAYS(years);
   
-  time = 
-    YEARS_TO_SEC(year) + 
-    MON_TO_SEC(tm.mon) +
-    DAYS_TO_SEC(tm.day) +
-    HOURS_TO_SEC(tm.hour) +
-    MIN_TO_SEC(tm.min) +
-    tm.sec;
+  time += tm.sec;
+  time += tm.min  * NUM_SEC_IN_MIN;
+  time += tm.hour * NUM_SEC_IN_HOUR;
+  time += ( begin_days[tm.mon-1] + tm.mday-1 ) * NUM_SEC_IN_DAY;
+  time += years * NUM_SEC_IN_YEAR;
+  time += leaps * NUM_SEC_IN_DAY;
   
   return time;
 }
 
-tm_t rdtime(time_t time) {
+tm_t gmtime(time_t time) {
   tm_t tm;
   
-  tm.year = (uint16_t) SEC_TO_YEARS(time) + TIME_EPOCH_START;
-  time -= (time_t) YEARS_TO_SEC(tm.year);
+  long year = time / NUM_SEC_IN_YEAR;
   
-  tm.mon = (uint8_t) SEC_TO_MON(time);
-  time -= (time_t) MON_TO_SEC(tm.mon);
+  long dayclock = time % NUM_SEC_IN_DAY;
+  long day      = time / NUM_SEC_IN_DAY;
   
-  tm.day = (uint8_t) SEC_TO_DAYS(time);
-  time -= (time_t) DAYS_TO_SEC(tm.day);
+  tm.sec = dayclock % NUM_SEC_IN_MIN;
+  tm.min = (dayclock % NUM_SEC_IN_HOUR) / NUM_SEC_IN_MIN;
+  tm.hour = dayclock / NUM_SEC_IN_HOUR;
   
+  tm.year = (uint16_t) year + TIME_EPOCH_START;
   
-  tm.hour = (uint8_t) SEC_TO_HOURS(time);
-  time -= (time_t) HOURS_TO_SEC(tm.hour);
+  while (day >= YEAR_SIZE(year)) {
+    day -= YEAR_SIZE(year);
+    year++;
+  }
   
-  tm.min = (uint8_t) SEC_TO_MIN(time);
-  time -= (time_t) MIN_TO_SEC(tm.min);
+  tm.yday = (uint16_t) day +1;
   
-  tm.sec = (uint8_t) time;
+  if(LEAP_YEAR(year)) {
+    for(tm.mon = 0; tm.yday > begin_days_leap_year[tm.mon]; tm.mon++);
+  } else {
+    for(tm.mon = 0; tm.yday > begin_days[tm.mon]; tm.mon++);
+  }
+  
+  tm.mday = (uint8_t) tm.yday - begin_days[tm.mon-1];
+  tm.wday = (uint8_t) ( (day + 6) % NUM_DAYS_IN_WEEK);
   
   return tm;
 }

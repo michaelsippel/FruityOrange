@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
+#include <math.h>
 
 int main(void) {
   printf("Druecke eine Taste um zu starten...\n");
@@ -33,7 +35,23 @@ int main(void) {
   gets(s_alter);
   alter = atoi(s_alter);
   
+  time_t t = time();
+  tm_t tm = gmtime(t);
+  
   printf("\nDu heisst %s und bist %u Jahre alt!\n", name, alter);
+  printf("Es ist das Jahr %d.Du bist also %d geboren!\n\n", tm.year, tm.year-alter);
+  
+  char s[] = "%d:%d:%d (UTC)";
+  printf("\n%s", s);
+  while(1) {
+    int i;
+    for(i=0; i < sizeof(s)-1; i++) printf("\r");
+    t = time();
+    tm = gmtime(t);
+    printf(s, tm.hour, tm.min, tm.sec);
+    // FIXME: pow is certainly the dirtiest wait fuction!
+    pow(80000,80000);//TODO: usleep()
+  }
   
   return 0;
 }

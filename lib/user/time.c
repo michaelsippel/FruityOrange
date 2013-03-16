@@ -21,7 +21,7 @@
 #include <time.h>
 
 time_t time(void) {
-  time_t time;
-  asm volatile("int $0x30" : "=b" (time) : "a" (SYSCALL_TIME));
-  return time;
+  time_t t;
+  asm volatile("int $0x30" : "=b" (t) : "a" (SYSCALL_TIME));
+  return t;
 }

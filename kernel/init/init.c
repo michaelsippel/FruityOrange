@@ -84,12 +84,12 @@ void init(struct multiboot_info *mb_info) {
   cmos_time_t *time = get_cmos_time();
   tm_t tm = mktm(time);
   time_t time_stamp = mktime(tm);
-  tm_t new_tm = rdtime(time_stamp);
+  tm_t new_tm = gmtime(time_stamp);
   
-  printf("Timestamp: %u\n", time_stamp);
+  printf("\nTimestamp: %d\n", time_stamp);
   
-  printf("Date: %d/%d/%d  ", new_tm.day, new_tm.mon, new_tm.year);
-  printf("Time: %d:%d\n", new_tm.hour, new_tm.min);
+  printf("Date: %d/%d/%d  ", new_tm.mday, new_tm.mon, new_tm.year);
+  printf("Time: %d:%d:%d (UTC)\n", new_tm.hour, new_tm.min, new_tm.sec);
   
   setColor(0x06);
   printf("The kernel is successful started!\n");

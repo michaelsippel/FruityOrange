@@ -26,7 +26,8 @@ tm_t mktm(cmos_time_t *cmos_time) {
   tm.min = cmos_time->minute;
   tm.hour= cmos_time->hour;
   
-  tm.day = cmos_time->day_in_month;
+  tm.mday = cmos_time->day_in_month;
+  tm.wday = cmos_time->week_day;
   tm.mon = cmos_time->month;
   tm.year= cmos_time->year + 2000;
   

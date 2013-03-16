@@ -24,36 +24,18 @@
 #define TIME_EPOCH_START 2000
 
 #define NUM_DAYS_IN_YEAR 365
+#define NUM_DAYS_IN_WEEK   7
 #define NUM_MON_IN_YEAR   12
-#define NUM_DAYS_IN_MON   30
 #define NUM_HOURS_IN_DAY  24
 #define NUM_MIN_IN_HOUR   60
-#define NUM_SEC_IN_MIN    60
+#define NUM_SEC_IN_MIN   ( 60 )
+#define NUM_SEC_IN_HOUR  ( 60 * 60 )
+#define NUM_SEC_IN_DAY   ( 60 * 60 * 24 )
+#define NUM_SEC_IN_YEAR  ( 60 * 60 * 24 * 365 )
 
-#define YEARS_TO_MON(x)  (x * NUM_MON_IN_YEAR)
-#define YEARS_TO_DAYS(x) (x * NUM_DAYS_IN_YEAR)
-#define MON_TO_DAYS(x)   (x * NUM_DAYS_IN_MON)
-#define DAYS_TO_HOURS(x) (x * NUM_HOURS_IN_DAY)
-#define HOURS_TO_MIN(x)  (x * NUM_MIN_IN_HOUR)
-#define MIN_TO_SEC(x)    (x * NUM_SEC_IN_MIN)
-
-#define HOURS_TO_SEC(x) ( MIN_TO_SEC(HOURS_TO_MIN(x))    )
-#define DAYS_TO_SEC(x)  ( HOURS_TO_SEC(DAYS_TO_HOURS(x)) )
-#define MON_TO_SEC(x)   ( DAYS_TO_SEC(MON_TO_DAYS(x))    )
-#define YEARS_TO_SEC(x) ( DAYS_TO_SEC(YEARS_TO_DAYS(x))  )
-
-
-#define SEC_TO_MIN(x)    (x / NUM_SEC_IN_MIN)
-#define MIN_TO_HOURS(x)  (x / NUM_MIN_IN_HOUR)
-#define HOURS_TO_DAYS(x) (x / NUM_HOURS_IN_DAY)
-#define DAYS_TO_MON(x)   (x / NUM_DAYS_IN_MON)
-#define DAYS_TO_YEARS(x) (x / NUM_DAYS_IN_YEAR)
-#define MON_TO_YEARS(x)  (x / NUM_MON_IN_YEAR)
-
-#define SEC_TO_HOURS(x) ( MIN_TO_HOURS(SEC_TO_MIN(x))     )
-#define SEC_TO_DAYS(x)  ( HOURS_TO_DAYS(SEC_TO_HOURS(x))  )
-#define SEC_TO_MON(x)   ( DAYS_TO_MON(SEC_TO_DAYS(x))     )
-#define SEC_TO_YEARS(x) ( DAYS_TO_YEARS(SEC_TO_DAYS(x))   )
+#define LEAP_DAYS(x) ( (x / 4) - (x / 100) + (x / 400) )
+#define LEAP_YEAR(x) ( !(x % 4) && (x % 100) || !(x % 400) )
+#define YEAR_SIZE(x) ( LEAP_YEAR(x) ? 366 : 365 )
 
 typedef unsigned long time_t;
 
@@ -62,13 +44,15 @@ typedef struct tm {
   uint8_t min;
   uint8_t hour;
   
-  uint8_t day;
   uint8_t mon;
+  uint8_t mday;
+  uint8_t wday;
+  uint8_t yday;
   uint16_t year;
 } tm_t;
 
 time_t mktime(tm_t tm);
-tm_t rdtime(time_t time);
+tm_t gmtime(time_t time);
 
 #ifndef _NO_USER_INC
 #include "user/time.h"
