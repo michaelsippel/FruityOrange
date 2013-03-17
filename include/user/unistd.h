@@ -1,7 +1,7 @@
 /**
- *  kernel/proc/syscall_wrappers.c
+ *  include/user/unistd.h
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,25 +16,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdint.h>
-#include <sys/syscalls.h>
+#ifndef _USER_UNISTD_H
+#define _USER_UNISTD_H
 
-#include <driver/pit.h>
-#include <proc/scheduler.h>
-#include <proc/proc.h>
-#include <syscall.h>
+#include <time.h>
 
-void scheduler_init_syscalls(void) {
-  setup_syscall(SYSCALL_EXIT, "exit", &syscall_exit);
-  setup_syscall(SYSCALL_USLEEP, "usleep", &syscall_usleep);
-}
+int usleep(long usec);
+int sleep(long sec);
 
-void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  proc_exit(get_current_proc(), *ebx);
-}
-
-void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  proc_t *proc = get_current_proc();
-  proc->ticks_util_wake = *ebx / (1000000 / PIT_FREQ);
-  proc_sleep(proc);
-}
+#endif

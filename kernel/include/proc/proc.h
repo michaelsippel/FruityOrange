@@ -45,7 +45,8 @@ typedef struct proc {
   vmm_context_t *context;
   size_t used_mem_pages;
   
-  int ticks;
+  unsigned long ticks;
+  unsigned long ticks_util_wake;
   proc_status_t status;
   
   struct proc *next;
@@ -64,5 +65,6 @@ int proc_exit(proc_t *proc, int status);
 int proc_kill(proc_t *proc);
 
 void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 #endif

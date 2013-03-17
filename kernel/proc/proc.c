@@ -49,6 +49,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->dpl = dpl;
   
   proc->ticks = 3;
+  proc->ticks_util_wake = -1;
   proc->status = ACTIVE;
   
   // Stack

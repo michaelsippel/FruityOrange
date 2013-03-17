@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include <init/gdt.h>
+#include <driver/pit.h>
 #include <cpu.h>
 #include <mm.h>
 #include <interrupt.h>
@@ -47,7 +48,20 @@ void schedule(void) {
     current_proc = current_proc->next; \
   } while(current_proc->status != ACTIVE);
   
+  
   if(current_proc != NULL) {
+    proc_t *p = current_proc;
+    do {
+      p = p->next;
+      if(p->status == SLEEP &&
+	p->ticks_util_wake != -1) {
+	if(--p->ticks_util_wake == 0) {
+	  p->ticks_util_wake = -1;
+	  proc_wake(p);
+	}
+      }
+    } while(p != current_proc);
+    
     current_proc->cpu = get_cpu_state();
     LOOK_FOR_ACTIVE_PROC();
     activate_proc(current_proc);

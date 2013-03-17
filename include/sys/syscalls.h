@@ -19,11 +19,12 @@
 #ifndef _SYSCALLS_H
 #define _SYSCALLS_H
 
-#define SYSCALL_EXIT 0x00 /* exit */
-#define SYSCALL_PUTC 0x01 /* put char   */
-#define SYSCALL_PUTS 0x02 /* put string */
-#define SYSCALL_GETC 0x03 /* get char   */
-#define SYSCALL_GETS 0x04 /* get string */
-#define SYSCALL_TIME 0x05 /* get datetime */
+#define SYSCALL_EXIT   0x00 /* exit */
+#define SYSCALL_PUTC   0x01 /* put char   */
+#define SYSCALL_PUTS   0x02 /* put string */
+#define SYSCALL_GETC   0x03 /* get char   */
+#define SYSCALL_GETS   0x04 /* get string */
+#define SYSCALL_TIME   0x05 /* get datetime */
+#define SYSCALL_USLEEP 0x06 /* usleep */
 
 #endif

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <unistd.h>
 
 int main(void) {
   printf("Druecke eine Taste um zu starten...\n");
@@ -45,12 +46,12 @@ int main(void) {
   printf("\n%s", s);
   while(1) {
     int i;
-    for(i=0; i < sizeof(s)-1; i++) printf("\r");
     t = time();
     tm = gmtime(t);
+    
+    for(i=0; i < sizeof(s)-1; i++) printf("\r");
     printf(s, tm.hour, tm.min, tm.sec);
-    // FIXME: pow is certainly the dirtiest wait fuction!
-    pow(80000,80000);//TODO: usleep()
+    sleep(1);
   }
   
   return 0;
