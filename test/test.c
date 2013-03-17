@@ -29,6 +29,7 @@ int main(void) {
   
   char name[100];
   char s_alter[3];
+  char y_n;
   unsigned int alter;
   printf("\nWie heisst du?\n\t");
   gets(name);
@@ -36,11 +37,22 @@ int main(void) {
   gets(s_alter);
   alter = atoi(s_alter);
   
+  printf("Hattest du dieses Jahr schon Geburtstag? [j/n]\n\t");
+  y_n = getch();
+  
+  if(y_n == 'j' || y_n == 'J') {
+    y_n = 0;
+    printf("ja\n");
+  } else {
+    y_n = 1;
+    printf("nein\n");
+  }
+  
   time_t t = time();
   tm_t tm = gmtime(t);
   
   printf("\nDu heisst %s und bist %u Jahre alt!\n", name, alter);
-  printf("Es ist das Jahr %d.Du bist also %d geboren!\n\n", tm.year, tm.year-alter);
+  printf("Es ist das Jahr %d. Du bist also %d geboren!\n\n", tm.year, tm.year-alter-y_n);
   
   char text[] = "Hallo! Das ist jetzt ein Text,\n"
 		"der mal so Buchstabe fuer Buchstabe angezeigt wird.\n"

@@ -34,7 +34,7 @@
 #define NUM_SEC_IN_YEAR  ( 60 * 60 * 24 * 365 )
 
 #define LEAP_DAYS(x) ( (x / 4) - (x / 100) + (x / 400) )
-#define LEAP_YEAR(x) ( !(x % 4) && (x % 100) || !(x % 400) )
+#define LEAP_YEAR(x) ( (!(x % 4) && (x % 100)) || !(x % 400) )
 #define YEAR_SIZE(x) ( LEAP_YEAR(x) ? 366 : 365 )
 
 typedef unsigned long time_t;

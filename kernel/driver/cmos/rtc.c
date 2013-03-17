@@ -22,6 +22,7 @@
 
 #include <driver/cmos.h>
 #include <mm.h>
+#include <syscall.h>
 #include <interrupt.h>
 #include <portio.h>
 
