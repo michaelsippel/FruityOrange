@@ -26,3 +26,9 @@ int sleep(long sec) {
   
   return 0;
 }
+
+int usleep(long usec) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_USLEEP), "b" (usec));
+  
+  return 0;
+}

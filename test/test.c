@@ -42,10 +42,19 @@ int main(void) {
   printf("\nDu heisst %s und bist %u Jahre alt!\n", name, alter);
   printf("Es ist das Jahr %d.Du bist also %d geboren!\n\n", tm.year, tm.year-alter);
   
+  char text[] = "Hallo! Das ist jetzt ein Text,\n"
+		"der mal so Buchstabe fuer Buchstabe angezeigt wird.\n"
+		"Jetzt kommt gleich die Zeit...\n";
+  
+  int i;
+  for(i = 0; i < sizeof(text); i++) {
+    usleep(100000);
+    printf("%c", text[i]);
+  }
+  
   char s[] = "%d:%d:%d (UTC)";
   printf("\n%s", s);
   while(1) {
-    int i;
     t = time();
     tm = gmtime(t);
     
