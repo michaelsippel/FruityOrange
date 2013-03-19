@@ -26,5 +26,7 @@
 #define SYSCALL_GETS   0x04 /* get string */
 #define SYSCALL_TIME   0x05 /* get datetime */
 #define SYSCALL_USLEEP 0x06 /* usleep */
+#define SYSCALL_MALLOC 0x07 /* allocate memory pages */
+#define SYSCALL_MFREE  0x08 /* free memory pages */
 
 #endif

@@ -21,7 +21,15 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 void exit(int status);
+
+void *alloc_pages(size_t num);
+void free_pages(uintptr_t ptr, size_t num);
+void *malloc(size_t bytes);
+void *calloc(size_t num, size_t size);
+void *realloc(void *ptr, size_t bytes);
+void free(void *ptr);
 
 #endif

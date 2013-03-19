@@ -67,6 +67,8 @@ void init(struct multiboot_info *mb_info) {
     init_heap();endini();
   kinip("Initalizing syscalltable... ");
     init_syscalltable();endini();
+  kinip("Register mm syscalls... ");
+    mm_init_syscalls();endini();
   kinip("Initalizing scheduler... ");
     init_scheduler();endini();
   

@@ -1,5 +1,5 @@
 /**
- *  lib/user/stdlib.c
+ *  lib/user/stdlib/exit.c
  *
  *  (C) Copyright 2013 Michael Sippel
  *
