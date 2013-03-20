@@ -80,8 +80,8 @@ typedef struct alloc_nd {
 
 void mm_init_syscalls(void);
 
-void syscall_malloc_pages(uint32_t *eax, uint32_t *ebx, uint32_t *ecx);
-void syscall_mfree_pages(uint32_t *eax, uint32_t *ebx, uint32_t *ecx);
+void syscall_malloc_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_mfree_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 // pmm
 void init_pmm(struct multiboot_info *mb_info);

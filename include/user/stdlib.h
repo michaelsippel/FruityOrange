@@ -23,10 +23,18 @@
 #include <stdlib.h>
 #include <stddef.h>
 
+#define PAGE_SIZE 0x1000
+
+typedef struct alloc_nd {
+  size_t bytes;
+  struct alloc_nd *prev_nd;
+  struct alloc_nd *next_nd;
+} alloc_nd_t;
+
 void exit(int status);
 
-void *alloc_pages(size_t num);
-void free_pages(uintptr_t ptr, size_t num);
+inline void *alloc_pages(size_t num);
+inline void free_pages(uintptr_t ptr, size_t num);
 void *malloc(size_t bytes);
 void *calloc(size_t num, size_t size);
 void *realloc(void *ptr, size_t bytes);

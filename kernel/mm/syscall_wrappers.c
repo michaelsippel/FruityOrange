@@ -28,10 +28,10 @@ void mm_init_syscalls(void) {
   setup_syscall(SYSCALL_MFREE, "free", &syscall_mfree_pages);
 }
 
-void syscall_malloc_pages(uint32_t *eax, uint32_t *ebx, uint32_t *ecx) {
+void syscall_malloc_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   *ecx = vmm_alloc_area(*ebx);
 }
 
-void syscall_mfree_pages(uint32_t *eax, uint32_t *ebx, uint32_t *ecx) {
-  vmm_unmap_area(current_context, *eax, *ebx);
+void syscall_mfree_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  vmm_unmap_area(current_context, *ebx, *ecx);
 }
