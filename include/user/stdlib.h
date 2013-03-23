@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-#define PAGE_SIZE 0x1000
+#define PAGE_SIZE 4096
 
 typedef struct alloc_nd {
   size_t bytes;

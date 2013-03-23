@@ -29,7 +29,14 @@ void mm_init_syscalls(void) {
 }
 
 void syscall_malloc_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  *ecx = vmm_alloc_area(*ebx);
+  uintptr_t vaddr = (uintptr_t) vmm_find(current_context, *ebx, VADDR_USER_START, VADDR_USER_END);
+  *ecx = vaddr;
+  
+  int i;
+  for(i = 0; i < *ebx; i++, vaddr += PAGE_SIZE) {
+    uintptr_t paddr = (uintptr_t) pmm_alloc();
+    vmm_map_page(current_context, vaddr, paddr);
+  }
 }
 
 void syscall_mfree_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {

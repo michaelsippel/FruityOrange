@@ -302,7 +302,9 @@ void *vmm_alloc_area(size_t pages) {
   uintptr_t paddr;
   uintptr_t vaddr_start = (uintptr_t) vmm_find(current_context, pages, VADDR_USER_START, VADDR_USER_END);
   uintptr_t vaddr = vaddr_start;
-  while(pages--) {
+  
+  int i;
+  for(i = 0; i < pages; i++) {
     paddr = (uintptr_t) pmm_alloc();
     vmm_map_page(current_context, vaddr, paddr);
     vaddr += PAGE_SIZE;

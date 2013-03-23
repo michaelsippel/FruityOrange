@@ -111,8 +111,8 @@ void init(struct multiboot_info *mb_info) {
       size_t pages = (modules[i].mod_end - modules[i].mod_start) / PAGE_SIZE +1;
       void *mod = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
       vmm_context_t *mod_context = vmm_create_context(VMM_USER_FLAGS);
-      load_elf32(mod, mod_context, (char*) modules[i].string);
-      vmm_unmap_area(current_context, (uintptr_t) mod, pages);
+      load_elf32(mod, current_context, (char*) modules[i].string);
+      vmm_unmap_area(mod_context, (uintptr_t) mod, pages);
     }
   } else {
     printf("error: no modules found!\n");

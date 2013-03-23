@@ -17,9 +17,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .section .text
 .extern main
+.extern init_heap
 
 .global _start
 _start:
+    call init_heap
     call main
     popl %ebx
     movl $0, %eax
