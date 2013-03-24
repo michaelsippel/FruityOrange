@@ -26,7 +26,6 @@ static alloc_nd_t *first_nd = NULL;
 inline void *alloc_pages(size_t num) {
   uintptr_t ptr;
   asm volatile("int $0x30" : "=c" (ptr) : "a" (SYSCALL_MALLOC), "b" (num));
-  printf("alloc_page = 0x%x\n", ptr);
   return (void*) ptr;
 }
 
@@ -36,7 +35,6 @@ inline void free_pages(uintptr_t ptr, size_t num) {
 
 void init_heap(void) {
   first_nd = (alloc_nd_t*) alloc_pages(1);
-  printf("heap_init(): %x\n", first_nd);
   first_nd->bytes = PAGE_SIZE;
   first_nd->next_nd = NULL;
   first_nd->prev_nd = NULL;

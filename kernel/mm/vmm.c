@@ -123,7 +123,7 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
   
   // copy kernelmappings
   pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | context->flags;
-  vmm_update_context(context);
+  memcpy(context->pagedir, current_context->pagedir, 0x1000);
   
   return context;
 }
