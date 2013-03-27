@@ -87,7 +87,7 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
       vmm_unmap_page(context, dest);
     }
   }
-  proc_t *proc = create_proc((void*) header->entry, name, context, DPL_KERNELMODE);
+  proc_t *proc = create_proc((void*) header->entry, name, context, DPL_USERMODE);
   
   return proc;
 }

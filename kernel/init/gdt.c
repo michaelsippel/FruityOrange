@@ -1,5 +1,5 @@
 /**
- *  kernel/gdt.c
+ *  kernel/init/gdt.c
  *  
  *  (C) Copyright 2012 Michael Sippel
  *
@@ -105,7 +105,7 @@ void init_gdt(void) {
       
   //TSS
   gdt[GDT_ENTRY_TSS] = create_gdt_entry(sizeof(tss), (uint32_t) tss,
-      GDT_TSS | GDT_RING3 | GDT_PRESENT);
+      GDT_TSS | GDT_PRESENT | GDT_RING3);
   
   load_gdt();
   // load task register

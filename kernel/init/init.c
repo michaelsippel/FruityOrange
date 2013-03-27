@@ -105,7 +105,7 @@ void init(struct multiboot_info *mb_info) {
     }
     
     multiboot_module_t *modules = (multiboot_module_t*) mb_info->mbs_mods_addr;
-    current_context->flags = VMM_USER_FLAGS;
+    
     int i;
     for(i = 0; i < mb_info->mbs_mods_count; i++)  {
       size_t pages = (modules[i].mod_end - modules[i].mod_start) / PAGE_SIZE +1;

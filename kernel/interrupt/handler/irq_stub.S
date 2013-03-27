@@ -64,11 +64,11 @@ common_irq_handler:
   mov %ax, %es
   mov %ax, %fs
   mov %ax, %gs
-
+  
   push %esp
   call handle_irq
   mov %eax, %esp
-
+  
   pop %eax
   pop %ebx
   pop %ecx

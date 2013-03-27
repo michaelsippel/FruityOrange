@@ -41,9 +41,9 @@ void init_vmm(void) {
   uintptr_t kernel_context_paddr = (uintptr_t) pmm_alloc();
   kernel_context = (void*) kernel_context_paddr + VADDR_KERNEL_START;
   memclr(kernel_context, PAGE_SIZE);
-  kernel_context->flags = VMM_KERNEL_FLAGS;
+  kernel_context->flags = VMM_USER_FLAGS;  
   kernel_context->alloc_offset = 1;
-  
+
   uintptr_t pagedir_paddr = (uintptr_t) pmm_alloc();
   vmm_pd_t pagedir = (void*) pagedir_paddr + VADDR_KERNEL_START;
   memclr(pagedir, PAGE_SIZE);
@@ -63,6 +63,8 @@ void init_vmm(void) {
   current_context = kernel_context;
   asm volatile("mov %0, %%cr3" : : "r" (pagedir_paddr));
   vmm_enable();
+  
+  
 }
 
 inline void vmm_enable(void) {
@@ -122,8 +124,8 @@ vmm_context_t *vmm_create_context(uint8_t flags) {
   context->pagedir_paddr = pd_paddr;
   
   // copy kernelmappings
-  pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | context->flags;
   memcpy(context->pagedir, current_context->pagedir, 0x1000);
+  pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | context->flags;
   
   return context;
 }

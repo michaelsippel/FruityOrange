@@ -29,7 +29,7 @@
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 
-#define PROC_DEBUG 1
+#define PROC_DEBUG 0
 
 static pid_t proc_count = 0;
 static size_t kernel_stack_size = 0x1000;
@@ -95,7 +95,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   }
   first_proc = proc;
   
-  debug(PROC_DEBUG, "create_proc(): created precess \"%s\" with pid %d\n", proc->name, proc->pid);
+  debug(PROC_DEBUG, "create_proc(): created precess \"%s\" with pid %d.\n", proc->name, proc->pid);
   
   return proc;
 }

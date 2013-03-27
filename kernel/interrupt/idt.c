@@ -127,7 +127,7 @@ void init_idt(void) {
   set_interrupt(0x2E, (uint32_t)&int_handler0x2E,0x08,INTERRUPT_GATE, 0  );//IRQ
   set_interrupt(0x2F, (uint32_t)&int_handler0x2F,0x08,INTERRUPT_GATE, 0  );//IRQ
   
-  set_interrupt(0x30, (uint32_t)&int_handler0x30,0x08,INTERRUPT_GATE, 0  );//Syscall
+  set_interrupt(0x30, (uint32_t)&int_handler0x30,0x08,INTERRUPT_GATE, 3  );//Syscall
   
   load_idt();
 }
