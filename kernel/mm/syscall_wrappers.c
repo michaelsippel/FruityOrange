@@ -35,7 +35,7 @@ void syscall_malloc_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   int i;
   for(i = 0; i < *ebx; i++, vaddr += PAGE_SIZE) {
     uintptr_t paddr = (uintptr_t) pmm_alloc();
-    vmm_map_page(current_context, vaddr, paddr);
+    vmm_map_page(current_context, vaddr, paddr, VMM_USER_FLAGS);
   }
 }
 

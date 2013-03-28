@@ -70,7 +70,7 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
   ph = (elf32_program_header_t*) (((uintptr_t) image) + header->ph_offset);
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
-      pages = ph->file_size / PAGE_SIZE +1;
+      pages = (ph->file_size + PAGE_SIZE) / PAGE_SIZE;
       uintptr_t dest = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
       
       for(j = 0; j < pages; j++) {
@@ -78,12 +78,13 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
 	uintptr_t vaddr = (uintptr_t) ph->virt_addr + j*PAGE_SIZE;
 	uintptr_t src   = (uintptr_t) image + ph->offset + j*PAGE_SIZE;
 	
-	vmm_map_page(context, vaddr, paddr);
-	vmm_map_page(current_context, dest, paddr);
+	vmm_map_page(context, vaddr, paddr, VMM_USER_FLAGS);
+	vmm_map_page(current_context, dest, paddr, VMM_USER_FLAGS);
 	
-	memclr((void*) dest, PAGE_SIZE);
 	memcpy((void*) dest, (void*) src, PAGE_SIZE);
       }
+      
+      memclr((void*) dest + ph->file_size, ph->mem_size - ph->file_size);
       vmm_unmap_page(context, dest);
     }
   }

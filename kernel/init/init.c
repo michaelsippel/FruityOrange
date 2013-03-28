@@ -110,7 +110,7 @@ void init(struct multiboot_info *mb_info) {
     for(i = 0; i < mb_info->mbs_mods_count; i++)  {
       size_t pages = (modules[i].mod_end - modules[i].mod_start) / PAGE_SIZE +1;
       void *mod = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
-      vmm_context_t *mod_context = vmm_create_context(VMM_USER_FLAGS);
+      vmm_context_t *mod_context = vmm_create_context();
       load_elf32(mod, mod_context, (char*) modules[i].string);
       vmm_unmap_area(current_context, (uintptr_t) mod, pages);
     }

@@ -67,7 +67,8 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->cpu = proc_cpu_state;
   
   if(dpl) { // Usermode
-    uintptr_t user_stack = (uintptr_t) malloc(user_stack_size);
+    uintptr_t user_stack_phys = (uintptr_t) pmm_alloc();
+    uintptr_t user_stack = (uintptr_t) vmm_automap_user_page(context, user_stack_phys);
     
     proc_cpu_state->esp = user_stack + user_stack_size;
     proc_cpu_state->cs = _USER_CS;

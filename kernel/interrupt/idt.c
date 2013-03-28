@@ -80,9 +80,9 @@ void init_idt(void) {
   set_interrupt(0x00, (uint32_t)&int_handler0x00,0x08,INTERRUPT_GATE, 0  );//Exeption
   set_interrupt(0x01, (uint32_t)&int_handler0x01,0x08,INTERRUPT_GATE, 0  );//Exeption
   set_interrupt(0x02, (uint32_t)&int_handler0x02,0x08,INTERRUPT_GATE, 0  );//Exeption
-  set_interrupt(0x03, (uint32_t)&int_handler0x03,0x08,INTERRUPT_GATE, 0  );//Exeption
-  set_interrupt(0x04, (uint32_t)&int_handler0x04,0x08,INTERRUPT_GATE, 0  );//Exeption
-  set_interrupt(0x05, (uint32_t)&int_handler0x05,0x08,INTERRUPT_GATE, 0  );//Exeption
+  set_interrupt(0x03, (uint32_t)&int_handler0x03,0x08,INTERRUPT_GATE, 3  );//Exeption
+  set_interrupt(0x04, (uint32_t)&int_handler0x04,0x08,     TRAP_GATE, 3  );//Exeption
+  set_interrupt(0x05, (uint32_t)&int_handler0x05,0x08,     TRAP_GATE, 3  );//Exeption
   set_interrupt(0x06, (uint32_t)&int_handler0x06,0x08,INTERRUPT_GATE, 0  );//Exeption
   set_interrupt(0x07, (uint32_t)&int_handler0x07,0x08,INTERRUPT_GATE, 0  );//Exeption
   set_interrupt(0x08, (uint32_t)&int_handler0x08,0x08,INTERRUPT_GATE, 0  );//Exeption
@@ -127,7 +127,7 @@ void init_idt(void) {
   set_interrupt(0x2E, (uint32_t)&int_handler0x2E,0x08,INTERRUPT_GATE, 0  );//IRQ
   set_interrupt(0x2F, (uint32_t)&int_handler0x2F,0x08,INTERRUPT_GATE, 0  );//IRQ
   
-  set_interrupt(0x30, (uint32_t)&int_handler0x30,0x08,INTERRUPT_GATE, 3  );//Syscall
+  set_interrupt(0x30, (uint32_t)&int_handler0x30,0x08,     TRAP_GATE, 3  );//Syscall
   
   load_idt();
 }

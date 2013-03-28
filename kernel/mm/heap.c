@@ -71,7 +71,7 @@ void *malloc(size_t bytes) {
     int i;
     for(i = 0; i < pages; i++, vaddr += PAGE_SIZE) {
       uintptr_t paddr = (uintptr_t) pmm_alloc();
-      vmm_map_page(current_context, vaddr, paddr);
+      vmm_map_page(current_context, vaddr, paddr, VMM_KERNEL_FLAGS);
     }
     
     node->bytes = PAGE_SIZE * pages;
