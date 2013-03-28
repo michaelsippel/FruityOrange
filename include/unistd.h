@@ -1,7 +1,7 @@
 /**
- *  include/sys/types.h
+ *  include/unistd.h
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,18 +16,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TYPES_H
-#define _TYPES_H
+#ifndef _UNISTD_H
+#define _UNISTD_H
 
-#define DPL_KERNELMODE 0
-#define DPL_USERMODE   3
+#include <stdint.h>
 
-typedef unsigned int id_t;
-typedef unsigned int uid_t;
-typedef unsigned int gid_t;
-typedef unsigned int pid_t;
-typedef unsigned int tid_t;
-typedef unsigned int mode_t;
-typedef unsigned char dpl_t;
+#define R_OK 0x1
+#define W_OK 0x2
+#define X_OK 0x4
+#define F_OK 0x8
+
+#ifndef _NO_USER_INC
+#include "user/unistd.h"
+#endif
 
 #endif

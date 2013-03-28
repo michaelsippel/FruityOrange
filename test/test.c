@@ -24,10 +24,6 @@
 #include <unistd.h>
 
 int main(void) {
-  printf("malloc_test = 0x%x\n", malloc(1));
-  printf("malloc_test = 0x%x\n", malloc(3));
-  printf("malloc_test = 0x%x\n", malloc(4));
-  
   printf("Druecke eine Taste um zu starten...\n");
   getch();
   

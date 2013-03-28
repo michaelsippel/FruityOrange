@@ -71,6 +71,8 @@ void init(struct multiboot_info *mb_info) {
     mm_init_syscalls();endini();
   kinip("Initalizing scheduler... ");
     init_scheduler();endini();
+  kinip("Initalizing VFS... ");
+    init_vfs();endini();
   
   sti();
   dinip("Initalizing terminal... ");
