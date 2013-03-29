@@ -20,6 +20,7 @@
 #include <sys/elf.h>
 #include <sys/syscalls.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <alloca.h>
 #include <math.h>
 #include <stdarg.h>
@@ -29,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <debug/debug.h>
 #include <debug/panic.h>
@@ -113,9 +115,11 @@ void init(struct multiboot_info *mb_info) {
       size_t pages = (modules[i].mod_end - modules[i].mod_start) / PAGE_SIZE +1;
       void *mod = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
       vmm_context_t *mod_context = vmm_create_context();
+      vfs_create_inode("module", S_IXUSR | S_IWUSR | S_IRUSR | S_IRGRP, NULL);
       load_elf32(mod, mod_context, (char*) modules[i].string);
       vmm_unmap_area(current_context, (uintptr_t) mod, pages);
     }
+    vfs_inode_list(NULL);
   } else {
     printf("error: no modules found!\n");
   }

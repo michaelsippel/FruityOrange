@@ -34,11 +34,41 @@ static gid_t gid = 0;
 void init_vfs(void) {
   root = malloc(sizeof(vfs_inode_t));
   root->name = "root";
-  root->type = VFS_TYPE_DIR;
   root->stat.id = id_counter++;
+  root->stat.mode = S_MODE_DIR | S_IRUSR | S_IWUSR;
   root->base = NULL;
   root->length = 0;
   root->parent = NULL;
+}
+
+// only debug function
+void vfs_inode_list(vfs_inode_t *parent) {
+  if(parent == NULL) {
+    parent = root;
+  }
+  vfs_dentry_t *entries = vfs_read(parent, 0);
+  int i;
+  int num = root->length / sizeof(vfs_dentry_t);
+  printf("num = %d\n", num);
+  for(i = 0; i < num; i++) {
+    vfs_dentry_t dentry = entries[i];
+    stat_t stat = dentry.inode->stat;
+    printf("[%s] %s %c%c%c %c%c%c %c%c%c\n",
+	   (S_ISREG(stat) ? "FILE" : "DIR"),
+	   dentry.inode->name,
+	   ((stat.mode & S_IRUSR) ? 'r' : '-'),
+	   ((stat.mode & S_IWUSR) ? 'w' : '-'),
+	   ((stat.mode & S_IXUSR) ? 'x' : '-'),
+	   
+	   ((stat.mode & S_IRGRP) ? 'r' : '-'),
+	   ((stat.mode & S_IWGRP) ? 'w' : '-'),
+	   ((stat.mode & S_IXGRP) ? 'x' : '-'),
+	   
+	   ((stat.mode & S_IROTH) ? 'r' : '-'),
+	   ((stat.mode & S_IWOTH) ? 'w' : '-'),
+	   ((stat.mode & S_IXOTH) ? 'x' : '-')
+    );
+  }
 }
 
 vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent) {
@@ -50,8 +80,15 @@ vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent
   if (parent == NULL) {
     inode->parent = root;
   } else {
-    inode->parent = parent;
+    if(parent->stat.mode & S_MODE_DIR) {
+      inode->parent = parent;
+    } else {
+      printf("[vfs] parent inode is no directory!\n");
+    }
   }
+  
+  vfs_dentry_t *entry = vfs_create_dentry(inode);
+  vfs_write(inode->parent, entry, sizeof(vfs_dentry_t));
   
   inode->stat.mode = mode;
   inode->stat.id = id_counter++;
@@ -60,6 +97,15 @@ vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent
   inode->stat.ctime = mktime(mktm(get_cmos_time()));
   
   return inode;
+}
+
+vfs_dentry_t *vfs_create_dentry(vfs_inode_t *inode) {
+  vfs_dentry_t *dentry = malloc(sizeof(vfs_dentry_t));
+  
+  dentry->id = inode->stat.id;
+  dentry->inode = inode;
+  
+  return dentry;
 }
 
 int vfs_write(vfs_inode_t *inode, void *base, size_t bytes) {
@@ -82,9 +128,9 @@ int vfs_write(vfs_inode_t *inode, void *base, size_t bytes) {
   
   if (writable) {
     if (inode->base == NULL) {
-	inode->base = malloc(bytes);
+      inode->base = malloc(bytes);
     } else {
-	inode->base = realloc(inode->base, inode->length + bytes);
+      inode->base = realloc(inode->base, inode->length + bytes);
     }
     
     uint8_t *nbase = (uint8_t*) inode->base + inode->length;
@@ -101,7 +147,7 @@ int vfs_write(vfs_inode_t *inode, void *base, size_t bytes) {
 }
 
 void* vfs_read(vfs_inode_t *inode, uintptr_t offset) {
-	return (void*) inode->base + offset;
+  return (void*) inode->base + offset;
 }
 
 int vfs_access(vfs_inode_t *inode, mode_t modus) {

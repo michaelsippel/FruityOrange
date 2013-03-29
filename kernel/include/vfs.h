@@ -24,9 +24,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define VFS_TYPE_FILE 0x0
-#define VFS_TYPE_DIR  0x1
-
 typedef struct vfs_inode {
   const char *name;
   uint8_t type;
@@ -48,8 +45,10 @@ typedef struct vfs_dentry {
 
 void init_vfs(void);
 vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent);
+vfs_dentry_t *vfs_create_dentry(vfs_inode_t *inode);
 int vfs_write(vfs_inode_t *inode, void *base, size_t bytes);
 void* vfs_read(vfs_inode_t *inode, uintptr_t offset);
 int vfs_access(vfs_inode_t *inode, mode_t modus);
+void vfs_inode_list(vfs_inode_t *parent);
 
 #endif
