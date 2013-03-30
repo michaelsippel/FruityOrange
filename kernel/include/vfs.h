@@ -43,12 +43,23 @@ typedef struct vfs_dentry {
   struct vfs_dentry *parent;
 } vfs_dentry_t;
 
+typedef struct fd {
+  vfs_inode_t *inode;
+} fd_t;
+
 void init_vfs(void);
+vfs_inode_t *vfs_root(void);
 vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent);
 vfs_dentry_t *vfs_create_dentry(vfs_inode_t *inode);
 int vfs_write(vfs_inode_t *inode, void *base, size_t bytes);
 void* vfs_read(vfs_inode_t *inode, uintptr_t offset);
 int vfs_access(vfs_inode_t *inode, mode_t modus);
 void vfs_inode_list(vfs_inode_t *parent);
+
+void vfs_init_syscalls(void);
+void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_close(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 #endif

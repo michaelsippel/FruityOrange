@@ -28,5 +28,9 @@
 #define SYSCALL_USLEEP 0x06 /* usleep */
 #define SYSCALL_MALLOC 0x07 /* allocate memory pages */
 #define SYSCALL_MFREE  0x08 /* free memory pages */
+#define SYSCALL_OPEN   0x09 /* open a file */
+#define SYSCALL_CLOSE  0x0A /* close a file */
+#define SYSCALL_READ   0x0B /* read from a file */
+#define SYSCALL_WRITE  0x0C /* write into a file */
 
 #endif

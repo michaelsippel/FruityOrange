@@ -1,5 +1,5 @@
 /**
- *  kernel/vfs/vfs.c
+ *  kernel/vfs/inode.c
  *
  *  (C) Copyright 2013 Michael Sippel
  *
@@ -39,6 +39,12 @@ void init_vfs(void) {
   root->base = NULL;
   root->length = 0;
   root->parent = NULL;
+  
+  vfs_init_syscalls();
+}
+
+vfs_inode_t *vfs_root(void) {
+  return root;
 }
 
 // only debug function
@@ -78,18 +84,16 @@ vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent
   inode->name = name;
   inode->length = 0;
   
-  if (parent == NULL) {
-    inode->parent = root;
-  } else {
+  if (parent != NULL) {
     if(parent->stat.mode & S_MODE_DIR) {
       inode->parent = parent;
+      vfs_dentry_t *entry = vfs_create_dentry(inode);
+      vfs_write(inode->parent, entry, sizeof(vfs_dentry_t));
     } else {
       printf("[vfs] parent inode is no directory!\n");
+      return NULL;
     }
   }
-  
-  vfs_dentry_t *entry = vfs_create_dentry(inode);
-  vfs_write(inode->parent, entry, sizeof(vfs_dentry_t));
   
   inode->stat.mode = mode;
   inode->stat.id = id_counter++;

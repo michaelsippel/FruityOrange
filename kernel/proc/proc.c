@@ -18,12 +18,14 @@
  */
 #define _PROC_C
 
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
 #include <stdint.h>
 
 #include <cpu.h>
 #include <mm.h>
+#include <vfs.h>
 #include <init/gdt.h>
 #include <debug/debug.h>
 #include <proc/scheduler.h>
@@ -51,6 +53,13 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->ticks = 3;
   proc->ticks_util_wake = -1;
   proc->status = ACTIVE;
+  
+  proc->num_fd = 3;
+  proc->fd = calloc(3, sizeof(fd_t));
+  #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
+  proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
+  proc->fd[1].inode = vfs_create_inode("stdin",  MODE, NULL);
+  proc->fd[2].inode = vfs_create_inode("stderr", MODE, NULL);
   
   // Stack
   uintptr_t kernel_stack = (uintptr_t) malloc(kernel_stack_size);
@@ -99,6 +108,12 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   debug(PROC_DEBUG, "create_proc(): created precess \"%s\" with pid %d.\n", proc->name, proc->pid);
   
   return proc;
+}
+
+int proc_get_unused_fd(proc_t *proc) {
+  proc->fd = realloc(proc->fd, proc->num_fd++);
+  
+  return proc->num_fd;
 }
 
 int proc_sleep(proc_t *proc) {

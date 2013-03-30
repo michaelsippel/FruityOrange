@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 #include <debug/debug.h>
+#include <proc/proc.h>
 #include <syscall.h>
 #include <mm.h>
 
@@ -37,8 +38,11 @@ void syscall_malloc_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     uintptr_t paddr = (uintptr_t) pmm_alloc();
     vmm_map_page(current_context, vaddr, paddr, VMM_USER_FLAGS);
   }
+  
+  ((proc_t*)get_current_proc())->used_mem_pages += *ebx;
 }
 
 void syscall_mfree_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   vmm_unmap_area(current_context, *ebx, *ecx);
+  ((proc_t*)get_current_proc())->used_mem_pages -= *ecx;
 }

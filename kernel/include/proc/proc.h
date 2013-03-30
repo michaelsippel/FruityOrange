@@ -24,6 +24,7 @@
 
 #include <cpu.h>
 #include <mm.h>
+#include <vfs.h>
 
 #define PROC_STATUS_ACTIVE 0x0
 #define PROC_STATUS_SLEEP  0x1
@@ -43,8 +44,10 @@ typedef struct proc {
   
   cpu_state_t *cpu;
   vmm_context_t *context;
-  size_t used_mem_pages;
+  unsigned int num_fd;
+  fd_t *fd;
   
+  size_t used_mem_pages;
   unsigned long ticks;
   unsigned long ticks_util_wake;
   proc_status_t status;
