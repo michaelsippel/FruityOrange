@@ -47,7 +47,7 @@ extern const void kernel_end_phys;
 extern const void kernel_end_virt;
 
 #define KERNEL_SIZE ((uintptr_t) &kernel_end_phys)
-#define KERNEL_PAGES (KERNEL_SIZE / PAGE_SIZE +1)
+#define KERNEL_PAGES ((KERNEL_SIZE+PAGE_SIZE) / PAGE_SIZE)
 
 #define VADDR_KERNEL_START ((uintptr_t) 0xc0000000)
 #define VADDR_KERNEL_END   ((uintptr_t) 0xffffffff)

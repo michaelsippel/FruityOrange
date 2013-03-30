@@ -48,7 +48,6 @@ void *malloc(size_t bytes) {
     return vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
   }
   
-  bytes += sizeof(alloc_nd_t)-1;
   alloc_nd_t *node = first_nd;
   
   // search for free nodes
@@ -56,32 +55,33 @@ void *malloc(size_t bytes) {
   while(node != NULL && !node_found) {
     if(node->bytes >= bytes) { // is enough space?
       node_found = 1;
-      break;
     } else {
       node = node->next_nd;
     }
   }
   
   // nothing avaiable - create new node
-  if(!node_found) {
-    size_t pages = bytes / PAGE_SIZE + 1;
-    uintptr_t vaddr = (uintptr_t) vmm_find(current_context, pages, VADDR_KERNEL_START, VADDR_KERNEL_END);
-    node = (alloc_nd_t*) vaddr;
+  if(! node_found) {
+    size_t pages = (bytes + sizeof(alloc_nd_t) + PAGE_SIZE) / PAGE_SIZE;
+    uintptr_t vaddr_start = (uintptr_t) vmm_find(current_context, pages, VADDR_KERNEL_START, VADDR_KERNEL_END);
     
     int i;
-    for(i = 0; i < pages; i++, vaddr += PAGE_SIZE) {
+    for(i = 0; i < pages; i++) {
       uintptr_t paddr = (uintptr_t) pmm_alloc();
+      uintptr_t vaddr = (uintptr_t) vaddr_start + i*PAGE_SIZE;
       vmm_map_page(current_context, vaddr, paddr, VMM_KERNEL_FLAGS);
     }
     
-    node->bytes = PAGE_SIZE * pages;
+    node = (alloc_nd_t*) vaddr_start;
+    node->bytes = PAGE_SIZE * pages - sizeof(alloc_nd_t);
   }
   
   // is there some space for more?
-  if(node->bytes > bytes) {
-    size_t rest = node->bytes - bytes;
-    alloc_nd_t *new_node = (alloc_nd_t*) node + node->bytes - rest;
-    new_node->bytes = rest;
+  size_t rest = node->bytes - bytes;
+  if(rest > sizeof(alloc_nd_t)) {
+    alloc_nd_t *new_node = (alloc_nd_t*) node + sizeof(alloc_nd_t);
+    new_node->bytes = rest - sizeof(alloc_nd_t);
+    node->bytes = bytes;
     insert_node(new_node);
   }
   
@@ -105,6 +105,10 @@ void *realloc(void *ptr, size_t bytes) {
 }
 
 void free(void *ptr) {
-  alloc_nd_t *node = (alloc_nd_t*) ptr - sizeof(alloc_nd_t);
-  insert_node(node);
+  if((uintptr_t)ptr & (~PAGE_MASK)) {
+    alloc_nd_t *node = (alloc_nd_t*) ptr - sizeof(alloc_nd_t);
+    insert_node(node);
+  } else {
+    vmm_unmap_page(current_context, (uintptr_t) ptr);
+  }
 }

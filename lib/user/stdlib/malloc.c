@@ -57,7 +57,6 @@ void *malloc(size_t bytes) {
     return alloc_pages(1);
   }
   
-  bytes += sizeof(alloc_nd_t)-1;
   alloc_nd_t *node = first_nd;
   
   // search for free nodes
@@ -65,14 +64,13 @@ void *malloc(size_t bytes) {
   while(node != NULL && !node_found) {
     if(node->bytes >= bytes) { // is enough space?
       node_found = 1;
-      break;
     } else {
       node = node->next_nd;
     }
   }
   
   // nothing avaiable - create new node
-  if(!node_found) {
+  if(! node_found) {
     size_t pages = bytes / PAGE_SIZE + 1;
     uintptr_t vaddr = (uintptr_t) alloc_pages(pages);
     node = (alloc_nd_t*) vaddr;
@@ -81,10 +79,11 @@ void *malloc(size_t bytes) {
   }
   
   // is there some space for more?
-  if(node->bytes > bytes) {
-    size_t rest = node->bytes - bytes;
-    alloc_nd_t *new_node = (alloc_nd_t*) node + node->bytes - rest;
-    new_node->bytes = rest;
+  size_t rest = node->bytes - bytes;
+  if(rest > sizeof(alloc_nd_t)) {
+    alloc_nd_t *new_node = (alloc_nd_t*) node + sizeof(alloc_nd_t);
+    new_node->bytes = rest - sizeof(alloc_nd_t);
+    node->bytes = bytes;
     insert_node(new_node);
   }
   
@@ -108,6 +107,10 @@ void *realloc(void *ptr, size_t bytes) {
 }
 
 void free(void *ptr) {
-  alloc_nd_t *node = (alloc_nd_t*) ptr - sizeof(alloc_nd_t);
-  insert_node(node);
+  if((uintptr_t)ptr & 0xFFF) {
+    alloc_nd_t *node = (alloc_nd_t*) ptr - sizeof(alloc_nd_t);
+    insert_node(node);
+  } else {
+    free_pages((uintptr_t) ptr, 1);
+  }
 }

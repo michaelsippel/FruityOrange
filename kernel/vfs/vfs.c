@@ -49,13 +49,12 @@ void vfs_inode_list(vfs_inode_t *parent) {
   vfs_dentry_t *entries = vfs_read(parent, 0);
   int i;
   int num = root->length / sizeof(vfs_dentry_t);
-  printf("num = %d\n", num);
+  printf("inode-list from parent \"%s\" (%d)\n", parent->name, parent->stat.id);
   for(i = 0; i < num; i++) {
     vfs_dentry_t dentry = entries[i];
     stat_t stat = dentry.inode->stat;
-    printf("[%s] %s %c%c%c %c%c%c %c%c%c\n",
-	   (S_ISREG(stat) ? "FILE" : "DIR"),
-	   dentry.inode->name,
+    printf("\t%c%c%c%c%c%c%c%c%c%c %s\n",
+	   (S_ISDIR(stat) ? 'd' : '-'),
 	   ((stat.mode & S_IRUSR) ? 'r' : '-'),
 	   ((stat.mode & S_IWUSR) ? 'w' : '-'),
 	   ((stat.mode & S_IXUSR) ? 'x' : '-'),
@@ -66,7 +65,9 @@ void vfs_inode_list(vfs_inode_t *parent) {
 	   
 	   ((stat.mode & S_IROTH) ? 'r' : '-'),
 	   ((stat.mode & S_IWOTH) ? 'w' : '-'),
-	   ((stat.mode & S_IXOTH) ? 'x' : '-')
+	   ((stat.mode & S_IXOTH) ? 'x' : '-'),
+	   
+	   dentry.inode->name
     );
   }
 }
