@@ -18,6 +18,7 @@
  */
 #define _PROC_C
 
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
@@ -55,11 +56,13 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->status = ACTIVE;
   
   proc->num_fd = 3;
-  proc->fd = calloc(3, sizeof(fd_t));
+  proc->fd = calloc(3, sizeof(fd_st_t));
   #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
   proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
   proc->fd[1].inode = vfs_create_inode("stdin",  MODE, NULL);
   proc->fd[2].inode = vfs_create_inode("stderr", MODE, NULL);
+  
+  proc->work_dir = vfs_root();
   
   // Stack
   uintptr_t kernel_stack = (uintptr_t) malloc(kernel_stack_size);
@@ -110,7 +113,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   return proc;
 }
 
-int proc_get_unused_fd(proc_t *proc) {
+fd_t proc_get_unused_fd(proc_t *proc) {
   proc->fd = realloc(proc->fd, proc->num_fd++);
   
   return proc->num_fd;
@@ -120,7 +123,7 @@ int proc_sleep(proc_t *proc) {
   if(proc->status != SLEEP) {
     proc->status = SLEEP;
     
-    if(proc == get_current_proc()) {
+    if(proc == current_proc) {
       schedule();
     }
     
@@ -155,7 +158,7 @@ int proc_exit(proc_t *proc, int status) {
 
 int proc_kill(proc_t *proc) {
   debug(PROC_DEBUG, "proc_kill(): kill process %d.\n",proc->pid);
-  if(proc == get_current_proc()) {
+  if(proc == current_proc) {
     schedule();
   }
   

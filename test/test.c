@@ -64,14 +64,17 @@ int main(void) {
     printf("%c", text[i]);
   }
   
-  char s[] = "%d:%d:%d (UTC)";
+  char s[] = "\t%d:%d:%d (UTC)";
+  char new_s[] = "\t%d:%d:%d (UTC)";
+  int length = sizeof(s)-1;
   printf("\n%s", s);
   while(1) {
     t = time();
     tm = gmtime(t);
     
-    for(i=0; i < sizeof(s)-1; i++) printf("\r");
-    printf(s, tm.hour, tm.min, tm.sec);
+    for(i=0; i < length; i++) printf("\r");
+    length = sprintf(new_s, s, tm.hour, tm.min, tm.sec);
+    puts(new_s);
     sleep(1);
   }
   

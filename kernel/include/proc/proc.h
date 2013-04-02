@@ -19,6 +19,7 @@
 #ifndef _PROC_H
 #define _PROC_H
 
+#include <sys/file.h>
 #include <sys/types.h>
 #include <stdint.h>
 
@@ -45,7 +46,8 @@ typedef struct proc {
   cpu_state_t *cpu;
   vmm_context_t *context;
   unsigned int num_fd;
-  fd_t *fd;
+  fd_st_t *fd;
+  vfs_inode_t *work_dir;
   
   size_t used_mem_pages;
   unsigned long ticks;
@@ -66,6 +68,7 @@ int proc_sleep(proc_t *proc);
 int proc_wake(proc_t *proc);
 int proc_exit(proc_t *proc, int status);
 int proc_kill(proc_t *proc);
+fd_t proc_get_unused_fd(proc_t *proc);
 
 void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);

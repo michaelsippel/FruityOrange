@@ -79,7 +79,9 @@ void init_pmm(multiboot_info_t *mb_info) {
     }
   }
   
-  pmm_mark_used(0);
+  // 6. the video-ram and NULL
+  pmm_mark_used((void*)0xb8000);
+  pmm_mark_used((void*)0);
 }
 
 void *pmm_alloc(void) {

@@ -21,6 +21,8 @@
 
 #include <stdint.h>
 
+#define EOF (-1)
+
 typedef struct file {
   char *fpos;
   void *base;
@@ -31,7 +33,6 @@ typedef struct file {
   uint8_t buffincrement;
 } file_t;
 typedef struct file FILE;
-
-
+typedef unsigned int fd_t;
 
 #endif

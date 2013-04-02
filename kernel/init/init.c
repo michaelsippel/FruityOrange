@@ -111,8 +111,8 @@ void init(struct multiboot_info *mb_info) {
     
     multiboot_module_t *modules = (multiboot_module_t*) mb_info->mbs_mods_addr;
     vfs_inode_t *bin = vfs_create_inode("bin", S_MODE_DIR | S_IXUSR | S_IWUSR | S_IRUSR, vfs_root());
-    vfs_create_inode("foo.txt", S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP | S_IROTH, vfs_root());
-    vfs_create_inode("bar.bin", S_IWUSR | S_IRUSR | S_IXUSR | S_IXGRP | S_IRGRP, vfs_root());
+    vfs_inode_t *foo = vfs_create_inode("foo.txt", S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP | S_IROTH, vfs_root());
+    vfs_inode_t *bar = vfs_create_inode("bar.bin", S_IWUSR | S_IRUSR | S_IXUSR | S_IXGRP | S_IRGRP, vfs_root());
     
     int i;
     for(i = 0; i < mb_info->mbs_mods_count; i++)  {
@@ -124,10 +124,12 @@ void init(struct multiboot_info *mb_info) {
       vmm_unmap_area(current_context, (uintptr_t) mod, pages);
     }
     vfs_inode_list(NULL);
+    vfs_inode_t *found = vfs_path_lookup("/foo.txt");
+    printf("found node: %s\n", found->name);
   } else {
     printf("error: no modules found!\n");
   }
-  
+  printf("\n");
   sti();
   while(1) {
     printf("%c", getch());

@@ -16,6 +16,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#define _SCHEDULER_C
+
 #include <stdint.h>
 
 #include <init/gdt.h>
@@ -27,7 +29,7 @@
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 
-static proc_t *current_proc = NULL;
+proc_t *current_proc = NULL;
 
 void init_scheduler(void) {
   set_irq_handler(0x0, schedule);
@@ -73,8 +75,4 @@ void schedule(void) {
     }
   }
   common_eoi(0x20);
-}
-
-proc_t *get_current_proc(void) {
-  return current_proc;
 }

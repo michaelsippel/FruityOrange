@@ -35,7 +35,7 @@ static proc_t *proc = NULL;
 void getc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   if(use == NONE) {
     use = GETC;
-    proc = get_current_proc();
+    proc = current_proc;
     proc_sleep(proc);
   }
 }
@@ -43,7 +43,7 @@ void getc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 void gets_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   if(use == NONE) {
     use = GETS;
-    proc = get_current_proc();
+    proc = current_proc;
     proc_sleep(proc);
   }
 }

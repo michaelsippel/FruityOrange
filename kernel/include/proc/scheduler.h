@@ -27,6 +27,9 @@ void init_scheduler(void);
 void scheduler_init_syscalls(void);
 void schedule(void);
 void idle(void);
-proc_t *get_current_proc(void);
+
+#ifndef _SCHEDULER_C
+extern proc_t *current_proc;
+#endif
 
 #endif

@@ -18,19 +18,28 @@
  */
 #include <sys/syscalls.h>
 
+#include <proc/scheduler.h>
 #include <vfs.h>
 #include <syscall.h>
 
 void vfs_init_syscalls(void) {
-  setup_syscall(SYSCALL_OPEN, "fopen", &syscall_open);
-  setup_syscall(SYSCALL_CLOSE, "fclose", &syscall_close);
-  setup_syscall(SYSCALL_READ, "fread", &syscall_read);
-  setup_syscall(SYSCALL_WRITE, "fwrite", &syscall_write);
+  setup_syscall(SYSCALL_OPEN, "open", &syscall_open);
+  setup_syscall(SYSCALL_CLOSE, "close", &syscall_close);
+  setup_syscall(SYSCALL_READ, "read", &syscall_read);
+  setup_syscall(SYSCALL_WRITE, "write", &syscall_write);
 }
 
-// TODO
 void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  const char *path = *ebx;
+  int oflags = *ecx;
+  mode_t mode = *edx;
   
+  fd_t fd = proc_get_unused_fd(current_proc);
+  vfs_inode_t *inode = vfs_path_lookup(path);
+  
+  current_proc->fd[fd].inode = inode;
+  
+  *ebx = fd;
 }
 
 void syscall_close(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {

@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 static alloc_nd_t *first_nd = NULL;
 

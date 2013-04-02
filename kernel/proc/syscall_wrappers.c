@@ -30,11 +30,11 @@ void scheduler_init_syscalls(void) {
 }
 
 void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  proc_exit(get_current_proc(), *ebx);
+  proc_exit(current_proc, *ebx);
 }
 
 void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  proc_t *proc = get_current_proc();
+  proc_t *proc = current_proc;
   proc->ticks_util_wake = *ebx / (1000000 / PIT_FREQ);
   proc_sleep(proc);
 }

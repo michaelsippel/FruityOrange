@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include <driver/cmos.h>
+#include <driver/console.h>
 #include <vfs.h>
 #include <mm.h>
 
@@ -54,7 +55,7 @@ void vfs_inode_list(vfs_inode_t *parent) {
   }
   vfs_dentry_t *entries = vfs_read(parent, 0);
   int i;
-  int num = root->length / sizeof(vfs_dentry_t);
+  int num = parent->length / sizeof(vfs_dentry_t);
   printf("inode-list from parent \"%s\" (%d)\n", parent->name, parent->stat.id);
   for(i = 0; i < num; i++) {
     vfs_dentry_t dentry = entries[i];
