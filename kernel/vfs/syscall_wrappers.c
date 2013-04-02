@@ -48,9 +48,19 @@ void syscall_close(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 }
 
 void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  fd_t fd = *ebx;
+  const void *buf = *ecx;
+  size_t len = *edx;
   
+  vfs_inode_t *inode = current_proc->fd[fd].inode;
+  memcpy(buf, vfs_read(inode, 0), len);
 }
 
 void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  fd_t fd = *ebx;
+  const void *buf = *ecx;
+  size_t len = *edx;
   
+  vfs_inode_t *inode = current_proc->fd[fd].inode;
+  *ebx = vfs_write(inode, buf, len);
 }
