@@ -45,6 +45,7 @@ typedef struct vfs_dentry {
 
 typedef struct fd {
   vfs_inode_t *inode;
+  int flags;
 } fd_st_t;
 
 void init_vfs(void);

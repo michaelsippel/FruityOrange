@@ -124,7 +124,7 @@ void init(struct multiboot_info *mb_info) {
       vmm_unmap_area(current_context, (uintptr_t) mod, pages);
     }
     vfs_inode_list(NULL);
-    vfs_inode_t *found = vfs_path_lookup("/foo.txt");
+    vfs_inode_t *found = vfs_path_lookup("/bin/module");
     printf("found node: %s\n", found->name);
   } else {
     printf("error: no modules found!\n");

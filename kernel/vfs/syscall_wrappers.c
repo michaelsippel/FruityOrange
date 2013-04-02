@@ -38,6 +38,7 @@ void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   vfs_inode_t *inode = vfs_path_lookup(path);
   
   current_proc->fd[fd].inode = inode;
+  current_proc->fd[fd].flags = oflags;
   
   *ebx = fd;
 }
