@@ -1,5 +1,5 @@
 /**
- *  include/user/unistd.h
+ *  lib/user/unistd/sleep.c
  *
  *  (C) Copyright 2013 Michael Sippel
  *
@@ -16,19 +16,19 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _USER_UNISTD_H
-#define _USER_UNISTD_H
+#include <sys/syscalls.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-#include <time.h>
-#include <stddef.h>
-#include <sys/stat.h>
+int sleep(long sec) {
+  long usec = sec * 1000000;
+  asm volatile("int $0x30" : : "a" (SYSCALL_USLEEP), "b" (usec));
+  
+  return 0;
+}
 
-int usleep(long usec);
-int sleep(long sec);
-
-int open(const char *path, int oflags, mode_t mode);
-void close(int fd);
-int write(int fd, const void *buf, size_t len);
-int read(int fd, const void *buf, size_t len);
-
-#endif
+int usleep(long usec) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_USLEEP), "b" (usec));
+  
+  return 0;
+}

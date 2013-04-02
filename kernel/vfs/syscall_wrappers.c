@@ -30,7 +30,7 @@ void vfs_init_syscalls(void) {
 }
 
 void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  const char *path = *ebx;
+  const char *path = (char*) *ebx;
   int oflags = *ecx;
   mode_t mode = *edx;
   

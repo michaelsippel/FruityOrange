@@ -116,7 +116,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
 fd_t proc_get_unused_fd(proc_t *proc) {
   proc->fd = realloc(proc->fd, proc->num_fd++);
   
-  return proc->num_fd;
+  return proc->num_fd-1;
 }
 
 int proc_sleep(proc_t *proc) {

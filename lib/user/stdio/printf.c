@@ -1,5 +1,5 @@
 /**
- *  lib/user/stdio.c
+ *  lib/user/stdio/printf.c
  *
  *  (C) Copyright 2013 Michael Sippel
  *

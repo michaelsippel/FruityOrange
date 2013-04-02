@@ -24,6 +24,13 @@
 #include <unistd.h>
 
 int main(void) {
+  int fd = open("/foo.txt", 0, 0);
+  printf("fd = %d\n", fd);
+  write(fd, "Hallo Welt!\n", 13);
+  char buf[13];
+  read(fd, buf, 13);
+  printf("%s", buf);
+  
   printf("Druecke eine Taste um zu starten...\n");
   getch();
   

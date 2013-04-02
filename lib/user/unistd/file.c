@@ -1,5 +1,5 @@
 /**
- *  lib/user/sleep.c
+ *  lib/user/unistd/file.c
  *
  *  (C) Copyright 2013 Michael Sippel
  *
@@ -17,18 +17,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sys/syscalls.h>
-#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stddef.h>
 #include <unistd.h>
 
-int sleep(long sec) {
-  long usec = sec * 1000000;
-  asm volatile("int $0x30" : : "a" (SYSCALL_USLEEP), "b" (usec));
-  
-  return 0;
+int open(const char *path, int oflags, mode_t mode) {
+  int ret;
+  asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_OPEN), "b" (path), "c" (oflags), "d" (mode));
+  return ret;
 }
 
-int usleep(long usec) {
-  asm volatile("int $0x30" : : "a" (SYSCALL_USLEEP), "b" (usec));
-  
-  return 0;
+void close(int fd) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_CLOSE), "b" (fd));
+}
+
+int write(int fd, const void *buf, size_t len) {
+  int ret;
+  asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_WRITE), "b" (fd), "c" (buf), "d" (len));
+  return ret;
+}
+
+int read(int fd, const void *buf, size_t len) {
+  int ret;
+  asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_READ), "b" (fd), "c" (buf), "d" (len));
+  return ret;
 }
