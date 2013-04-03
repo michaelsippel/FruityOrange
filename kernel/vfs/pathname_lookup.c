@@ -31,7 +31,6 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
   
   if(path[0] != '/') {
     parent = current_proc->work_dir;
-    printf("%s\n", parent->name);
     i = 0;
   } else {
     i = 1;

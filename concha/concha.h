@@ -21,17 +21,15 @@
 
 #include <stdint.h>
 
-#define SHELL_SYMBOL "$ "
-
 typedef struct {
   const char *name;
-  int (*handler)(uint8_t *args);
+  int (*handler)(uint8_t argc, uint8_t **argv);
 } sh_cmd_t;
 
-sh_cmd_t *parse_cmd(char *str);
+void parse_cmd(char *str);
 
-int command_cd(uint8_t *args);
-int command_help(uint8_t *args);
-int command_exit(uint8_t *args);
+int command_cd(uint8_t argc, uint8_t **argv);
+int command_help(uint8_t argc, uint8_t **argv);
+int command_exit(uint8_t argc, uint8_t **argv);
 
 #endif

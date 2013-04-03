@@ -17,4 +17,6 @@ kernel.txt
 build/image/kernel
 kernel/kernel
 test
+concha
 *.lst~
+

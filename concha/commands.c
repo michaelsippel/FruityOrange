@@ -24,12 +24,20 @@
 
 extern char *path;
 
-int command_cd(uint8_t *args) {
-  printf("cd!\n");
+int command_cd(uint8_t argc, uint8_t **argv) {
+  if(argc > 0) {
+    if(chdir(argv[0]) < 0) {
+      printf("Verzeichnis nicht gefunden!\n");
+    } else {
+      printf("nach \'%s\' gewechselt.\n", argv[0]);
+    }
+  } else {
+    printf("Kein Pfad angegeben!\n");
+  }
   return 0;
 }
 
-int command_help(uint8_t *args) {
+int command_help(uint8_t argc, uint8_t **argv) {
   printf(
     "Concha - Help\n"
     "\tcd - Verzeichnich wechseln\n"
@@ -39,7 +47,7 @@ int command_help(uint8_t *args) {
   return 0;
 }
 
-int command_exit(uint8_t *args) {
+int command_exit(uint8_t argc, uint8_t **argv) {
   printf("exiting concha...\n");
   exit(0);
   return 0;

@@ -26,37 +26,71 @@ char *path;
 void main(void){
   char buf[100];
   path = "/";
-  sh_cmd_t *cmd;
-  
   while(1){
-    printf("%s%s", path, SHELL_SYMBOL);
+    printf("%s$ ", path);
     gets(buf);
-    cmd = parse_cmd(buf);
-    if(cmd != NULL) {
-      cmd->handler(0);
-    } else {
-      printf("Unbekannter Befehl!\n\"help\" fuer Hilfe\n");
-    }
+    parse_cmd(buf);
   }
 }
 
-sh_cmd_t *parse_cmd(char *str) {
+void parse_cmd(char *str) {
   sh_cmd_t commands[] = {
     {"cd",   &command_cd},
     {"help", &command_help},
     {"exit", &command_exit}
   };
   int num_cmd = 3;
+  int i=0, j=0, k=0;
   
-  sh_cmd_t *cmd;
+  char cmd_str[100];
+  char arg_str[100];
+  int argc = 0;
   
-  int i;
+  while(*str == ' ' || *str == '\t') { str++; } // remove spaces and tabulators
+  if(str[0] == '#') { // ignore comments
+    printf("Kommentar\n");
+    return;
+  }
+  
+  while(str[i] != ' ' && str[i] != '\t' && str[i] != '\0') {i++;}
+  j = i;
+  while(str[j] != '\0') {j++;}
+  memcpy(cmd_str, str, i);
+  memcpy(arg_str, str+i, j);
+  
+  cmd_str[i] = '\0';
+  arg_str[j] = '\0';
+//   printf("%s - %s#\n", cmd_str, arg_str);
+  if(cmd_str[0] == '\0') { // nothing entered
+    return;
+  }
+  
+  int found = 0;
   for(i = 0; i < num_cmd; i++) {
-    if( strcmp(str, commands[i].name) ) {
-      cmd = &commands[i];
-      return cmd;
+    if( strcmp(cmd_str, commands[i].name) ) {
+      
+      for(j = 0; arg_str[j] != '\0'; j++) {
+	if(arg_str[j] == ' ' || arg_str[j] == '\t') {
+	  argc++;
+	}
+      }
+      
+      char *argv[argc];
+      
+      for(k = 0, j = 0; k < argc; k++) {
+	size_t len = 0;
+	while(arg_str[j+1] != ' ' && arg_str[j+1] != '\t' && arg_str[j+1] != '\0') { j++; len++; }
+        argv[i] = malloc(len);
+        memcpy(argv[i], arg_str+1, len);
+        argv[i][len] = '\0';
+      }
+      
+      commands[i].handler(argc, argv);
+      found = 1;
     }
   }
   
-  return NULL;
+  if(!found) {
+    printf("Unbekannter Befehl \'%s\'!\n\'help\' fuer Hilfe\n", cmd_str);
+  }
 }
