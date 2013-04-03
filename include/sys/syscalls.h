@@ -32,5 +32,6 @@
 #define SYSCALL_CLOSE  0x0A /* close a file */
 #define SYSCALL_READ   0x0B /* read from a file */
 #define SYSCALL_WRITE  0x0C /* write into a file */
+#define SYSCALL_SEEK   0x0D /* seek */
 
 #endif

@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sys/syscalls.h>
+#include <unistd.h>
+#include <string.h>
 
 #include <proc/scheduler.h>
 #include <vfs.h>
@@ -27,6 +29,7 @@ void vfs_init_syscalls(void) {
   setup_syscall(SYSCALL_CLOSE, "close", &syscall_close);
   setup_syscall(SYSCALL_READ, "read", &syscall_read);
   setup_syscall(SYSCALL_WRITE, "write", &syscall_write);
+  setup_syscall(SYSCALL_SEEK, "seek", &syscall_seek);
 }
 
 void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -39,6 +42,8 @@ void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   
   current_proc->fd[fd].inode = inode;
   current_proc->fd[fd].flags = oflags;
+  current_proc->fd[fd].mode = mode;
+  current_proc->fd[fd].pos = 0;
   
   *ebx = fd;
 }
@@ -49,18 +54,43 @@ void syscall_close(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 
 void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   fd_t fd = *ebx;
-  const void *buf = *ecx;
+  void *buf = (void*) *ecx;
   size_t len = *edx;
   
   vfs_inode_t *inode = current_proc->fd[fd].inode;
-  memcpy(buf, vfs_read(inode, 0), len);
+  memcpy((void*)buf, vfs_read(inode, current_proc->fd[fd].pos), len);
+  current_proc->fd[fd].pos += len;
 }
 
 void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   fd_t fd = *ebx;
-  const void *buf = *ecx;
+  const void *buf = (const void*) *ecx;
   size_t len = *edx;
   
   vfs_inode_t *inode = current_proc->fd[fd].inode;
-  *ebx = vfs_write(inode, buf, len);
+  *ebx = vfs_write(inode, current_proc->fd[fd].pos, buf, len);
+  current_proc->fd[fd].pos += len;
+}
+
+void syscall_seek(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  fd_t fd = *ebx;
+  int off = *ecx;
+  int whence = *edx;
+  
+  switch(whence) {
+    case SEEK_SET: // absolute
+      current_proc->fd[fd].pos = off;
+      break;
+    case SEEK_CUR: // relative from begin
+      current_proc->fd[fd].pos += off;
+      break;
+    case SEEK_END: // relative from end
+      current_proc->fd[fd].pos = current_proc->fd[fd].inode->length - off;
+      break;
+    default: // ???
+      *ebx = -1;
+      return;
+  }
+  
+  *ebx = current_proc->fd[fd].pos;
 }

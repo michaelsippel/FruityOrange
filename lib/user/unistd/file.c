@@ -43,3 +43,9 @@ int read(int fd, const void *buf, size_t len) {
   asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_READ), "b" (fd), "c" (buf), "d" (len));
   return ret;
 }
+
+int lseek(int fd, int off, int whence) {
+  int ret;
+  asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_SEEK), "b" (fd), "c" (off), "d" (whence));
+  return ret;
+}

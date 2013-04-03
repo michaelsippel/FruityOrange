@@ -23,6 +23,10 @@
 #include <stddef.h>
 #include <sys/stat.h>
 
+#define SEEK_SET 0x1
+#define SEEK_CUR 0x2
+#define SEEK_END 0x3
+
 int usleep(long usec);
 int sleep(long sec);
 
@@ -30,5 +34,6 @@ int open(const char *path, int oflags, mode_t mode);
 void close(int fd);
 int write(int fd, const void *buf, size_t len);
 int read(int fd, const void *buf, size_t len);
+int lseek(int fd, int off, int whence);
 
 #endif

@@ -89,7 +89,7 @@ vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent
     if(parent->stat.mode & S_MODE_DIR) {
       inode->parent = parent;
       vfs_dentry_t *entry = vfs_create_dentry(inode);
-      vfs_write(inode->parent, entry, sizeof(vfs_dentry_t));
+      vfs_write(inode->parent, parent->length, entry, sizeof(vfs_dentry_t));
     } else {
       printf("[vfs] parent inode is no directory!\n");
       return NULL;
@@ -114,7 +114,7 @@ vfs_dentry_t *vfs_create_dentry(vfs_inode_t *inode) {
   return dentry;
 }
 
-int vfs_write(vfs_inode_t *inode, void *base, size_t bytes) {
+int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
   int i = 0;
   int writable = 0;
   if ((inode->stat.uid == uid) &&
@@ -133,27 +133,30 @@ int vfs_write(vfs_inode_t *inode, void *base, size_t bytes) {
   }
   
   if (writable) {
-    if (inode->base == NULL) {
-      inode->base = malloc(bytes);
-    } else {
-      inode->base = realloc(inode->base, inode->length + bytes);
+    if( (off + bytes) > inode->length) {
+      inode->length = off + bytes;
     }
     
-    uint8_t *nbase = (uint8_t*) inode->base + inode->length;
+    if (inode->base == NULL) {
+      inode->base = malloc(inode->length);
+    } else {
+      inode->base = realloc(inode->base, inode->length);
+    }
+    
+    uint8_t *nbase = (uint8_t*) inode->base + off;
     uint8_t *wbase = (uint8_t*) base;
     while (i++ < bytes) {
 	*nbase++ = *wbase++;
-	inode->length++;
     }
   } else {
     printf("[vfs] inode %d isn't writable!\n", inode->stat.id);
   }
   
-  return i;
+  return i-1;
 }
 
-void* vfs_read(vfs_inode_t *inode, uintptr_t offset) {
-  return (void*) inode->base + offset;
+void* vfs_read(vfs_inode_t *inode, int off) {
+  return (void*) inode->base + off;
 }
 
 int vfs_access(vfs_inode_t *inode, mode_t modus) {

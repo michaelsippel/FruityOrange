@@ -123,7 +123,8 @@ void init(struct multiboot_info *mb_info) {
       load_elf32(mod, mod_context, (char*) modules[i].string);
       vmm_unmap_area(current_context, (uintptr_t) mod, pages);
     }
-    vfs_inode_list(NULL);
+    
+    vfs_inode_list(vfs_root());
   } else {
     printf("error: no modules found!\n");
   }
