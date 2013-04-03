@@ -24,11 +24,11 @@
 #include <unistd.h>
 
 int main(void) {
-  int fd = open("/foo.txt", 0, 0);
-  if(write(fd, "Hallo Welt!", 13)) {
+  int fd = open("/foo.txt", O_RDWR | O_APPEND, 0);
+  if(write(fd, "Hallo Welt!", 13) > 0) {
     char buf[13];
     lseek(fd, 0, SEEK_SET);
-    if(read(fd, buf, 13)) {
+    if(read(fd, buf, 13) > 0) {
       printf("%s\n", buf);
     } else {
       printf("Fehler beim lesen!\n");

@@ -40,6 +40,24 @@ void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   fd_t fd = proc_get_unused_fd(current_proc);
   vfs_inode_t *inode = vfs_path_lookup(path);
   
+  if(inode == NULL) { 
+    if(oflags & O_CREAT) {// create inode
+      // TODO
+    } else {
+      *ebx = -1;
+      return;
+    }
+  } else {
+    if(oflags & O_EXCL) {
+      *ebx = -1;
+      return;
+    }
+  }
+  
+  if(oflags & O_TRUNC) {
+    memclr(inode->base, inode->length);
+  }
+  
   current_proc->fd[fd].inode = inode;
   current_proc->fd[fd].flags = oflags;
   current_proc->fd[fd].mode = mode;
@@ -57,9 +75,15 @@ void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   void *buf = (void*) *ecx;
   size_t len = *edx;
   
-  vfs_inode_t *inode = current_proc->fd[fd].inode;
-  memcpy((void*)buf, vfs_read(inode, current_proc->fd[fd].pos), len);
-  current_proc->fd[fd].pos += len;
+  if(current_proc->fd[fd].flags & O_RDONLY ||
+     current_proc->fd[fd].flags & O_RDWR) 
+  {
+    vfs_inode_t *inode = current_proc->fd[fd].inode;
+    memcpy((void*)buf, vfs_read(inode, current_proc->fd[fd].pos), len);
+    current_proc->fd[fd].pos += len;
+  } else {
+    *ebx = -1;
+  }
 }
 
 void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -67,9 +91,19 @@ void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   const void *buf = (const void*) *ecx;
   size_t len = *edx;
   
-  vfs_inode_t *inode = current_proc->fd[fd].inode;
-  *ebx = vfs_write(inode, current_proc->fd[fd].pos, buf, len);
-  current_proc->fd[fd].pos += len;
+  if(current_proc->fd[fd].flags & O_WRONLY ||
+     current_proc->fd[fd].flags & O_RDWR) 
+  {
+    if(! current_proc->fd[fd].flags & O_APPEND) {
+      current_proc->fd[fd].pos = 0;
+      current_proc->fd[fd].flags |= O_APPEND;
+    }
+    vfs_inode_t *inode = current_proc->fd[fd].inode;
+    *ebx = vfs_write(inode, current_proc->fd[fd].pos, buf, len);
+    current_proc->fd[fd].pos += len;
+  } else {
+    *ebx = -1;
+  }
 }
 
 void syscall_seek(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -77,6 +111,7 @@ void syscall_seek(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   int off = *ecx;
   int whence = *edx;
   
+  current_proc->fd[fd].flags |= O_APPEND;
   switch(whence) {
     case SEEK_SET: // absolute
       current_proc->fd[fd].pos = off;
