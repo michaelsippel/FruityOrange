@@ -55,7 +55,7 @@ void init_keyboard(void) {
 void keyboard_irq_handler(void) {
   uint8_t scancode;
   uint8_t keycode = 0;
-  bool break_code = 1;
+  bool break_code = 0;
   
   static int e0_code = 0;
   static int e1_code = 0;
@@ -68,7 +68,7 @@ void keyboard_irq_handler(void) {
      (e1_code || (scancode != 0xE1)) &&
      (e0_code || (scancode != 0xE0)))
   {
-    break_code = 0;
+    break_code = 1;
     scancode &= ~0x80;
     keycode = translate_scancode(SNC_TYPE_STD, scancode);
     send_key_event(keycode, break_code);
@@ -107,11 +107,10 @@ void keyboard_irq_handler(void) {
 }
 
 void send_key_event(uint8_t data, bool breaked) {
-  if(! breaked) {
+  if(breaked) {
     switch(data) {
       case 53:
       case 67:
-      case 56:
       modus = 0;
     }
   } else {
@@ -121,8 +120,6 @@ void send_key_event(uint8_t data, bool breaked) {
       case 53:
       case 67:
 	modus = 1;break;
-      case 56:
-	modus = 2;break;
       
       default: 
 	  buffer = data;

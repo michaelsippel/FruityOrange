@@ -12,6 +12,7 @@ kernel:
 
 mods:
 	$(MAKE) -C test
+	$(MAKE) -C concha
 
 floppy-img: all
 	#TODO
@@ -26,5 +27,6 @@ clean:
 	$(MAKE) -C kernel clean
 	$(MAKE) -C lib clean
 	$(MAKE) -C test clean
+	$(MAKE) -C concha clean
 
 .PHONY: all kernel lib clean qemu

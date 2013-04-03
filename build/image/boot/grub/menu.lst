@@ -3,6 +3,6 @@ timeout 0
 
 title FruityOrange
     kernel /kernel
-    module /test
+    module /concha
     boot
 
