@@ -65,6 +65,7 @@ void syscall_close(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_seek(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_chdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 vfs_inode_t *vfs_path_lookup(const char *path);
 

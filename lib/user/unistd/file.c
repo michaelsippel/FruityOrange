@@ -49,3 +49,9 @@ int lseek(fd_t fd, int off, int whence) {
   asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_SEEK), "b" (fd), "c" (off), "d" (whence));
   return ret;
 }
+
+int chdir(const char *path) {
+  int ret;
+  asm volatile("int $0x30" : "=c" (ret) : "a" (SYSCALL_CHDIR), "b" (path));
+  return ret;
+}

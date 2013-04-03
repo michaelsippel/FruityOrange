@@ -27,46 +27,54 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
   vfs_inode_t *parent = vfs_root();
   vfs_inode_t *inode = NULL;
   
+  int i,j,ino;
+  
   if(path[0] != '/') {
     parent = current_proc->work_dir;
+    printf("%s\n", parent->name);
+    i = 0;
+  } else {
+    i = 1;
   }
-  
-  int i,j,ino;
   
   vfs_dentry_t *entries = vfs_read(parent, 0);
   int num = parent->length / sizeof(vfs_dentry_t);
   bool *map = malloc(num);
   
-  for(i = 0; i < num; i++) map[i] = TRUE;
+  for(j = 0; j < num; j++) map[j] = TRUE;
   
-  i = 0;
   j = 0;
   ino = 0;
   
-  while(path[++i] != '\0') {
-    if(path[i] == '/') {
-      for(i = 0; i < num; i++) {
-	if(map[i] == TRUE) {
-	  parent = entries[i].inode;
-	}
-      }
-      entries = vfs_read(parent, 0);
-      num = parent->length / sizeof(vfs_dentry_t);
-      map = realloc(map, num);
-      for(j = 0; j < num; j++) map[j] = TRUE;
-      j = 0;
-      i++;
-    } else {
-      for(ino = 0; ino < num; ino++) {
-	inode = entries[ino].inode;
-	if(map[ino]) {
-	  if(path[i] != inode->name[j] && inode->name[j] != '\0') {
-	    map[ino] = FALSE;
+  while(path[i] != '\0') {
+    switch(path[i]) {
+      case '/':
+	for(i = 0; i < num; i++) {
+	  if(map[i] == TRUE) {
+	    parent = entries[i].inode;
 	  }
 	}
-      }
-      j++;
+	entries = vfs_read(parent, 0);
+	num = parent->length / sizeof(vfs_dentry_t);
+	map = realloc(map, num);
+	for(j = 0; j < num; j++) map[j] = TRUE;
+	j = 0;
+	i++;
+	break;
+	
+      default:
+	for(ino = 0; ino < num; ino++) {
+	  inode = entries[ino].inode;
+	  if(map[ino]) {
+	    if(path[i] != inode->name[j] && inode->name[j] != '\0') {
+	      map[ino] = FALSE;
+	    }
+	  }
+	}
+	j++;
+	break;
     }
+    i++;
   }
   
   for(i = 0; i < num; i++) {

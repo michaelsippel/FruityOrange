@@ -24,7 +24,8 @@
 #include <unistd.h>
 
 int main(void) {
-  int fd = open("/foo.txt", O_RDWR | O_APPEND, 0);
+  chdir("/bin");
+  int fd = open("module", O_RDWR | O_APPEND, 0);
   if(write(fd, "Hallo Welt!", 13) > 0) {
     char buf[13];
     lseek(fd, 0, SEEK_SET);

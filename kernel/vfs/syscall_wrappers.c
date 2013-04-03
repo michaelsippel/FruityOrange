@@ -30,6 +30,7 @@ void vfs_init_syscalls(void) {
   setup_syscall(SYSCALL_READ, "read", &syscall_read);
   setup_syscall(SYSCALL_WRITE, "write", &syscall_write);
   setup_syscall(SYSCALL_SEEK, "seek", &syscall_seek);
+  setup_syscall(SYSCALL_CHDIR, "chdir", &syscall_chdir);
 }
 
 void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -137,4 +138,16 @@ void syscall_seek(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   }
   
   *ebx = current_proc->fd[fd].pos;
+}
+
+void syscall_chdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  const char *path = (const char*) *ebx;
+  
+  vfs_inode_t *inode = vfs_path_lookup(path);
+  if(inode != NULL) {
+    current_proc->work_dir = inode;
+    *ecx = 0;
+  } else {
+    *ecx = -1;
+  }
 }
