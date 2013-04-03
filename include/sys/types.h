@@ -29,5 +29,6 @@ typedef unsigned int pid_t;
 typedef unsigned int tid_t;
 typedef unsigned int mode_t;
 typedef unsigned char dpl_t;
+typedef unsigned int fd_t;
 
 #endif

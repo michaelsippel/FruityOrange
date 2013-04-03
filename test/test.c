@@ -36,6 +36,7 @@ int main(void) {
   } else {
     printf("Fehler beim schreiben!\n");
   }
+  close(fd);
   
   printf("Druecke eine Taste um zu starten...\n");
   getch();

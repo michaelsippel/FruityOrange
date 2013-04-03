@@ -22,29 +22,29 @@
 #include <stddef.h>
 #include <unistd.h>
 
-int open(const char *path, int oflags, mode_t mode) {
+fd_t open(const char *path, int oflags, mode_t mode) {
   int ret;
   asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_OPEN), "b" (path), "c" (oflags), "d" (mode));
   return ret;
 }
 
-void close(int fd) {
+void close(fd_t fd) {
   asm volatile("int $0x30" : : "a" (SYSCALL_CLOSE), "b" (fd));
 }
 
-int write(int fd, const void *buf, size_t len) {
+int write(fd_t fd, const void *buf, size_t len) {
   int ret;
   asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_WRITE), "b" (fd), "c" (buf), "d" (len));
   return ret;
 }
 
-int read(int fd, const void *buf, size_t len) {
+int read(fd_t fd, void *buf, size_t len) {
   int ret;
   asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_READ), "b" (fd), "c" (buf), "d" (len));
   return ret;
 }
 
-int lseek(int fd, int off, int whence) {
+int lseek(fd_t fd, int off, int whence) {
   int ret;
   asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_SEEK), "b" (fd), "c" (off), "d" (whence));
   return ret;

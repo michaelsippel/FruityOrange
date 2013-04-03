@@ -67,7 +67,8 @@ void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 }
 
 void syscall_close(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  
+  fd_t fd = *ebx;
+  memclr(&current_proc->fd[fd], sizeof(fd_st_t));
 }
 
 void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -79,8 +80,14 @@ void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
      current_proc->fd[fd].flags & O_RDWR) 
   {
     vfs_inode_t *inode = current_proc->fd[fd].inode;
-    memcpy((void*)buf, vfs_read(inode, current_proc->fd[fd].pos), len);
-    current_proc->fd[fd].pos += len;
+    void *read = vfs_read(inode, current_proc->fd[fd].pos);
+    if(read != NULL) {
+      memcpy((void*)buf, read, len);
+      current_proc->fd[fd].pos += len;
+      *ebx = len;
+    } else {
+      *ebx = -1;
+    }
   } else {
     *ebx = -1;
   }
@@ -100,7 +107,9 @@ void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     }
     vfs_inode_t *inode = current_proc->fd[fd].inode;
     *ebx = vfs_write(inode, current_proc->fd[fd].pos, buf, len);
-    current_proc->fd[fd].pos += len;
+    if(((int)*ebx) > 0) {
+      current_proc->fd[fd].pos += len;
+    }
   } else {
     *ebx = -1;
   }
