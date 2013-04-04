@@ -34,5 +34,6 @@
 #define SYSCALL_WRITE  0x0C /* write into a file */
 #define SYSCALL_SEEK   0x0D /* seek */
 #define SYSCALL_CHDIR  0x0E /* change directory */
+#define SYSCALL_GETCWD 0x0F /* get current working directory */
 
 #endif

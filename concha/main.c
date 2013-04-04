@@ -16,17 +16,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 
 #include "concha.h"
 
-char *path;
-
-void main(void){
+void main(void) {
   char buf[100];
-  path = "/";
-  while(1){
+  char path[100];
+  
+  while(1) {
+    getcwd(path, 100);
     printf("%s$ ", path);
     gets(buf);
     parse_cmd(buf);

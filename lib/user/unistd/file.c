@@ -55,3 +55,8 @@ int chdir(const char *path) {
   asm volatile("int $0x30" : "=c" (ret) : "a" (SYSCALL_CHDIR), "b" (path));
   return ret;
 }
+
+char *getcwd(char *buf, size_t len) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_GETCWD), "b" (buf), "c" (len));
+  return buf;
+}

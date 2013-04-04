@@ -31,5 +31,7 @@ void close(fd_t fd);
 int write(fd_t fd, const void *buf, size_t len);
 int read(fd_t fd, void *buf, size_t len);
 int lseek(fd_t fd, int off, int whence);
+int chdir(const char *path);
+char *getcwd(char *buf, size_t len);
 
 #endif

@@ -26,10 +26,15 @@ extern char *path;
 
 int command_cd(uint8_t argc, uint8_t **argv) {
   if(argc > 0) {
-    if(chdir(argv[0]) < 0) {
-      printf("Verzeichnis nicht gefunden!\n");
+    int ret = chdir(argv[0]);
+    if(ret < 0) {
+      if(ret == -1) {
+	printf("\'%s\' ist kein Verzeichnis!\n", argv[0]);
+      } else {
+	printf("Verzeichnis nicht gefunden!\n");
+      }
     } else {
-      printf("nach \'%s\' gewechselt.\n", argv[0]);
+//       printf("nach \'%s\' gewechselt.\n", argv[0]);
     }
   } else {
     printf("Kein Pfad angegeben!\n");

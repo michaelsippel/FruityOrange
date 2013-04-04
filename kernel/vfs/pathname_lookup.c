@@ -100,15 +100,20 @@ void vfs_generate_path(char *buf, size_t bytes, vfs_inode_t *parent) {
     return;
   }
   
-  buf += len+1;
-  *buf-- = '\0';
-  
-  inode = parent;
-  while(inode != vfs_root()) {
-    buf -= strlen(inode->name);
-    memcpy(buf, inode->name, strlen(inode->name));
+  memclr(buf, bytes);
+  if(len > 0) {
+    buf += len+1;
+    *--buf = '\0';
     
-    *--buf = '/';
-    inode = inode->parent;
+    inode = parent;
+    while(inode != vfs_root()) {
+      buf -= strlen(inode->name);
+      memcpy(buf, inode->name, strlen(inode->name));
+      
+      *--buf = '/';
+      inode = inode->parent;
+    }
+  } else {
+    strcpy(buf,"/");
   }
 }

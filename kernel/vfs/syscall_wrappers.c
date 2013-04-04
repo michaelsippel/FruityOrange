@@ -31,6 +31,7 @@ void vfs_init_syscalls(void) {
   setup_syscall(SYSCALL_WRITE, "write", &syscall_write);
   setup_syscall(SYSCALL_SEEK, "seek", &syscall_seek);
   setup_syscall(SYSCALL_CHDIR, "chdir", &syscall_chdir);
+  setup_syscall(SYSCALL_GETCWD, "getcwd", &syscall_getcwd);
 }
 
 void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -145,9 +146,20 @@ void syscall_chdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   
   vfs_inode_t *inode = vfs_path_lookup(path);
   if(inode != NULL) {
-    current_proc->work_dir = inode;
-    *ecx = 0;
+    if(S_ISDIR(inode->stat)) {
+      current_proc->work_dir = inode;
+      *ecx = 0;
+    } else {
+      *ecx = -1;
+    }
   } else {
-    *ecx = -1;
+    *ecx = -2;
   }
+}
+
+void syscall_getcwd(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  char *buf = (char*) *ebx;
+  size_t len = *ecx;
+  
+  vfs_generate_path(buf, len, current_proc->work_dir);
 }
