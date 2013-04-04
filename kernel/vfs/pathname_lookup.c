@@ -85,3 +85,30 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
   
   return NULL;
 }
+
+void vfs_generate_path(char *buf, size_t bytes, vfs_inode_t *parent) {
+  size_t len = 0;
+  
+  vfs_inode_t *inode = parent;
+  while(inode != vfs_root()) {
+    len += strlen(inode->name) + 1;
+    inode = inode->parent;
+  }
+  
+  if(len > bytes) {
+    printf("Puffer zu klein!\n");
+    return;
+  }
+  
+  buf += len+1;
+  *buf-- = '\0';
+  
+  inode = parent;
+  while(inode != vfs_root()) {
+    buf -= strlen(inode->name);
+    memcpy(buf, inode->name, strlen(inode->name));
+    
+    *--buf = '/';
+    inode = inode->parent;
+  }
+}

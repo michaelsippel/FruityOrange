@@ -113,18 +113,21 @@ void init(struct multiboot_info *mb_info) {
     vfs_inode_t *bin = vfs_create_inode("bin", S_MODE_DIR | S_IXUSR | S_IWUSR | S_IRUSR, vfs_root());
     vfs_inode_t *foo = vfs_create_inode("foo.txt", S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP | S_IROTH, vfs_root());
     vfs_inode_t *bar = vfs_create_inode("bar.bin", S_IWUSR | S_IRUSR | S_IXUSR | S_IXGRP | S_IRGRP, vfs_root());
-    
+    vfs_inode_t *module;
     int i;
     for(i = 0; i < mb_info->mbs_mods_count; i++)  {
       size_t pages = (modules[i].mod_end - modules[i].mod_start + PAGE_SIZE) / PAGE_SIZE;
       void *mod = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
       vmm_context_t *mod_context = vmm_create_context();
-      vfs_create_inode("module", S_IXUSR | S_IWUSR | S_IRUSR | S_IRGRP | S_IXGRP | S_IROTH, bin);
+      module = vfs_create_inode("module", S_IXUSR | S_IWUSR | S_IRUSR | S_IRGRP | S_IXGRP | S_IROTH, bin);
       load_elf32(mod, mod_context, (char*) modules[i].string);
       vmm_unmap_area(current_context, (uintptr_t) mod, pages);
     }
     
     vfs_inode_list(vfs_root());
+    char path[100];
+    vfs_generate_path(path, 100, module);
+    printf("%s\n", path);
   } else {
     printf("error: no modules found!\n");
   }
