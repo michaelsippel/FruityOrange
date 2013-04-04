@@ -44,13 +44,18 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
   
   j = 0;
   ino = 0;
+  int k = 0;
+  
+  if(strcmp(path, ".")) return current_proc->work_dir;
+  if(strcmp(path, "..")) return current_proc->work_dir->parent;
+  if(strcmp(path, "/")) return vfs_root();
   
   while(path[i] != '\0') {
     switch(path[i]) {
       case '/':
-	for(i = 0; i < num; i++) {
-	  if(map[i] == TRUE) {
-	    parent = entries[i].inode;
+	for(ino = 0; ino < num; ino++) {
+	  if(map[ino] == TRUE) {
+	    parent = entries[ino].inode;
 	  }
 	}
 	entries = vfs_read(parent, 0);
@@ -60,7 +65,6 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
 	j = 0;
 	i++;
 	break;
-	
       default:
 	for(ino = 0; ino < num; ino++) {
 	  inode = entries[ino].inode;
