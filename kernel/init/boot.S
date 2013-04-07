@@ -1,7 +1,7 @@
 //
 //  kernel/boot.S
 //
-//  (C) Copyright 2012 Michael Sippel
+//  (C) Copyright 2012-2013 Michael Sippel
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define VADDR_KERNEL_START 0xC0000000
+#define KERNEL_PAGES (VADDR_KERNEL_START >> 22)
 
 .section multiboot
 #define MB_MAGIC 0x1BADB002
@@ -27,44 +28,49 @@
 .int     MB_FLAGS
 .int     MB_CHECKSUM
 
+.section .data
+.align 0x1000
+_first_pd:
+    .long 0x00000083
+
+    .rept (KERNEL_PAGES - 1)  
+    .long 0
+    .endr
+
+    .long 0x00000083
+
+    .rept (1024 - KERNEL_PAGES - 1)
+    .long 0
+    .endr
+
 .section .text
-.extern init
-
 .global _start
+.extern init
 _start:
-  lgdt (_first_gdt) - VADDR_KERNEL_START
-  mov $0x10, %ax
-  mov %ax, %ds
-  mov %ax, %es
-  mov %ax, %fs
-  mov %ax, %gs
-  mov %ax, %ss
-  ljmp $0x08, $_higherhalf
-
-_higherhalf:
-    mov $kernel_stack, %esp
-    add $VADDR_KERNEL_START, %ebx
-    push %ebx
-    call init
-    jmp _stop
+  movl $_first_pd - VADDR_KERNEL_START, %ecx
+  movl %ecx, %cr3
+  
+  movl %cr4, %ecx
+  orl $(1 << 4), %ecx
+  movl %ecx, %cr4
+  
+  movl %cr0, %ecx
+  orl $(1 << 31), %ecx
+  movl %ecx, %cr0
+  
+  movl $kernel_stack, %esp
+  addl $VADDR_KERNEL_START, %ebx
+  pushl %ebx
+  call init
+  jmp _stop
 
 _stop:
-    cli
-    hlt
-    jmp _stop
-
-_first_gdt:
-    .short _first_gdt_end - _first_gdt_start - 1
-    .long _first_gdt_start - VADDR_KERNEL_START
-
-_first_gdt_start:
-    .long 0, 0
-    .byte 0xFF, 0xFF, 0, 0, 0, 0b10011010, 0b11001111, 0x40
-    .byte 0xFF, 0xFF, 0, 0, 0, 0b10010010, 0b11001111, 0x40
-
-_first_gdt_end:
-
+  cli
+  hlt
+  jmp _stop
 
 .section .bss
 .space 8192
+
 kernel_stack:
+

@@ -34,6 +34,7 @@ static gid_t gid = 0;
 
 void init_vfs(void) {
   root = malloc(sizeof(vfs_inode_t));
+  memclr(root, sizeof(vfs_inode_t));
   root->name = "root";
   root->stat.id = id_counter++;
   root->stat.mode = S_MODE_DIR | S_IRUSR | S_IWUSR;
@@ -81,7 +82,8 @@ void vfs_inode_list(vfs_inode_t *parent) {
 
 vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent) {
   vfs_inode_t *inode = malloc(sizeof(vfs_inode_t));
-  
+  memclr(inode, sizeof(vfs_inode_t));
+
   inode->name = name;
   inode->length = 0;
   
@@ -149,7 +151,7 @@ int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
 	*nbase++ = *wbase++;
     }
   } else {
-    printf("[vfs] inode %d isn't writable!\n", inode->stat.id);
+    printf("[vfs] inode %d isn't writable! (0x%x)\n", inode->stat.id, inode);
   }
   
   return i-1;

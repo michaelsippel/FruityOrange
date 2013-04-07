@@ -66,7 +66,7 @@ void init_pmm(multiboot_info_t *mb_info) {
   }
   
   // 4. occupy the multiboot-struct
-  pmm_mark_used(mb_info);
+  pmm_mark_used(mb_info - VADDR_KERNEL_START);
   pmm_mark_used((void*) mb_info->mbs_mods_addr);
   
   // 5. the multiboot-modules too.
@@ -75,19 +75,22 @@ void init_pmm(multiboot_info_t *mb_info) {
     addr = modules[i].mod_start;
     while(addr < modules[i].mod_end) {
       pmm_mark_used((void*) addr);
-      addr += 0x1000;
+      addr += PAGE_SIZE;
     }
   }
   
   // 6. the video-ram and NULL
-  pmm_mark_used((void*)0xb8000);
+  pmm_mark_used((void*)0xB8000);
   pmm_mark_used((void*)0);
+
+  can_do_fast_alloc = 0;
 }
 
 void *pmm_alloc(void) {
   int i, j, k=0;
   uintptr_t addr;
   if(can_do_fast_alloc) {
+    debug(PMM_DEBUG, "pmm_alloc(): doing fast alloc");
     can_do_fast_alloc = FALSE;
     pmm_mark_used((void*) last_free_ptr);
     return (void*) last_free_ptr;

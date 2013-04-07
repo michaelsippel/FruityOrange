@@ -49,10 +49,10 @@ void init_vmm(void) {
   kernel_context->pagedir = pagedir;
   kernel_context->pagedir_paddr = pagedir_paddr;
   
-  vmm_map_area(kernel_context, 0, (uintptr_t) 0, KERNEL_PAGES, VMM_KERNEL_FLAGS);  // kernel
+  vmm_map_area(kernel_context, (uintptr_t) 0, (uintptr_t) 0, KERNEL_PAGES, VMM_KERNEL_FLAGS);
   vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) 0, KERNEL_PAGES, VMM_KERNEL_FLAGS);// kernel
   vmm_map_area(kernel_context, VIDEOMEM_START, VIDEOMEM_START, VIDEOMEM_PAGES, VMM_KERNEL_FLAGS);// videomemory (0xB8000 - 0xBFFFF)
-  
+ 
   void *pd = vmm_automap_kernel_page(kernel_context, pagedir_paddr);
   void *ct = vmm_automap_kernel_page(kernel_context, kernel_context_paddr);
   kernel_context->pagedir = pd;
@@ -60,7 +60,6 @@ void init_vmm(void) {
   
   current_context = kernel_context;
   asm volatile("mov %0, %%cr3" : : "r" (pagedir_paddr));
-  vmm_enable(); 
 }
 
 inline void vmm_enable(void) {
