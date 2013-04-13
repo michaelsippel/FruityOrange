@@ -27,6 +27,7 @@
 void scheduler_init_syscalls(void) {
   setup_syscall(SYSCALL_EXIT, "exit", &syscall_exit);
   setup_syscall(SYSCALL_USLEEP, "usleep", &syscall_usleep);
+  setup_syscall(SYSCALL_FORK, "fork", &syscall_fork);
 }
 
 void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -38,3 +39,21 @@ void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   proc->ticks_util_wake = *ebx / (1000000 / PIT_FREQ);
   proc_sleep(proc);
 }
+
+void syscall_fork(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  proc_t *new_proc = malloc(sizeof(proc_t));
+  memcpy(new_proc, current_proc, sizeof(proc_t));
+  
+  new_proc->next = first_proc;
+  new_proc->prev = first_proc->prev;
+  first_proc->prev->next = new_proc;
+  first_proc->prev = new_proc;
+  first_proc = new_proc;
+  
+  new_proc->context = vmm_fork(current_proc->context);
+  new_proc->pid = get_pid();
+  
+  *ebx = 1;
+  new_proc->cpu->ebx = 0;
+}
+

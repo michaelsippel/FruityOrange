@@ -26,6 +26,9 @@ void main(void) {
   char path[100];
   
   while(1) {
+    memclr(buf, 100);
+    memclr(path, 100);
+
     getcwd(path, 100);
     printf("%s$ ", path);
     gets(buf);
@@ -48,7 +51,7 @@ void parse_cmd(char *str) {
   
   while(*str == ' ' || *str == '\t') { str++; } // remove spaces and tabulators
   if(str[0] == '#') { // ignore comments
-    printf("Kommentar\n");
+//    printf("Kommentar\n");
     return;
   }
   

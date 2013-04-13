@@ -47,3 +47,4 @@ void syscall_mfree_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   vmm_unmap_area(current_context, *ebx, *ecx);
   current_proc->used_mem_pages -= *ecx;
 }
+

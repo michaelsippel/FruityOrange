@@ -35,5 +35,7 @@
 #define SYSCALL_SEEK   0x0D /* seek */
 #define SYSCALL_CHDIR  0x0E /* change directory */
 #define SYSCALL_GETCWD 0x0F /* get current working directory */
+#define SYSCALL_FORK   0x10 /* fork */
 
 #endif
+

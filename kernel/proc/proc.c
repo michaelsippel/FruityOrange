@@ -32,7 +32,7 @@
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 
-#define PROC_DEBUG 0
+#define PROC_DEBUG 1
 
 static pid_t proc_count = 0;
 static size_t kernel_stack_size = 0x1000;
@@ -47,7 +47,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->context = context;
   proc->used_mem_pages = 0;
   
-  proc->pid = proc_count++;
+  proc->pid = get_pid();
   proc->uid = 0;
   proc->dpl = dpl;
   
@@ -117,6 +117,10 @@ fd_t proc_get_unused_fd(proc_t *proc) {
   proc->fd = realloc(proc->fd, proc->num_fd++);
   
   return proc->num_fd-1;
+}
+
+pid_t get_pid(void) {
+  return proc_count++;
 }
 
 int proc_sleep(proc_t *proc) {

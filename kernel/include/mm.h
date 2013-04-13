@@ -94,6 +94,7 @@ inline void vmm_disable(void);
 vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index, uint8_t flags);
 vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index, uint8_t flags);
 vmm_context_t *vmm_create_context(void);
+vmm_context_t *vmm_fork(vmm_context_t *context);
 int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, uint8_t flags);
 int vmm_unmap_page(vmm_context_t *context, uintptr_t vaddr);
 int vmm_map_area(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, size_t pages, uint8_t flags);

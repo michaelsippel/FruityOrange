@@ -69,8 +69,10 @@ int proc_wake(proc_t *proc);
 int proc_exit(proc_t *proc, int status);
 int proc_kill(proc_t *proc);
 fd_t proc_get_unused_fd(proc_t *proc);
+pid_t get_pid(void);
 
 void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_fork(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 #endif
