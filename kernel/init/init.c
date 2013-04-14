@@ -103,25 +103,17 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x0f);
   
   if(mb_info->mbs_mods_count > 0) {
-    if(mb_info->mbs_mods_count > 1) {
-      printf("Load %d modules...\n", mb_info->mbs_mods_count);
-    } else {
-      printf("Load the one module...\n");
-    }
-    
     multiboot_module_t *modules = (multiboot_module_t*) mb_info->mbs_mods_addr;
-    vfs_inode_t *bin = vfs_create_inode("bin", S_MODE_DIR | S_IXUSR | S_IWUSR | S_IRUSR, vfs_root());
-    vfs_inode_t *foo = vfs_create_inode("foo.txt", S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP | S_IROTH, vfs_root());
-    vfs_inode_t *bar = vfs_create_inode("bar.bin", S_IWUSR | S_IRUSR | S_IXUSR | S_IXGRP | S_IRGRP, vfs_root());
-    int i;
-    for(i = 0; i < mb_info->mbs_mods_count; i++)  {
-      size_t pages = (modules[i].mod_end - modules[i].mod_start + PAGE_SIZE) / PAGE_SIZE;
-      void *mod = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
-      vmm_context_t *mod_context = vmm_create_context();
-      vfs_create_inode("module", S_IXUSR | S_IWUSR | S_IRUSR | S_IRGRP | S_IXGRP | S_IROTH, bin);
-      load_elf32(mod, mod_context, (char*) modules[i].string);
-      vmm_unmap_area(current_context, (uintptr_t) mod, pages);
-    }
+    
+    size_t len = modules[0].mod_end - modules[0].mod_start;
+    size_t pages = (len + PAGE_SIZE) / PAGE_SIZE;
+    char *mod = vmm_automap_kernel_area(current_context, modules[0].mod_start, pages);
+    vfs_inode_t *module = vfs_create_inode("initrd.img", S_IWUSR | S_IRUSR | S_IXUSR | S_IXGRP | S_IRGRP, vfs_root());
+    module->base = mod;
+    module->length = len;
+    
+    printf("\n");
+    vfs_load_initrd(mod);
     
     vfs_inode_list(vfs_root());
   } else {

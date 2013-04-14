@@ -51,6 +51,7 @@ typedef struct fd {
 } fd_st_t;
 
 void init_vfs(void);
+void vfs_load_initrd(void *initrd);
 vfs_inode_t *vfs_root(void);
 vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent);
 vfs_dentry_t *vfs_create_dentry(vfs_inode_t *inode);

@@ -18,5 +18,6 @@ build/image/kernel
 kernel/kernel
 test
 concha
+mkinitrd
 *.lst~
 
