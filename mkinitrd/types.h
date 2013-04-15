@@ -44,36 +44,17 @@
 #define S_ISBLK(x) ((x.mode & S_MODE_CHR) ? 0 : 1)
 #define S_ISLNK(x) ((x.mode & S_MODE_LNK) ? 1 : 0)
 
-typedef struct stat {
+typedef struct initrd_inode {
+  const char name[256];
   mode_t mode;
   id_t id;
-  
-  uid_t uid;
-  gid_t gid;
-  
-  time_t atime;
-  time_t mtime;
-  time_t ctime;
-} stat_t;
-
-typedef struct vfs_inode {
-  char name[256];
-  uint8_t type;
-  stat_t stat;
-  
-  void *base;
   size_t length;
-  
-  struct vfs_inode *parent;
-} vfs_inode_t;
+} initrd_inode_t;
 
-typedef struct vfs_dentry {
-  const char *name;
+typedef struct initrd_dentry {
+  const char name[256];
   id_t id;
-  
-  struct vfs_inode *inode;
-  struct vfs_dentry *parent;
-} vfs_dentry_t;
+} initrd_dentry_t;
 
 #endif
 

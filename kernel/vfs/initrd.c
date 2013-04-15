@@ -27,11 +27,9 @@
 void vfs_load_initrd(void *initrd) {
   printf("Loading initial ramdisk...\n");
   
-  vfs_inode_t *initrd_root = malloc(sizeof(vfs_inode_t));
-  strcpy(initrd_root->name, initrd);
-  memcpy(&initrd_root->length, &initrd[256], 4);
-  vfs_dentry_t *entries = vfs_read(initrd_root, 0);
-  int num = initrd_root->length / sizeof(vfs_dentry_t);
-  printf("%s, %d bytes, %d files\n", initrd_root->name, initrd_root->length, num);
+  initrd_inode_t *initrd_root = malloc(sizeof(initrd_inode_t));
+  memcpy(initrd_root, initrd, sizeof(initrd_inode_t));
+  int num = initrd_root->length / sizeof(initrd_inode_t);
+  printf("inode \'%s\' (%d): %d bytes, %d files\n", initrd_root->name, initrd_root->id, initrd_root->length, num);
 }
 

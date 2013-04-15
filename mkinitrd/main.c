@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,7 +42,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   
-  FILE *dest = fopen(dest_path, "wa");
+  FILE *dest = fopen(dest_path, "wb");
   if(!dest) {
     printf("Couldn't open \'%s\'!\n", dest_path);
     return EXIT_FAILURE;
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
   id_t count = 0;
   struct dirent *dirent;  
   
-  vfs_inode_t *inodes = malloc(sizeof(vfs_inode_t));
+  initrd_inode_t **inodes = calloc(4, sizeof(initrd_inode_t*));//FIXME
   while( ( dirent = readdir(parent) ) != NULL ) {
     if( (!strcmp("." ,dirent->d_name)) ||
         (!strcmp("..",dirent->d_name))
@@ -62,29 +63,31 @@ int main(int argc, char **argv) {
     struct stat attr; 
     stat(dirent->d_name, &attr);
     
-    //strcpy(inodes[count].name, "123");
+    inodes[count] = malloc(sizeof(initrd_inode_t));    
     
-    //inodes[count].
+    strcpy(&inodes[count]->name, dirent->d_name);
     
-    inodes = realloc(inodes, (++count)*sizeof(vfs_inode_t));
+    //inodes[count]->
+    
+    count++;
+//    inodes = realloc(inodes, (1+count++)*sizeof(initrd_inode_t*));
   }
   
   #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
-  vfs_inode_t *root = malloc(sizeof(vfs_inode_t));
+  initrd_inode_t *root = malloc(sizeof(initrd_inode_t));
   strcpy(root->name, "root");
-  root->parent = NULL;
-  root->length = (count-1) * sizeof(vfs_inode_t);
-  root->stat.mode = S_MODE_DIR | MODE;
-  root->stat.id = 0;
-  
+  root->mode = S_MODE_DIR | MODE;
+  root->id = 0;
+  root->length = (count) * sizeof(initrd_inode_t);
+  printf("%d bytes\n", root->length);
+  printf("%d\n", sizeof(initrd_inode_t));
   printf("\nWriting root...\n");
-  fseek(dest, 0, SEEK_SET);
-  fwrite(root, 1, sizeof(vfs_inode_t), dest);
+  fwrite(root, sizeof(initrd_inode_t), 1, dest);
   
   int i;
   for(i = 0; i < count-1; i++) {
-    printf("Writing %s (%d)...\n", inodes[i].name, i);
-    fwrite(&inodes[i], 1, sizeof(vfs_inode_t), dest);
+    printf("Writing %s (%d)...\n", inodes[i]->name, i);
+    fwrite(inodes[i], sizeof(initrd_inode_t), 1, dest);
   }
   
   return EXIT_SUCCESS;
