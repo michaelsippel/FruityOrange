@@ -18,6 +18,7 @@
  */
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +52,9 @@ int main(int argc, char **argv) {
   id_t count = 0;
   struct dirent *dirent;  
   
-  initrd_inode_t **inodes = calloc(4, sizeof(initrd_inode_t*));//FIXME
+  int parent_id = 0;
+  initrd_inode_t *inodes = calloc(4, sizeof(initrd_inode_t));//FIXME
+  chdir(src_path);
   while( ( dirent = readdir(parent) ) != NULL ) {
     if( (!strcmp("." ,dirent->d_name)) ||
         (!strcmp("..",dirent->d_name))
@@ -63,11 +66,14 @@ int main(int argc, char **argv) {
     struct stat attr; 
     stat(dirent->d_name, &attr);
     
-    inodes[count] = malloc(sizeof(initrd_inode_t));    
+    if(S_ISDIR(attr.st_mode)) {
+      inodes[count].mode = S_MODE_DIR;
+    }
     
-    strcpy(&inodes[count]->name, dirent->d_name);
+    strcpy(&inodes[count].name, dirent->d_name);
     
-    inodes[count]->id = count;
+    inodes[count].id = count;
+    inodes[count].parent_id = parent_id;
     
     count++;
 //    inodes = realloc(inodes, (1+count++)*sizeof(initrd_inode_t*));
@@ -75,29 +81,25 @@ int main(int argc, char **argv) {
   
   int i;
   printf("\nGenerating directory entries...\n");
-  initrd_dentry_t **root_dentries = calloc(count-1, sizeof(initrd_dentry_t));
-  for(i = 0; i < count-1; i++) {
-    root_dentries[i] = malloc(sizeof(initrd_dentry_t));
-    
-    strcpy(root_dentries[i]->name, inodes[i]->name);
-    root_dentries[i]->id = i;
+  initrd_dentry_t *root_dentries = calloc(count, sizeof(initrd_dentry_t));
+  for(i = 0; i < count; i++) {
+    strcpy(root_dentries[i].name, inodes[i].name);
+    root_dentries[i].id = i;
   }
   
-  #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
   initrd_inode_t *root = malloc(sizeof(initrd_inode_t));
   strcpy(root->name, "root");
-  root->mode = S_MODE_DIR | MODE;
+  root->mode = S_MODE_DIR;
   root->id = 0;
-  root->length = (count) * sizeof(initrd_inode_t);
+  root->length = count * sizeof(initrd_inode_t);
   printf("%d bytes\n", root->length);
-  printf("%d\n", sizeof(initrd_inode_t));
   printf("\nWriting root...\n");
   fwrite(root, sizeof(initrd_inode_t), 1, dest);
+  fwrite(root_dentries, sizeof(initrd_dentry_t), count, dest);
   
-  for(i = 0; i < count-1; i++) {
-    printf("Writing %s (%d)...\n", root_dentries[i]->name, i);
-    fwrite(root_dentries[i], sizeof(initrd_dentry_t), 1, dest);
-    //fwrite(inodes[i], sizeof(initrd_inode_t), 1, dest);
+  for(i = 0; i < count; i++) {
+    printf("Writing %s (%d)...\n", inodes[i].name, inodes[i].id);
+    fwrite(&inodes[i], sizeof(initrd_inode_t), 1, dest);
   }
   
   return EXIT_SUCCESS;

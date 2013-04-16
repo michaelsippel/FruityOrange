@@ -21,39 +21,24 @@
 
 #include <stdint.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #define S_MODE_DIR 0x1
 #define S_MODE_CHR 0x2
 #define S_MODE_LNK 0x4
 
-#define S_MAO 0x4 // mode: access offset
-
-#define S_IRUSR (0x001 << S_MAO) //user-read
-#define S_IWUSR (0x002 << S_MAO) // -write
-#define S_IXUSR (0x004 << S_MAO) // -execute
-#define S_IRGRP (0x008 << S_MAO) //group-read
-#define S_IWGRP (0x010 << S_MAO) // -write
-#define S_IXGRP (0x020 << S_MAO) // -execute
-#define S_IROTH (0x040 << S_MAO) //other-read
-#define S_IWOTH (0x080 << S_MAO) // -write
-#define S_IXOTH (0x100 << S_MAO) // -execute
-
-#define S_ISREG(x) ((x.mode & S_MODE_DIR) ? 0 : 1)
-#define S_ISDIR(x) ((x.mode & S_MODE_DIR) ? 1 : 0)
-#define S_ISCHR(x) ((x.mode & S_MODE_CHR) ? 1 : 0)
-#define S_ISBLK(x) ((x.mode & S_MODE_CHR) ? 0 : 1)
-#define S_ISLNK(x) ((x.mode & S_MODE_LNK) ? 1 : 0)
-
 typedef struct initrd_inode {
   const char name[256];
-  int mode;
-  int id;
-  int length;
+  uint32_t mode;
+  uint32_t id;
+  uint32_t length;
+  
+  uint32_t parent_id;
 } initrd_inode_t;
 
 typedef struct initrd_dentry {
   const char name[256];
-  id_t id;
+  uint32_t id;
 } initrd_dentry_t;
 
 #endif

@@ -58,6 +58,10 @@ _start:
   orl $(1 << 31), %ecx
   movl %ecx, %cr0
   
+  lea (_higherhalf), %ecx
+  jmp %ecx
+
+_higherhalf: 
   movl $kernel_stack, %esp
   addl $VADDR_KERNEL_START, %ebx
   pushl %ebx
