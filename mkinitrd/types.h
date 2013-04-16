@@ -46,9 +46,9 @@
 
 typedef struct initrd_inode {
   const char name[256];
-  mode_t mode;
-  id_t id;
-  size_t length;
+  int mode;
+  int id;
+  int length;
 } initrd_inode_t;
 
 typedef struct initrd_dentry {

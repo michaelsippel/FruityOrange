@@ -67,10 +67,20 @@ int main(int argc, char **argv) {
     
     strcpy(&inodes[count]->name, dirent->d_name);
     
-    //inodes[count]->
+    inodes[count]->id = count;
     
     count++;
 //    inodes = realloc(inodes, (1+count++)*sizeof(initrd_inode_t*));
+  }
+  
+  int i;
+  printf("\nGenerating directory entries...\n");
+  initrd_dentry_t **root_dentries = calloc(count-1, sizeof(initrd_dentry_t));
+  for(i = 0; i < count-1; i++) {
+    root_dentries[i] = malloc(sizeof(initrd_dentry_t));
+    
+    strcpy(root_dentries[i]->name, inodes[i]->name);
+    root_dentries[i]->id = i;
   }
   
   #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
@@ -84,10 +94,10 @@ int main(int argc, char **argv) {
   printf("\nWriting root...\n");
   fwrite(root, sizeof(initrd_inode_t), 1, dest);
   
-  int i;
   for(i = 0; i < count-1; i++) {
-    printf("Writing %s (%d)...\n", inodes[i]->name, i);
-    fwrite(inodes[i], sizeof(initrd_inode_t), 1, dest);
+    printf("Writing %s (%d)...\n", root_dentries[i]->name, i);
+    fwrite(root_dentries[i], sizeof(initrd_dentry_t), 1, dest);
+    //fwrite(inodes[i], sizeof(initrd_inode_t), 1, dest);
   }
   
   return EXIT_SUCCESS;

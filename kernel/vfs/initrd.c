@@ -31,5 +31,12 @@ void vfs_load_initrd(void *initrd) {
   memcpy(initrd_root, initrd, sizeof(initrd_inode_t));
   int num = initrd_root->length / sizeof(initrd_inode_t);
   printf("inode \'%s\' (%d): %d bytes, %d files\n", initrd_root->name, initrd_root->id, initrd_root->length, num);
+  
+  printf("%d\n", sizeof(initrd_inode_t));
+  initrd_dentry_t *entries = initrd + sizeof(initrd_inode_t);
+  int i;
+  for(i = 0; i < num; i++) {
+    printf("\t%s\n", entries[i].name);
+  }
 }
 
