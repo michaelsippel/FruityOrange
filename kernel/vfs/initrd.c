@@ -24,18 +24,38 @@
 #include <driver/console.h>
 #include <vfs.h>
 
+static void *initrd_ptr;
+
+void initrd_read_dir(initrd_dentry_t *entries, int num) {
+  int i;
+  for(i = 0; i < num; i++) {
+    initrd_inode_t *ino = initrd_ptr + entries[i].off;
+    printf("\t%c %s (%d, %d)\n", ((ino->mode & S_MODE_DIR) ? 'd' : '-'), ino->name, ino->off, entries[i].off);
+  }
+  
+  for(i = 0; i < num; i++) {
+    initrd_inode_t *ino = initrd_ptr + entries[i].off;
+    if(ino->mode & S_MODE_DIR) {
+      int d_num = ino->length / sizeof(initrd_inode_t);
+      initrd_dentry_t *d_entries = initrd_ptr + entries[0].off + sizeof(initrd_inode_t)*num;
+      printf("\ninode \'%s\' (%d): %d bytes, %d file(s)\n", ino->name, ino->off, ino->length, d_num);
+      
+      initrd_read_dir(d_entries, d_num);
+    }
+  }
+}
+
 void vfs_load_initrd(void *initrd) {
   printf("Loading initial ramdisk...\n");
+  initrd_ptr = initrd;  
   
   initrd_inode_t *initrd_root = initrd;
   int num = initrd_root->length / sizeof(initrd_inode_t);
-  printf("inode \'%s\' (%d): %d bytes, %d files\n", initrd_root->name, initrd_root->id, initrd_root->length, num);
+  printf("inode \'%s\' (%d): %d bytes, %d file(s)\n", initrd_root->name, initrd_root->off, initrd_root->length, num);
   
   initrd_dentry_t *entries = initrd + sizeof(initrd_inode_t);
-  initrd_inode_t *inodes = initrd + sizeof(initrd_inode_t) + sizeof(initrd_dentry_t)*num;
-  int i;
-  for(i = 0; i < num; i++) {
-    printf("\t%c %s\n", ((inodes[i].mode & S_MODE_DIR) ? 'd' : '-'), entries[i].name);
-  }
+  initrd_read_dir(entries, num);
+  
+  printf("\n");
 }
 

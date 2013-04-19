@@ -30,15 +30,15 @@
 typedef struct initrd_inode {
   const char name[256];
   uint32_t mode;
-  uint32_t id;
   uint32_t length;
   
-  uint32_t parent_id;
+  uint32_t off;
+  uint32_t parent_off;
 } initrd_inode_t;
 
 typedef struct initrd_dentry {
   const char name[256];
-  uint32_t id;
+  uint32_t off;
 } initrd_dentry_t;
 
 #endif
