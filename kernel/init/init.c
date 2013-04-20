@@ -77,11 +77,12 @@ void init(struct multiboot_info *mb_info) {
   kinip("Initalizing VFS... ");
     init_vfs();endini();
   
-  sti();
+  
   dinip("Initalizing terminal... ");
     init_console();endini();
   dinip("Initalizing PIT... ");
     init_pit(PIT_FREQ);endini();
+  sti();
   dinip("Initalizing CMOS... ");
     init_cmos();endini();
   dinip("Initalizing keyboard... ");
@@ -108,11 +109,10 @@ void init(struct multiboot_info *mb_info) {
     size_t len = modules[0].mod_end - modules[0].mod_start;
     size_t pages = (len + PAGE_SIZE) / PAGE_SIZE;
     char *mod = vmm_automap_kernel_area(current_context, modules[0].mod_start, pages);
-    vfs_inode_t *module = vfs_create_inode("initrd.img", S_IWUSR | S_IRUSR | S_IXUSR | S_IXGRP | S_IRGRP, vfs_root());
-    module->base = mod;
-    module->length = len;
     
-    printf("\n");
+    setColor(0x06);
+    printf("Loading initial ramdisk...\n");
+    setColor(0x0f);
     vfs_load_initrd(mod);
     
     vfs_inode_list(vfs_root());
@@ -125,3 +125,4 @@ void init(struct multiboot_info *mb_info) {
     printf("%c", getch());
   }
 }
+

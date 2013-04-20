@@ -1,5 +1,4 @@
 SRCS = $(shell find -name '*.c')
-OBJS = $(addsuffix .o,$(basename $(SRCS)))
 
 IMGSRC = ../build/image
 SRC = initrd.img
@@ -12,7 +11,6 @@ mkinitrd: $(SRCS)
 	./mkinitrd $(SRC) $(IMGSRC)
 
 clean:
-	rm $(OBJS)
 	rm mkinitrd
 
 .PHONY: clean

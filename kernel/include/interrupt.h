@@ -49,7 +49,8 @@ cpu_state_t *get_cpu_state(void);
 extern cpu_state_t *new_cpu;
 #endif
 
-#define sti() asm volatile("sti");
-#define cli() asm volatile("cli");
+#define sti() asm volatile("sti")
+#define cli() asm volatile("cli")
 
 #endif
+

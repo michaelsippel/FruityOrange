@@ -83,7 +83,7 @@ void vfs_inode_list(vfs_inode_t *parent) {
 vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent) {
   vfs_inode_t *inode = malloc(sizeof(vfs_inode_t));
   memclr(inode, sizeof(vfs_inode_t));
-
+  
   inode->name = name;
   inode->length = 0;
   
@@ -157,7 +157,7 @@ int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
   return i-1;
 }
 
-void* vfs_read(vfs_inode_t *inode, int off) {
+void *vfs_read(vfs_inode_t *inode, int off) {
   return (void*) inode->base + off;
 }
 

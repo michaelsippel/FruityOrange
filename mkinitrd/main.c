@@ -26,6 +26,8 @@
 
 #include "types.h"
 
+#define MODE_ALL 0x1ff0
+
 uint32_t parent_off = 0;
 uint32_t gen_off = 0;
 FILE *dest;
@@ -50,8 +52,9 @@ initrd_inode_t *initrd_read_dir(const char *path, int *num) {
     
     inodes[i].parent_off = parent_off;
     
+    inodes[i].mode = MODE_ALL;
     if(S_ISDIR(attr.st_mode)) {
-      inodes[i].mode = S_MODE_DIR;
+      inodes[i].mode |= S_MODE_DIR;
     }
     
     i++;
@@ -153,7 +156,7 @@ int main(int argc, char **argv) {
   
   initrd_inode_t *root = malloc(sizeof(initrd_inode_t));
   strcpy(root->name, "root");
-  root->mode = S_MODE_DIR;
+  root->mode = S_MODE_DIR | MODE_ALL;
   root->off = 0;
   root->parent_off = 0;
   root->length = root_count * sizeof(initrd_inode_t);

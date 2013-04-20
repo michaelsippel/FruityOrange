@@ -26,7 +26,6 @@
 
 typedef struct vfs_inode {
   const char *name;
-  uint8_t type;
   stat_t stat;
   
   void *base;
@@ -70,7 +69,7 @@ vfs_inode_t *vfs_root(void);
 vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent);
 vfs_dentry_t *vfs_create_dentry(vfs_inode_t *inode);
 int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes);
-void* vfs_read(vfs_inode_t *inode, int off);
+void *vfs_read(vfs_inode_t *inode, int off);
 int vfs_access(vfs_inode_t *inode, mode_t mode);
 void vfs_inode_list(vfs_inode_t *parent);
 

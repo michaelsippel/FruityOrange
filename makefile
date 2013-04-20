@@ -32,7 +32,6 @@ clean:
 	$(MAKE) -C test clean
 	$(MAKE) -C concha clean
 	$(MAKE) -C mkinitrd clean
-	rm $(IMAGE)/initrd.img
 
 .PHONY: all kernel lib clean qemu
 
