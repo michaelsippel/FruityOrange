@@ -105,21 +105,26 @@ void init(struct multiboot_info *mb_info) {
   
   if(mb_info->mbs_mods_count > 0) {
     multiboot_module_t *modules = (multiboot_module_t*) mb_info->mbs_mods_addr;
+
+    void *mods[2];
+    int i;
+    for(i = 0; i < mb_info->mbs_mods_count; i++) {
+      size_t len = modules[i].mod_end - modules[i].mod_start;
+      size_t pages = (len + PAGE_SIZE) / PAGE_SIZE;
+      mods[i] = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
+    }
     
-    size_t len = modules[0].mod_end - modules[0].mod_start;
-    size_t pages = (len + PAGE_SIZE) / PAGE_SIZE;
-    char *mod = vmm_automap_kernel_area(current_context, modules[0].mod_start, pages);
-    
-    setColor(0x06);
     printf("Loading initial ramdisk...\n");
-    setColor(0x0f);
-    vfs_load_initrd(mod);
+    vfs_load_initrd(mods[0]);
     
-    vfs_inode_list(vfs_root());
+    if(mb_info->mbs_mods_count > 1) {
+      load_elf32(mods[1], vmm_create_context(), "init");
+    } else {
+      printf("error: no init-module found!\n");
+    }
   } else {
     printf("error: no modules found!\n");
   }
-  printf("\n");
   sti();
   while(1) {
     printf("%c", getch());

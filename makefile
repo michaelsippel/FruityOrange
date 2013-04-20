@@ -11,8 +11,8 @@ kernel:
 	cp $(KERNEL) $(IMAGE)/kernel
 
 mods:
-	$(MAKE) -C test
 	$(MAKE) -C concha
+	$(MAKE) -C init
 	$(MAKE) -C mkinitrd
 
 floppy-img: all
@@ -29,8 +29,8 @@ qemu: cdrom-img
 clean:
 	$(MAKE) -C kernel clean
 	$(MAKE) -C lib clean
-	$(MAKE) -C test clean
 	$(MAKE) -C concha clean
+	$(MAKE) -C init clean
 	$(MAKE) -C mkinitrd clean
 
 .PHONY: all kernel lib clean qemu

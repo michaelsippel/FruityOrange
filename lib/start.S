@@ -23,10 +23,11 @@
 _start:
     call init_heap
     call main
-    popl %ebx
+    movl %eax, %ebx
     movl $0, %eax
     int $0x30
     jmp _stop
 
 _stop:
     jmp _stop
+

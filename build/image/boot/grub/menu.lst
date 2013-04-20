@@ -4,5 +4,6 @@ timeout 0
 title FruityOrange
     kernel /kernel
     module /initrd.img
+    module /sys_init
     boot
 

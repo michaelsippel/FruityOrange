@@ -85,7 +85,7 @@ void *malloc(size_t bytes) {
     insert_node(new_node);
   }
   
-  remove_node(node);
+  //remove_node(node);
   return (void*) node + sizeof(alloc_nd_t);
 }
 

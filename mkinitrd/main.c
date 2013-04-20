@@ -35,7 +35,7 @@ DIR *parent;
 
 initrd_inode_t *initrd_read_dir(const char *path, int *num) {
   struct dirent *dirent;
-  initrd_inode_t *inodes = calloc(10, sizeof(initrd_inode_t));
+  initrd_inode_t *inodes = calloc(100, sizeof(initrd_inode_t));//FIXME
   chdir(path);
   int i = 0;
   while( ( dirent = readdir(parent) ) != NULL ) {

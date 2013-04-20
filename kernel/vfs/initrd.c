@@ -34,7 +34,7 @@ void initrd_read_dir(initrd_dentry_t *entries, int num, vfs_inode_t *vfs_parent)
     char *name = malloc(strlen(ino->name));
     strcpy(name, ino->name);
     
-    vfs_inode_t *vfs_ino = vfs_create_inode(name, ino->mode, vfs_parent);    
+    vfs_inode_t *vfs_ino = vfs_create_inode(name, ino->mode, vfs_parent);
     vfs_ino->length = ino->length;
     
     if(ino->mode & S_MODE_DIR) {
@@ -47,7 +47,7 @@ void initrd_read_dir(initrd_dentry_t *entries, int num, vfs_inode_t *vfs_parent)
 }
 
 void vfs_load_initrd(void *initrd) {
-  initrd_ptr = initrd;  
+  initrd_ptr = initrd;
   
   initrd_inode_t *initrd_root = initrd;
   int num = initrd_root->length / sizeof(initrd_inode_t);

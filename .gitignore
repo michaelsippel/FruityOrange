@@ -14,10 +14,11 @@ Makefile~
 *.bin
 *.txt~
 kernel.txt
-build/image/kernel
+kernel
 kernel/kernel
 test
 concha
 mkinitrd
+sys_init
 *.lst~
 

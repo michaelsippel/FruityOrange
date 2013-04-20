@@ -12,6 +12,7 @@ mkinitrd: $(SRCS)
 
 clean:
 	rm mkinitrd
+	rm initrd.img
 
 .PHONY: clean
 

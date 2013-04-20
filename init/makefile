@@ -3,7 +3,7 @@ OBJS = $(addsuffix .o,$(basename $(SRCS)))
 
 LIBS = ../lib/user/userlibc.a ../lib/common/commonlibc.a 
 IMGSRC = ../build/image
-SRC = concha
+SRC = sys_init
 DEST = $(IMGSRC)/$(SRC)
 
 INC = -I ../include -I ../include/user
