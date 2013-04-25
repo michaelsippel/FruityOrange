@@ -1,7 +1,7 @@
 /**
- *  kernel/proc/idle.c
+ *  lib/user/unistd/fork.c
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,11 +16,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdint.h>
+#include <sys/syscalls.h>
+#include <unistd.h>
 
-void idle(void) {
-  while(1) {
-    asm volatile("hlt");
-  }
+pid_t fork(void) {
+  pid_t pid;
+  asm volatile("int $0x30" : "=b" (pid) : "a" (SYSCALL_FORK));
+  return pid;
 }
 

@@ -43,6 +43,8 @@ typedef struct proc {
   uid_t uid;
   dpl_t dpl;
   
+  void *kernel_stack;
+  void *user_stack;
   cpu_state_t *cpu;
   vmm_context_t *context;
   unsigned int num_fd;

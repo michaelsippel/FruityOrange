@@ -51,7 +51,7 @@ cpu_state_t *handle_syscall(cpu_state_t *cpu) {
   } else {
     syscall_table[cpu->eax]->handler(&new_cpu->ebx, &new_cpu->ecx, &new_cpu->edx);
   }
-  
+
   return new_cpu;
 }
 

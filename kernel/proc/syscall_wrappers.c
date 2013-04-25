@@ -1,7 +1,7 @@
 /**
  *  kernel/proc/syscall_wrappers.c
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,12 +17,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdint.h>
+#include <string.h>
 #include <sys/syscalls.h>
 
 #include <driver/pit.h>
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 #include <syscall.h>
+#include <mm.h>
 
 void scheduler_init_syscalls(void) {
   setup_syscall(SYSCALL_EXIT, "exit", &syscall_exit);
@@ -41,17 +43,22 @@ void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 }
 
 void syscall_fork(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  proc_t *new_proc = malloc(sizeof(proc_t));
-  memcpy(new_proc, current_proc, sizeof(proc_t));
+  vmm_context_t *context = current_proc->context;//vmm_fork(current_proc->context);
+  proc_t *new_proc = create_proc(0, current_proc->name, context, current_proc->dpl);
+  memcpy(new_proc->kernel_stack, current_proc->kernel_stack, PAGE_SIZE);
   
-  new_proc->next = first_proc;
-  new_proc->prev = first_proc->prev;
-  first_proc->prev->next = new_proc;
-  first_proc->prev = new_proc;
-  first_proc = new_proc;
+  if(current_proc->dpl) {
+    void *cur_stack = vmm_automap_kernel_page(current_context, current_proc->user_stack);
+    void *new_stack = vmm_automap_kernel_page(current_context, new_proc->user_stack);
+    
+    memcpy(new_stack, cur_stack, PAGE_SIZE);
+    
+    vmm_unmap_page(current_context, cur_stack);
+    vmm_unmap_page(current_context, new_stack);
+  }
   
-  new_proc->context = vmm_fork(current_proc->context);
-  new_proc->pid = get_pid();
+  new_proc->status = current_proc->status;
+  new_proc->used_mem_pages = current_proc->used_mem_pages;  
   
   *ebx = 1;
   new_proc->cpu->ebx = 0;

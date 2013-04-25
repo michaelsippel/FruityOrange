@@ -16,10 +16,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <sys/syscalls.h>
 #include <stdio.h>
+#include <unistd.h>
 
 int main(void) {
   printf("Init\n");
+  
+  pid_t pid;
+  asm volatile("int $0x30" : "=b" (pid) : "a" (SYSCALL_FORK));
+  printf("pid = %d: ", pid);
+  if(pid) {
+    printf("Parent-process!\n");
+  } else {
+    printf("Child-process!\n");
+  }
   
   return 0;
 }

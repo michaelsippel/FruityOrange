@@ -55,12 +55,12 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->ticks_util_wake = -1;
   proc->status = ACTIVE;
   
-  proc->num_fd = 3;
-  proc->fd = calloc(3, sizeof(fd_st_t));
-  #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
-  proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
-  proc->fd[1].inode = vfs_create_inode("stdin",  MODE, NULL);
-  proc->fd[2].inode = vfs_create_inode("stderr", MODE, NULL);
+  proc->num_fd = 0;
+  //proc->fd = calloc(proc->num_fd, sizeof(fd_st_t));
+  //#define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
+  //proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
+  //proc->fd[1].inode = vfs_create_inode("stdin",  MODE, NULL);
+  //proc->fd[2].inode = vfs_create_inode("stderr", MODE, NULL);
   
   proc->work_dir = vfs_root();
   
@@ -77,10 +77,13 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
     .eflags = 0x202,
   };
   proc->cpu = proc_cpu_state;
+  proc->kernel_stack = kernel_stack;  
   
   if(dpl) { // Usermode
     uintptr_t user_stack_phys = (uintptr_t) pmm_alloc();
     uintptr_t user_stack = (uintptr_t) vmm_automap_user_page(context, user_stack_phys);
+    
+    proc->user_stack = user_stack_phys;
     
     proc_cpu_state->esp = user_stack + user_stack_size;
     proc_cpu_state->cs = _USER_CS;
@@ -108,7 +111,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   }
   first_proc = proc;
   
-  debug(PROC_DEBUG, "create_proc(): created precess \"%s\" with pid %d.\n", proc->name, proc->pid);
+  debug(PROC_DEBUG, "create_proc(): created process \"%s\" with pid %d.\n", proc->name, proc->pid);
   
   return proc;
 }

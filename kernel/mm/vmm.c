@@ -125,19 +125,17 @@ vmm_context_t *vmm_create_context(void) {
 }
 
 vmm_context_t *vmm_fork(vmm_context_t *context) {
-  uintptr_t paddr = (uintptr_t) pmm_alloc();
-  vmm_context_t *new_context = vmm_automap_kernel_page(current_context, paddr);
-  memclr(new_context, PAGE_SIZE);
-
+  vmm_context_t *new_context = vmm_create_context();
+  
   int i, j;
   for(i = 0; i < PD_SIZE; i++) {
-    vmm_pt_t *new_pt = vmm_create_pagetable(new_context, i, VMM_USER_FLAGS);
-    vmm_pt_t *pt = vmm_get_pagetable(context, i, VMM_USER_FLAGS);
-    for(j = 0; j < PT_SIZE; j++) {
-      new_pt[j] = pt[j];
+    if(context->pagedir[i]) {
+      vmm_pt_t *new_pt = vmm_create_pagetable(new_context, i, VMM_USER_FLAGS);
+      vmm_pt_t *pt     = vmm_get_pagetable(context, i, VMM_USER_FLAGS);
+      memcpy(new_pt, pt, PAGE_SIZE);
     }
   }
-
+  
   return new_context;
 }
 
