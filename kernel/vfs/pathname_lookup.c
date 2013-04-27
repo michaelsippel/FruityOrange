@@ -46,13 +46,14 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
   ptr = strtok(path, delimiter);
   while(ptr != NULL) {
     for(i = 0; i < num; i++) {
-      //if(strcmp(ptr, entries[i].name)) {
-        //inode = entries[i].inode;
-        //if(S_ISDIR(inode->stat)) {
-        //} else {
-        //  return inode;
-        //}
-      //}
+      if(strcmp(ptr, entries[i].inode->name)) {
+        inode = entries[i].inode;
+        if(S_ISDIR(inode->stat)) {
+          // TODO
+        } else {
+          return inode;
+        }
+      }
     }
     ptr = strtok(NULL, delimiter);
   }

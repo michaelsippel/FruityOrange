@@ -35,13 +35,14 @@ void initrd_read_dir(initrd_dentry_t *entries, int num, vfs_inode_t *vfs_parent)
     strcpy(name, ino->name);
     
     vfs_inode_t *vfs_ino = vfs_create_inode(name, ino->mode, vfs_parent);
-    vfs_ino->length = ino->length;
+    vfs_ino->length = ino->length;  
     
     if(ino->mode & S_MODE_DIR) {
       int d_num = ino->length / sizeof(initrd_inode_t);
       initrd_dentry_t *d_entries = initrd_ptr + entries[0].off + sizeof(initrd_inode_t)*num;
       
-      initrd_read_dir(d_entries, d_num, vfs_ino);
+      // FIXME!!
+      //initrd_read_dir(d_entries, d_num, vfs_ino);
     }
   }
 }

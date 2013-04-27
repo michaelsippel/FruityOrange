@@ -60,6 +60,8 @@ void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   
   printf("exec: %s\n", path);
   vfs_inode_t *file = vfs_path_lookup(path);
-  
+  if(file == NULL) {
+    printf("File not found!\n");
+  }
 }
 
