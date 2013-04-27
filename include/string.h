@@ -28,6 +28,7 @@ void cut(char *s,int pos,char *os1,char *os2);
 void insert(char *s,int pos,char *is);
 void replace(char *s,int pos, char *rs);
 void strcpy(char *dest, const char *src);
+char *strtok(char *string, char *delimiters);
 char *strcat(char *dest, const char *src);
 int strcmp(char *str1, char *str2);
 

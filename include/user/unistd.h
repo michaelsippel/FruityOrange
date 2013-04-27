@@ -34,5 +34,7 @@ int lseek(fd_t fd, int off, int whence);
 int chdir(const char *path);
 char *getcwd(char *buf, size_t len);
 pid_t fork(void);
+void waitpid(pid_t pid);
 
 #endif
+

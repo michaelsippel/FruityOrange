@@ -114,9 +114,9 @@ void init(struct multiboot_info *mb_info) {
       mods[i] = vmm_automap_kernel_area(current_context, modules[i].mod_start, pages);
     }
     
-    //printf("Loading initial ramdisk...\n");
-    //vfs_load_initrd(mods[0]);
-    
+    printf("Loading initial ramdisk...\n");
+    vfs_load_initrd(mods[0]);    
+
     if(mb_info->mbs_mods_count > 1) {
       load_elf32(mods[1], vmm_create_context(), "init");
     } else {

@@ -86,3 +86,4 @@ vfs_inode_t *vfs_path_lookup(const char *path);
 void vfs_generate_path(char *buf, size_t bytes, vfs_inode_t *parent);
 
 #endif
+

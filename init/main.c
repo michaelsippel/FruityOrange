@@ -24,11 +24,12 @@ int main(void) {
   printf("Init\n");
   
   pid_t pid = fork();
-  printf("pid = %d: ", pid);
-  if(pid) {
-    printf("Parent-process!\n");
+  if(!pid) {
+    printf("starting shell...\n");
+    exec("/concha");
   } else {
-    printf("Child-process!\n");
+    waitpid(pid);
+    printf("shell exited.\n");
   }
   
   return 0;

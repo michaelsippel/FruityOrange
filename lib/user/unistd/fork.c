@@ -25,3 +25,11 @@ pid_t fork(void) {
   return pid;
 }
 
+void waitpid(pid_t pid) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_WAITPID), "b" (pid));
+}
+
+void exec(const char *path) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_EXEC), "b" (path));
+}
+

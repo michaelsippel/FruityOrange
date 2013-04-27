@@ -25,11 +25,14 @@
 #include <proc/proc.h>
 #include <syscall.h>
 #include <mm.h>
+#include <vfs.h>
 
 void scheduler_init_syscalls(void) {
   setup_syscall(SYSCALL_EXIT, "exit", &syscall_exit);
   setup_syscall(SYSCALL_USLEEP, "usleep", &syscall_usleep);
   setup_syscall(SYSCALL_FORK, "fork", &syscall_fork);
+  setup_syscall(SYSCALL_WAITPID, "waitpid", &syscall_waitpid);
+  setup_syscall(SYSCALL_EXEC, "exec", &syscall_exec);
 }
 
 void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -45,6 +48,18 @@ void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 void syscall_fork(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   proc_t *child = proc_fork(current_proc);
   child->cpu->ebx = 0;
-  *ebx = 1;
+  *ebx = child->ppid;
+}
+
+void syscall_waitpid(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  proc_waitpid(current_proc, *ebx);
+}
+
+void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  const char *path = *ebx;
+  
+  printf("exec: %s\n", path);
+  vfs_inode_t *file = vfs_path_lookup(path);
+  
 }
 

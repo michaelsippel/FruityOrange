@@ -31,7 +31,7 @@ void initrd_read_dir(initrd_dentry_t *entries, int num, vfs_inode_t *vfs_parent)
   
   for(i = 0; i < num; i++) {
     initrd_inode_t *ino = initrd_ptr + entries[i].off;
-    char *name = malloc(strlen(ino->name));
+    char *name = malloc(strlen(ino->name)+1);
     strcpy(name, ino->name);
     
     vfs_inode_t *vfs_ino = vfs_create_inode(name, ino->mode, vfs_parent);

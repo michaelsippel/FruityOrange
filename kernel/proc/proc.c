@@ -47,7 +47,10 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->context = context;
   proc->used_mem_pages = 0;
   
+  proc->waitpid = 0;
+  proc->child_count = 0;
   proc->pid = get_pid();
+  proc->ppid = 0;
   proc->uid = 0;
   proc->dpl = dpl;
   
@@ -97,6 +100,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
     proc_cpu_state->gs = _KERNEL_DS;
   }
   
+  proc->parent = NULL;
   if(proc_count == 1) {
     proc->next = proc;
     proc->prev = proc;
@@ -137,12 +141,21 @@ proc_t *proc_fork(proc_t *parent) {
     
     vmm_unmap_page(current_context, (uintptr_t)cur_stack);
     vmm_unmap_page(current_context, (uintptr_t)new_stack);
-  } 
+  }
   
-  child->status = parent->status;
+  child->parent = parent;
+  child->ppid = ++parent->child_count;
+  child->status = ACTIVE;
   child->used_mem_pages = parent->used_mem_pages;
   
+  debug(PROC_DEBUG, "proc_fork(): forked pid %d from pid %d\n", child->pid, parent->pid);  
+
   return child;
+}
+
+void proc_waitpid(proc_t *proc, pid_t pid) {
+  proc_sleep(proc);
+  proc->waitpid = pid;
 }
 
 int proc_sleep(proc_t *proc) {
@@ -175,6 +188,13 @@ int proc_wake(proc_t *proc) {
 int proc_exit(proc_t *proc, int status) {
   debug(PROC_DEBUG, "proc_exit(): exit process %d with status %d.\n",proc->pid, status);
   proc->status = ZOMBIE;
+  
+  if(proc->parent) {
+    if(proc->parent->waitpid == proc->ppid) {
+      proc->parent->waitpid = 0;
+      proc_wake(proc->parent);
+    }
+  }
   
   // TODO
   proc_kill(proc);

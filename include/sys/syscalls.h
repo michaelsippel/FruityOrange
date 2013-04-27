@@ -19,23 +19,25 @@
 #ifndef _SYSCALLS_H
 #define _SYSCALLS_H
 
-#define SYSCALL_EXIT   0x00 /* exit */
-#define SYSCALL_PUTC   0x01 /* put char   */
-#define SYSCALL_PUTS   0x02 /* put string */
-#define SYSCALL_GETC   0x03 /* get char   */
-#define SYSCALL_GETS   0x04 /* get string */
-#define SYSCALL_TIME   0x05 /* get datetime */
-#define SYSCALL_USLEEP 0x06 /* usleep */
-#define SYSCALL_MALLOC 0x07 /* allocate memory pages */
-#define SYSCALL_MFREE  0x08 /* free memory pages */
-#define SYSCALL_OPEN   0x09 /* open a file */
-#define SYSCALL_CLOSE  0x0A /* close a file */
-#define SYSCALL_READ   0x0B /* read from a file */
-#define SYSCALL_WRITE  0x0C /* write into a file */
-#define SYSCALL_SEEK   0x0D /* seek */
-#define SYSCALL_CHDIR  0x0E /* change directory */
-#define SYSCALL_GETCWD 0x0F /* get current working directory */
-#define SYSCALL_FORK   0x10 /* fork */
+#define SYSCALL_EXIT    0x00 /* exit */
+#define SYSCALL_PUTC    0x01 /* put char   */
+#define SYSCALL_PUTS    0x02 /* put string */
+#define SYSCALL_GETC    0x03 /* get char   */
+#define SYSCALL_GETS    0x04 /* get string */
+#define SYSCALL_TIME    0x05 /* get datetime */
+#define SYSCALL_USLEEP  0x06 /* usleep */
+#define SYSCALL_MALLOC  0x07 /* allocate memory pages */
+#define SYSCALL_MFREE   0x08 /* free memory pages */
+#define SYSCALL_OPEN    0x09 /* open a file */
+#define SYSCALL_CLOSE   0x0A /* close a file */
+#define SYSCALL_READ    0x0B /* read from a file */
+#define SYSCALL_WRITE   0x0C /* write into a file */
+#define SYSCALL_SEEK    0x0D /* seek */
+#define SYSCALL_CHDIR   0x0E /* change directory */
+#define SYSCALL_GETCWD  0x0F /* get current working directory */
+#define SYSCALL_FORK    0x10 /* fork */
+#define SYSCALL_WAITPID 0x11 /* wait for pid */
+#define SYSCALL_EXEC    0x12 /* exec */
 
 #endif
 
