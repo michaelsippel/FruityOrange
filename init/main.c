@@ -23,8 +23,7 @@
 int main(void) {
   printf("Init\n");
   
-  pid_t pid;
-  asm volatile("int $0x30" : "=b" (pid) : "a" (SYSCALL_FORK));
+  pid_t pid = fork();
   printf("pid = %d: ", pid);
   if(pid) {
     printf("Parent-process!\n");

@@ -15,6 +15,8 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+.extern common_eoi
+.extern handle_irq
 
 .macro irq_stub nr
 .global int_handler\nr
@@ -58,7 +60,7 @@ common_irq_handler:
   push %ecx
   push %ebx
   push %eax
-
+  
   // load  kernel-datasegments
   mov $0x10, %ax
   mov %ax, %ds

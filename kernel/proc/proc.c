@@ -83,15 +83,12 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
     uintptr_t user_stack_phys = (uintptr_t) pmm_alloc();
     uintptr_t user_stack = (uintptr_t) vmm_automap_user_page(context, user_stack_phys);
     
-    proc->user_stack = user_stack_phys;
+    proc->user_stack_phys = user_stack_phys;
+    proc->user_stack = user_stack;    
     
     proc_cpu_state->esp = user_stack + user_stack_size;
     proc_cpu_state->cs = _USER_CS;
     proc_cpu_state->ss = _USER_SS;
-//     proc_cpu_state->ds = _USER_DS;
-//     proc_cpu_state->es = _USER_DS;
-//     proc_cpu_state->fs = _USER_DS;
-//     proc_cpu_state->gs = _USER_DS;
   } else { // Kernelmode
     proc_cpu_state->cs = _KERNEL_CS;
     proc_cpu_state->ds = _KERNEL_DS;
@@ -124,6 +121,28 @@ fd_t proc_get_unused_fd(proc_t *proc) {
 
 pid_t get_pid(void) {
   return proc_count++;
+}
+
+proc_t *proc_fork(proc_t *parent) {
+  vmm_context_t *context = vmm_fork(parent->context);
+  proc_t *child = create_proc(0, parent->name, context, parent->dpl);
+  memcpy(child->kernel_stack, parent->kernel_stack, PAGE_SIZE);  
+  
+  if(parent->dpl) {
+    child->cpu->esp = child->user_stack + (parent->cpu->esp - parent->user_stack);
+    void *cur_stack = vmm_automap_kernel_page(current_context, parent->user_stack_phys);
+    void *new_stack = vmm_automap_kernel_page(current_context, child->user_stack_phys);
+    
+    memcpy((uintptr_t)new_stack, (uintptr_t)cur_stack, PAGE_SIZE);
+    
+    vmm_unmap_page(current_context, (uintptr_t)cur_stack);
+    vmm_unmap_page(current_context, (uintptr_t)new_stack);
+  } 
+  
+  child->status = parent->status;
+  child->used_mem_pages = parent->used_mem_pages;
+  
+  return child;
 }
 
 int proc_sleep(proc_t *proc) {
@@ -179,3 +198,4 @@ int proc_kill(proc_t *proc) {
   
   return 0;
 }
+

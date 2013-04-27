@@ -43,24 +43,8 @@ void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 }
 
 void syscall_fork(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  vmm_context_t *context = current_proc->context;//vmm_fork(current_proc->context);
-  proc_t *new_proc = create_proc(0, current_proc->name, context, current_proc->dpl);
-  memcpy(new_proc->kernel_stack, current_proc->kernel_stack, PAGE_SIZE);
-  
-  if(current_proc->dpl) {
-    void *cur_stack = vmm_automap_kernel_page(current_context, current_proc->user_stack);
-    void *new_stack = vmm_automap_kernel_page(current_context, new_proc->user_stack);
-    
-    memcpy(new_stack, cur_stack, PAGE_SIZE);
-    
-    vmm_unmap_page(current_context, cur_stack);
-    vmm_unmap_page(current_context, new_stack);
-  }
-  
-  new_proc->status = current_proc->status;
-  new_proc->used_mem_pages = current_proc->used_mem_pages;  
-  
+  proc_t *child = proc_fork(current_proc);
+  child->cpu->ebx = 0;
   *ebx = 1;
-  new_proc->cpu->ebx = 0;
 }
 
