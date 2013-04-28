@@ -58,8 +58,8 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->ticks_util_wake = -1;
   proc->status = ACTIVE;
   
-  proc->num_fd = 0;
-  //proc->fd = calloc(proc->num_fd, sizeof(fd_st_t));
+  proc->num_fd = 1;
+  proc->fd = calloc(proc->num_fd, sizeof(fd_st_t));
   //#define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
   //proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
   //proc->fd[1].inode = vfs_create_inode("stdin",  MODE, NULL);
@@ -147,6 +147,7 @@ proc_t *proc_fork(proc_t *parent) {
   child->ppid = ++parent->child_count;
   child->status = ACTIVE;
   child->used_mem_pages = parent->used_mem_pages;
+  child->work_dir = parent->work_dir;  
   
   debug(PROC_DEBUG, "proc_fork(): forked pid %d from pid %d\n", child->pid, parent->pid);  
 

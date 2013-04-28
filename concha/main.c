@@ -63,7 +63,6 @@ void parse_cmd(char *str) {
   
   cmd_str[i] = '\0';
   arg_str[j] = '\0';
-//   printf("%s - %s#\n", cmd_str, arg_str);
   if(cmd_str[0] == '\0') { // nothing entered
     return;
   }
@@ -90,10 +89,24 @@ void parse_cmd(char *str) {
       
       commands[i].handler(argc, argv);
       found = 1;
+      break;
     }
   }
   
   if(!found) {
-    printf("Unbekannter Befehl \'%s\'!\n\'help\' fuer Hilfe\n", cmd_str);
+    int fd;
+    if( (fd = open(cmd_str, O_RDWR, 0)) > 0 ) {
+      close(fd);
+      
+      pid_t pid = fork();
+      if(!pid) {
+        exec(cmd_str);
+      } else {
+        waitpid(pid);
+      }
+    } else {
+      printf("Unbekannter Befehl \'%s\'!\n\'help\' fuer Hilfe\n", cmd_str);
+    }
   }
 }
+
