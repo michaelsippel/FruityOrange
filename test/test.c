@@ -24,24 +24,6 @@
 #include <unistd.h>
 
 int main(void) {
-  chdir("/bin");
-  int fd = open("module", O_RDWR | O_APPEND, 0);
-  if(write(fd, "Hallo Welt!", 13) > 0) {
-    char buf[13];
-    lseek(fd, 0, SEEK_SET);
-    if(read(fd, buf, 13) > 0) {
-      printf("%s\n", buf);
-    } else {
-      printf("Fehler beim lesen!\n");
-    }
-  } else {
-    printf("Fehler beim schreiben!\n");
-  }
-  close(fd);
-  
-  printf("Druecke eine Taste um zu starten...\n");
-  getch();
-  
   char name[100];
   char s_alter[3];
   char y_n;
@@ -83,7 +65,8 @@ int main(void) {
   char new_s[] = "\t%d:%d:%d (UTC)";
   int length = sizeof(s)-1;
   printf("\n%s", s);
-  while(1) {
+  int sec;
+  for(sec = 0; sec < 10; sec++) {
     t = time();
     tm = gmtime(t);
     

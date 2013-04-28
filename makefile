@@ -12,7 +12,8 @@ kernel:
 
 mods:
 	$(MAKE) -C concha
-	$(MAKE) -C init
+	$(MAKE) -C init	
+	$(MAKE) -C test
 	$(MAKE) -C mkinitrd
 
 floppy-img: all
@@ -28,6 +29,7 @@ qemu: cdrom-img
 
 clean:
 	$(MAKE) -C kernel clean
+	$(MAKE) -C test clean
 	$(MAKE) -C lib clean
 	$(MAKE) -C concha clean
 	$(MAKE) -C init clean

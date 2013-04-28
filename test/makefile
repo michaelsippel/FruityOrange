@@ -24,6 +24,7 @@ $(SRC): $(OBJS)
 
 clean:
 	rm $(OBJS)
+	rm $(SRC)
 
 .PHONY: clean
 
