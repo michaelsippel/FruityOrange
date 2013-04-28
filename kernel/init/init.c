@@ -103,9 +103,10 @@ void init(struct multiboot_info *mb_info) {
   printf("The kernel is successful started!\n");
   setColor(0x0f);
   
-  if(mb_info->mbs_mods_count > 0) {
+  int mod_count = mb_info->mbs_mods_count;
+  if(mod_count > 0) {
     multiboot_module_t *modules = (multiboot_module_t*) mb_info->mbs_mods_addr;
-
+    
     void *mods[2];
     int i;
     for(i = 0; i < mb_info->mbs_mods_count; i++) {
@@ -115,10 +116,11 @@ void init(struct multiboot_info *mb_info) {
     }
     
     printf("Loading initial ramdisk...\n");
-    vfs_load_initrd(mods[0]);
+    vfs_load_initrd(mods[0]);  
     
-    if(mb_info->mbs_mods_count > 1) {
-      load_elf32(mods[1], vmm_create_context(), "init");
+    if(mod_count > 1) {
+      loaded_elf_t *elf = load_elf32(mods[1], vmm_create_context(), "init");
+      run_elf32(elf);
     } else {
       printf("error: no init-module found!\n");
     }

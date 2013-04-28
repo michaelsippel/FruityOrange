@@ -80,14 +80,14 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
     .eflags = 0x202,
   };
   proc->cpu = proc_cpu_state;
-  proc->kernel_stack = kernel_stack;  
+  proc->kernel_stack = kernel_stack;
   
   if(dpl) { // Usermode
     uintptr_t user_stack_phys = (uintptr_t) pmm_alloc();
     uintptr_t user_stack = (uintptr_t) vmm_automap_user_page(context, user_stack_phys);
     
     proc->user_stack_phys = user_stack_phys;
-    proc->user_stack = user_stack;    
+    proc->user_stack = user_stack;
     
     proc_cpu_state->esp = user_stack + user_stack_size;
     proc_cpu_state->cs = _USER_CS;

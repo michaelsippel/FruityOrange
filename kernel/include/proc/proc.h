@@ -67,11 +67,19 @@ typedef struct proc {
   struct proc *prev;
 } proc_t;
 
+typedef struct loaded_elf {
+  void *entry;
+  const char *name;
+  vmm_context_t *context;
+  dpl_t dpl;
+} loaded_elf_t;
+
 #ifndef _PROC_C
 extern proc_t *first_proc;
 #endif
 
-proc_t *load_elf32(void *image, vmm_context_t *context, const char *name);
+loaded_elf_t *load_elf32(void *image, vmm_context_t *context, const char *name);
+proc_t *run_elf32(loaded_elf_t *elf);
 proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t dpl);
 int proc_sleep(proc_t *proc);
 int proc_wake(proc_t *proc);

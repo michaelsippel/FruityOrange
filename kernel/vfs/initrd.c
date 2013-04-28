@@ -27,7 +27,7 @@
 static void *initrd_ptr;
 
 void initrd_read_dir(initrd_dentry_t *entries, int num, vfs_inode_t *vfs_parent) {
-  int i;
+  int i,j;
   
   for(i = 0; i < num; i++) {
     initrd_inode_t *ino = initrd_ptr + entries[i].off;
@@ -37,12 +37,15 @@ void initrd_read_dir(initrd_dentry_t *entries, int num, vfs_inode_t *vfs_parent)
     vfs_inode_t *vfs_ino = vfs_create_inode(name, ino->mode, vfs_parent);
     vfs_ino->length = ino->length;  
     
+    void *file_start = initrd_ptr + ino->off;
+    
     if(ino->mode & S_MODE_DIR) {
       int d_num = ino->length / sizeof(initrd_inode_t);
-      initrd_dentry_t *d_entries = initrd_ptr + entries[0].off + sizeof(initrd_inode_t)*num;
+      initrd_dentry_t *d_entries = file_start;
       
-      // FIXME!!
       //initrd_read_dir(d_entries, d_num, vfs_ino);
+    } else {
+      vfs_ino->base = file_start;
     }
   }
 }

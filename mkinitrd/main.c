@@ -83,25 +83,45 @@ void initrd_write(initrd_inode_t *inodes, initrd_dentry_t *entries, int num) {
   initrd_inode_t *d_inodes[num];
   initrd_dentry_t *d_entries[num];  
   
+  int i_off = gen_off + num * ( sizeof(initrd_dentry_t) + sizeof(initrd_inode_t) );
   for(i = 0; i < num; i++) {
     printf("PREPEARING %s...\n", inodes[i].name);
-    inodes[i].off = entries[i].off = gen_off + num*sizeof(initrd_dentry_t) + sizeof(initrd_inode_t)*i;
+    entries[i].off = gen_off + num*sizeof(initrd_dentry_t) + sizeof(initrd_inode_t)*i;
     
     if(inodes[i].mode & S_MODE_DIR) {
       closedir(parent);
       parent = opendir(inodes[i].name);
-      parent_off = inodes[i].off;
+      parent_off = entries[i].off;
       
       d_inodes[i] = initrd_read_dir(inodes[i].name, &count[i]);
       d_entries[i] = initrd_generate_dentries(d_inodes[i], count[i]);
       inodes[i].length = count[i] * sizeof(initrd_inode_t);
       
+      inodes[i].off = entries[i].off;      
+      
       closedir(parent);
       parent = opendir("..");
+      chdir("..");
+    } else {
+      char *path = inodes[i].name;
+      FILE *f = fopen(path, "r");
+      if(f != NULL) {
+        fseek(f, 0, SEEK_END);
+        int len = ftell(f);
+        inodes[i].length = len;
+        printf("Filesize: %d bytes\n", len);
+        
+        inodes[i].off = i_off;
+        i_off += inodes[i].length;
+        
+        fclose(f);
+      } else {
+        printf("error opening file \'%s\'\n", path);
+      }
     }
   }
   
-  printf("writing directory entries at %d\n", gen_off);
+  printf("\nwriting directory entries at %d\n", gen_off);
   gen_off += fwrite(entries, 1, sizeof(initrd_dentry_t) * num, dest);
   
   for(i = 0; i < num; i++) {
@@ -109,10 +129,9 @@ void initrd_write(initrd_inode_t *inodes, initrd_dentry_t *entries, int num) {
     gen_off += fwrite(&inodes[i], 1, sizeof(initrd_inode_t), dest);
   }
   
-  printf("\n");
-  
   for(i = 0; i < num; i++) {
     if(inodes[i].mode & S_MODE_DIR) {
+/*
       closedir(parent);
       parent = opendir(inodes[i].name);
       parent_off = inodes[i].off;
@@ -121,6 +140,24 @@ void initrd_write(initrd_inode_t *inodes, initrd_dentry_t *entries, int num) {
       
       closedir(parent);
       parent = opendir("..");
+*/
+    } else {
+      char *path = inodes[i].name;
+      FILE *f = fopen(path, "r");
+      if(f != NULL) {
+        int len = inodes[i].length;
+        int j;
+        
+        printf("writing %d bytes at %d - %d (%s)\n", len, gen_off, inodes[i].off, inodes[i].name);
+        for(j = 0; j < len; j++) {
+          char byte;
+          fread(&byte, 1, 1, f);
+          gen_off += fwrite(&byte, 1, 1, dest);
+        }
+        fclose(f);
+      } else {
+        printf("error opening file \'%s\'\n", path);
+      }
     }
   }
 }

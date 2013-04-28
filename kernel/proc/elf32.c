@@ -23,7 +23,7 @@
 #include <driver/console.h>
 #include <proc/proc.h>
 
-proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
+loaded_elf_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
   elf32_header_t *header = image;
   elf32_program_header_t *ph;
   int i, j;
@@ -88,7 +88,17 @@ proc_t *load_elf32(void *image, vmm_context_t *context, const char *name) {
       vmm_unmap_page(context, dest);
     }
   }
-  proc_t *proc = create_proc((void*) header->entry, name, context, DPL_USERMODE);
   
-  return proc;
+  loaded_elf_t elf;
+  elf.entry = (void*) header->entry;
+  elf.name = name;
+  elf.context = context;
+  elf.dpl = DPL_USERMODE;
+  
+  return &elf;
 }
+
+proc_t *run_elf32(loaded_elf_t *elf) {
+  return create_proc(elf->entry, elf->name, elf->context, elf->dpl);
+}
+

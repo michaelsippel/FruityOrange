@@ -26,6 +26,7 @@
 #include <syscall.h>
 #include <mm.h>
 #include <vfs.h>
+#include <init/gdt.h>
 
 void scheduler_init_syscalls(void) {
   setup_syscall(SYSCALL_EXIT, "exit", &syscall_exit);
@@ -62,6 +63,38 @@ void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   vfs_inode_t *file = vfs_path_lookup(path);
   if(file == NULL) {
     printf("File not found!\n");
+  } else {
+    loaded_elf_t *elf = load_elf32(file->base, current_context, "exec");    
+    current_proc->name = elf->name;
+    current_proc->context = elf->context;
+    current_proc->used_mem_pages = 0;
+    
+    current_proc->ticks = 3;
+    current_proc->ticks_util_wake = -1;
+    current_proc->status = ACTIVE;
+    
+    *current_proc->cpu = (cpu_state_t) {
+      .eax = 0, .ebx = 0, .ecx = 0, .edx = 0,
+      .esi = 0, .edi = 0, .ebp = 0,
+      
+      .eip = (uint32_t) elf->entry,
+      
+      .eflags = 0x202,
+    };
+    
+    current_proc->name = elf->name;
+    current_proc->context = elf->context;
+    current_proc->dpl = elf->dpl;
+    
+    if(elf->dpl) {
+      void *stack = vmm_automap_kernel_page(current_context, current_proc->user_stack_phys);
+      memclr((uintptr_t) stack, PAGE_SIZE);
+      vmm_unmap_page(current_context, (uintptr_t) stack);
+      
+      current_proc->cpu->esp = current_proc->user_stack + PAGE_SIZE;
+      current_proc->cpu->cs = _USER_CS;
+      current_proc->cpu->ss = _USER_SS;
+    }
   }
 }
 
