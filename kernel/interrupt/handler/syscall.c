@@ -25,10 +25,11 @@
 #include <interrupt.h>
 #include <syscall.h>
 
-static syscall_t **syscall_table = NULL;
+#define MAX_SYSCALLS 0x30
+static syscall_t **syscall_table;
 
 void init_syscalltable(void) {
-  syscall_table = malloc(sizeof(syscall_t*));
+  syscall_table = calloc(sizeof(syscall_t*), MAX_SYSCALLS);
 }
 
 void setup_syscall(uint32_t id, const char *name, SYSCALL_HANDLER) {
@@ -51,7 +52,7 @@ cpu_state_t *handle_syscall(cpu_state_t *cpu) {
   } else {
     syscall_table[cpu->eax]->handler(&new_cpu->ebx, &new_cpu->ecx, &new_cpu->edx);
   }
-
+  
   return new_cpu;
 }
 

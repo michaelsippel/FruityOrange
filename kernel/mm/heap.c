@@ -1,7 +1,7 @@
 /**
  *  kernel/mm/heap.c
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2012-2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,71 +22,75 @@
 
 #include <mm.h>
 
-static alloc_nd_t *first_nd = NULL;
+static alloc_block_t *first_block = NULL;
 
 void init_heap(void) {
-  first_nd = (alloc_nd_t*) vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
-  first_nd->bytes = PAGE_SIZE;
-  first_nd->next_nd = NULL;
-  first_nd->prev_nd = NULL;
+  uintptr_t addr = vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
+  first_block->base = addr + sizeof(alloc_block_t);
+  first_block->size = PAGE_SIZE - sizeof(alloc_block_t);
+  first_block->next = NULL;
+  first_block->prev = NULL;
+  
+  malloc(1);
 }
 
-void insert_node(alloc_nd_t *node) {
-  first_nd->prev_nd = node;
-  node->next_nd = first_nd;
-  node->prev_nd = NULL;
-  first_nd = node;
-}
-
-void remove_node(alloc_nd_t *node) {
-  if(node->prev_nd) node->prev_nd->next_nd = node->next_nd;
-  if(node->next_nd) node->next_nd->prev_nd = node->prev_nd;
+alloc_block_t *heap_increase(size_t pages) {
+  uintptr_t paddr = NULL;
+  uintptr_t vaddr = vmm_find(current_context, pages, VADDR_KERNEL_HEAP_START, VADDR_KERNEL_HEAP_END);
+  
+  int i;
+  for(i = 0; i < pages; i++) {
+    paddr = pmm_alloc();
+    vmm_map_page(current_context, vaddr + i*PAGE_SIZE, paddr, VMM_KERNEL_FLAGS);
+  }
+  
+  alloc_block_t *node = first_block;
+  alloc_block_t *new  = vaddr;
+  
+  new->size = pages*PAGE_SIZE - sizeof(alloc_block_t);
+  new->base = vaddr + sizeof(alloc_block_t);
+  
+  new->prev = NULL;
+  new->next = first_block;
+  first_block->prev = new;
+  first_block = new;
+  
+  return new;
 }
 
 void *malloc(size_t bytes) {
-  if( bytes <= PAGE_SIZE && bytes > (PAGE_SIZE - sizeof(alloc_nd_t)) ) {
+  if( bytes <= PAGE_SIZE && bytes > (PAGE_SIZE - sizeof(alloc_block_t)) ) {
     return vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
   }
   
-  alloc_nd_t *node = first_nd;
+  alloc_block_t *node = first_block;
   
   // search for free nodes
-  int node_found = 0;
-  while(node != NULL && !node_found) {
-    if(node->bytes >= bytes) { // is enough space?
-      node_found = 1;
+  while(node != NULL) {
+    if(node->size >= bytes) { // is enough space?
+      if(node->prev == NULL) {
+        heap_increase(1);
+      }
+      node->prev->next = node->next;
+      if(node->next != NULL) {
+        node->next->prev = node->prev;
+      }
+      
+      node->prev = NULL;
+      node->next = NULL;
+      
+      return node->base;
     } else {
-      node = node->next_nd;
+      node = node->next;
     }
   }
   
-  // nothing avaiable - create new node
-  if(! node_found) {
-    size_t pages = (bytes + sizeof(alloc_nd_t) + PAGE_SIZE) / PAGE_SIZE;
-    uintptr_t vaddr_start = (uintptr_t) vmm_find(current_context, pages, VADDR_KERNEL_START, VADDR_KERNEL_END);
-    
-    int i;
-    for(i = 0; i < pages; i++) {
-      uintptr_t paddr = (uintptr_t) pmm_alloc();
-      uintptr_t vaddr = (uintptr_t) vaddr_start + i*PAGE_SIZE;
-      vmm_map_page(current_context, vaddr, paddr, VMM_KERNEL_FLAGS);
-    }
-    
-    node = (alloc_nd_t*) vaddr_start;
-    node->bytes = PAGE_SIZE * pages - sizeof(alloc_nd_t);
+  node = heap_increase((bytes+sizeof(alloc_block_t)+PAGE_SIZE)/PAGE_SIZE);
+  if(node != NULL) {
+    return node->base;
   }
   
-  // is there some space for more?
-  size_t rest = node->bytes - bytes;
-  if(rest > sizeof(alloc_nd_t)) {
-    alloc_nd_t *new_node = (alloc_nd_t*) node + sizeof(alloc_nd_t);
-    new_node->bytes = rest - sizeof(alloc_nd_t);
-    node->bytes = bytes;
-    insert_node(new_node);
-  }
-  
-  //remove_node(node);
-  return (void*) node + sizeof(alloc_nd_t);
+  return NULL;
 }
 
 void *calloc(size_t num, size_t size) {
@@ -97,8 +101,8 @@ void *calloc(size_t num, size_t size) {
 
 void *realloc(void *ptr, size_t bytes) {
   void *nptr = malloc(bytes);
-  alloc_nd_t *nd = ptr - sizeof(alloc_nd_t);
-  memmove(nptr, ptr, nd->bytes);
+  alloc_block_t *nd = ptr - sizeof(alloc_block_t);
+  memmove(nptr, ptr, nd->size);
   free(ptr);
   
   return nptr;
@@ -106,9 +110,13 @@ void *realloc(void *ptr, size_t bytes) {
 
 void free(void *ptr) {
   if((uintptr_t)ptr & (~PAGE_MASK)) {
-    alloc_nd_t *node = (alloc_nd_t*) ptr - sizeof(alloc_nd_t);
-    insert_node(node);
+    alloc_block_t *node = (alloc_block_t*) ptr - sizeof(alloc_block_t);
+    node->prev = NULL;
+    node->next = first_block;
+    first_block->prev = node;
+    first_block = node;
   } else {
     vmm_unmap_page(current_context, (uintptr_t) ptr);
   }
 }
+

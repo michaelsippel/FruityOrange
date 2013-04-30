@@ -24,12 +24,15 @@
 #include <stddef.h>
 
 #define PAGE_SIZE 4096
+#define PAGE_MASK 0xfff
 
-typedef struct alloc_nd {
-  size_t bytes;
-  struct alloc_nd *prev_nd;
-  struct alloc_nd *next_nd;
-} alloc_nd_t;
+typedef struct alloc_block {
+  size_t size;
+  void *base;
+  
+  struct alloc_block *prev;
+  struct alloc_block *next;
+} alloc_block_t;
 
 void exit(int status);
 

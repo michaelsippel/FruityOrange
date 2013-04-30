@@ -20,5 +20,6 @@ test
 concha
 mkinitrd
 sys_init
+ls
 *.lst~
 

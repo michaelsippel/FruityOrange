@@ -1,5 +1,5 @@
 /**
- *  include/sys/file.h
+ *  utils/ls/ls.c
  *
  *  (C) Copyright 2013 Michael Sippel
  *
@@ -16,28 +16,24 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _FILE_H
-#define _FILE_H
+#include <unistd.h>
+#include <stdio.h>
 
-#include <stdint.h>
-
-#define EOF (-1)
-
-typedef struct file {
-  char *fpos;
-  void *base;
-  uint8_t handle;
-  int8_t flags;
-  int8_t unget;
-  unsigned long alloc;
-  uint8_t buffincrement;
-} file_t;
-typedef struct file FILE;
-
-typedef struct dirent {
-  int id;
-  char *name;
-} dirent_t;
-
-#endif
+int main(void) {
+  int d = open(".", O_RDONLY, 0);
+  if(d == NULL) {
+    printf("Error.\n");
+    return -1;
+  }
+  
+  //dirent_t dentry;
+  //read(d, &dentry, sizeof(dirent_t));
+  //while( read(d, &dentry, sizeof(dirent_t)) ) {
+  //  printf("\t%s\n", dentry.name);
+  //}
+  
+  close(d);
+  
+  return 0;
+}
 

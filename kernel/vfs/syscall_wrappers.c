@@ -32,6 +32,7 @@ void vfs_init_syscalls(void) {
   setup_syscall(SYSCALL_SEEK, "seek", &syscall_seek);
   setup_syscall(SYSCALL_CHDIR, "chdir", &syscall_chdir);
   setup_syscall(SYSCALL_GETCWD, "getcwd", &syscall_getcwd);
+  setup_syscall(SYSCALL_READDIR, "readdir", &syscall_readdir);
 }
 
 void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -93,6 +94,18 @@ void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   } else {
     *ebx = -1;
   }
+}
+
+void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  fd_t fd = *ebx;
+  dirent_t *dentry = malloc(sizeof(dirent_t));
+  
+  vfs_inode_t *ino = current_proc->fd[fd].inode;
+  
+  dentry->name = ino->name;
+  dentry->id = ino->stat.id;
+  
+  *ebx = dentry;
 }
 
 void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -163,3 +176,4 @@ void syscall_getcwd(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   
   vfs_generate_path(buf, len, current_proc->work_dir);
 }
+

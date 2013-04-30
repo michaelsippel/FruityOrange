@@ -21,7 +21,6 @@
 
 .global _start
 _start:
-    call init_heap
     call main
     movl %eax, %ebx
     movl $0, %eax

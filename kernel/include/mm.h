@@ -49,10 +49,12 @@ extern const void kernel_end_virt;
 #define KERNEL_SIZE ((uintptr_t) &kernel_end_phys)
 #define KERNEL_PAGES ((KERNEL_SIZE+PAGE_SIZE) / PAGE_SIZE)
 
-#define VADDR_KERNEL_START ((uintptr_t) 0xc0000000)
-#define VADDR_KERNEL_END   ((uintptr_t) 0xffffffff)
 #define VADDR_USER_START ((uintptr_t) 0x00001000)
 #define VADDR_USER_END   ((uintptr_t) 0xbfffffff)
+#define VADDR_KERNEL_START ((uintptr_t) 0xc0000000)
+#define VADDR_KERNEL_END   ((uintptr_t) 0xffffffff)
+#define VADDR_KERNEL_HEAP_START ((uintptr_t) 0xc2000000)
+#define VADDR_KERNEL_HEAP_END   ((uintptr_t) 0xcf000000)
 #define VADDR_PT_START ((uintptr_t)   0xf0000000)
 
 #define PT_PADDR(c, i) (c->pagedir[i] & PAGE_MASK)
@@ -70,11 +72,13 @@ typedef struct vmm_context {
   uintptr_t pagedir_paddr;
 } vmm_context_t;
 
-typedef struct alloc_nd {
-  size_t bytes;
-  struct alloc_nd *prev_nd;
-  struct alloc_nd *next_nd;
-} alloc_nd_t;
+typedef struct alloc_block {
+  size_t size;
+  void *base;
+  
+  struct alloc_block *prev;
+  struct alloc_block *next;
+} alloc_block_t;
 
 void mm_init_syscalls(void);
 
@@ -117,8 +121,6 @@ extern vmm_context_t *kernel_context;
 
 // heap
 void init_heap(void);
-void insert_node(alloc_nd_t *node);
-void remove_node(alloc_nd_t *node);
 void *malloc(size_t bytes);
 void *calloc(size_t num, size_t size);
 void *realloc(void *ptr, size_t bytes);

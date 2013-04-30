@@ -75,6 +75,8 @@ int main(void) {
     puts(new_s);
     sleep(1);
   }
-  
+
+  printf("\n");  
+
   return 0;
 }

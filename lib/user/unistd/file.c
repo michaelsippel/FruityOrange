@@ -19,6 +19,7 @@
 #include <sys/syscalls.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <stddef.h>
 #include <unistd.h>
 
@@ -44,6 +45,12 @@ int read(fd_t fd, void *buf, size_t len) {
   return ret;
 }
 
+dirent_t *readdir(fd_t fd) {
+  dirent_t *d;
+  asm volatile("int $0x30" : "=b" (d) : "a" (SYSCALL_READDIR), "b" (fd));
+  return d;
+}
+
 int lseek(fd_t fd, int off, int whence) {
   int ret;
   asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_SEEK), "b" (fd), "c" (off), "d" (whence));
@@ -60,3 +67,4 @@ char *getcwd(char *buf, size_t len) {
   asm volatile("int $0x30" : : "a" (SYSCALL_GETCWD), "b" (buf), "c" (len));
   return buf;
 }
+
