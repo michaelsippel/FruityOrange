@@ -24,18 +24,19 @@
 
 static alloc_block_t *first_block = NULL;
 
-inline void *alloc_pages(size_t num) {
+void *alloc_pages(size_t num) {
   uintptr_t ptr;
   asm volatile("int $0x30" : "=c" (ptr) : "a" (SYSCALL_MALLOC), "b" (num));
   return (void*) ptr;
 }
 
-inline void free_pages(uintptr_t ptr, size_t num) {
+void free_pages(uintptr_t ptr, size_t num) {
   asm volatile("int $0x30" : : "a" (SYSCALL_MFREE), "b" (ptr), "c" (num));
 }
 
 void init_heap(void) {
   uintptr_t addr = alloc_pages(1);
+  first_block = addr;
   first_block->base = addr + sizeof(alloc_block_t);
   first_block->size = PAGE_SIZE - sizeof(alloc_block_t);
   first_block->next = NULL;
@@ -63,11 +64,11 @@ void *malloc(size_t bytes) {
   }
   
   alloc_block_t *node = first_block;
-
+  
   if(node == NULL) {
     init_heap();
-  }  
-
+  }
+  
   // search for free nodes
   while(node != NULL) {
     if(node->size >= bytes) { // is enough space?

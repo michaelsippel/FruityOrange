@@ -21,6 +21,8 @@
 
 .global _start
 _start:
+    push %ebx // argc
+    push %eax // argv
     call main
     movl %eax, %ebx
     movl $0, %eax

@@ -58,6 +58,8 @@ void syscall_waitpid(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 
 void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   const char *path = *ebx;
+  int argc = *ecx;
+  char **argv = *edx;  
   
   vfs_inode_t *file = vfs_path_lookup(path);
   if(file == NULL) {
@@ -73,7 +75,7 @@ void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     current_proc->status = ACTIVE;
     
     *current_proc->cpu = (cpu_state_t) {
-      .eax = 0, .ebx = 0, .ecx = 0, .edx = 0,
+      .eax = argc, .ebx = argv, .ecx = 0, .edx = 0,
       .esi = 0, .edi = 0, .ebp = 0,
       
       .eip = (uint32_t) elf->entry,

@@ -29,7 +29,7 @@ void waitpid(pid_t pid) {
   asm volatile("int $0x30" : : "a" (SYSCALL_WAITPID), "b" (pid));
 }
 
-void exec(const char *path) {
-  asm volatile("int $0x30" : : "a" (SYSCALL_EXEC), "b" (path));
+void exec(const char *path, int argc, char **argv) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_EXEC), "b" (path), "c" (argc), "d" (argv));
 }
 

@@ -26,12 +26,11 @@ static alloc_block_t *first_block = NULL;
 
 void init_heap(void) {
   uintptr_t addr = vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
+  first_block = addr;
   first_block->base = addr + sizeof(alloc_block_t);
   first_block->size = PAGE_SIZE - sizeof(alloc_block_t);
   first_block->next = NULL;
   first_block->prev = NULL;
-  
-  malloc(1);
 }
 
 alloc_block_t *heap_increase(size_t pages) {

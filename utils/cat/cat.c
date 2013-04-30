@@ -19,8 +19,13 @@
 #include <unistd.h>
 #include <stdio.h>
 
-int main(void) {
-  int f = open("hello.txt", O_RDONLY, 0);// TODO
+int main(int argc, char **argv) {
+  if(argc < 1) {
+    printf("Usage: %s [file]\n", "cat");//argv[0]);
+    return -1;
+  }
+  
+  int f = open(argv[0], O_RDONLY, 0);// TODO
   if(f == NULL) {
     printf("Error.\n");
     return -1;

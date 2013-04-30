@@ -36,8 +36,8 @@ typedef struct alloc_block {
 
 void exit(int status);
 
-inline void *alloc_pages(size_t num);
-inline void free_pages(uintptr_t ptr, size_t num);
+void *alloc_pages(size_t num);
+void free_pages(uintptr_t ptr, size_t num);
 void *malloc(size_t bytes);
 void *calloc(size_t num, size_t size);
 void *realloc(void *ptr, size_t bytes);

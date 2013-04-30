@@ -26,7 +26,7 @@ int main(void) {
   pid_t pid = fork();
   if(!pid) {
     printf("starting shell...\n");
-    exec("/concha");
+    exec("/concha", 0, 0);
   } else {
     waitpid(pid);
     printf("shell exited.\n");

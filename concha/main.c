@@ -67,26 +67,24 @@ void parse_cmd(char *str) {
     return;
   }
   
+  for(j = 0; arg_str[j] != '\0'; j++) {
+    if(arg_str[j] == ' ' || arg_str[j] == '\t') {
+      argc++;
+    }
+  }
+  
+  char *argv[argc];
+  for(k = 0, j = 0; k < argc; k++) {
+    size_t len = 0;
+    while(arg_str[j+1] != ' ' && arg_str[j+1] != '\t' && arg_str[j+1] != '\0') { j++; len++; }
+    argv[k] = malloc(len);
+    memcpy(argv[k], arg_str+1, len);
+    argv[k][len] = '\0';
+  }
+  
   int found = 0;
   for(i = 0; i < num_cmd; i++) {
     if( strcmp(cmd_str, commands[i].name) ) {
-      
-      for(j = 0; arg_str[j] != '\0'; j++) {
-	if(arg_str[j] == ' ' || arg_str[j] == '\t') {
-	  argc++;
-	}
-      }
-      
-      char *argv[argc];
-      
-      for(k = 0, j = 0; k < argc; k++) {
-	size_t len = 0;
-	while(arg_str[j+1] != ' ' && arg_str[j+1] != '\t' && arg_str[j+1] != '\0') { j++; len++; }
-        argv[i] = malloc(len);
-        memcpy(argv[i], arg_str+1, len);
-        argv[i][len] = '\0';
-      }
-      
       commands[i].handler(argc, argv);
       found = 1;
       break;
@@ -100,7 +98,7 @@ void parse_cmd(char *str) {
       
       pid_t pid = fork();
       if(!pid) {
-        exec(cmd_str);
+        exec(cmd_str, argc, argv);
       } else {
         waitpid(pid);
       }
