@@ -46,7 +46,7 @@ int read(fd_t fd, void *buf, size_t len) {
 }
 
 dirent_t *readdir(fd_t fd) {
-  dirent_t *d;
+  dirent_t *d = NULL;
   asm volatile("int $0x30" : "=b" (d) : "a" (SYSCALL_READDIR), "b" (fd));
   return d;
 }

@@ -97,15 +97,28 @@ void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 }
 
 void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  static int pos = 0;
+  vfs_inode_t *parent;
   fd_t fd = *ebx;
-  dirent_t *dentry = malloc(sizeof(dirent_t));
   
-  vfs_inode_t *ino = current_proc->fd[fd].inode;
+  parent = current_proc->fd[fd].inode;  
+  dirent_t *dentry = vmm_automap_user_page(current_context, pmm_alloc());//TODO!!!  
+
+  vfs_dentry_t *entries = vfs_read(parent, 0);  
+  int num = parent->length / sizeof(vfs_dentry_t);  
   
-  dentry->name = ino->name;
-  dentry->id = ino->stat.id;
-  
-  *ebx = dentry;
+  if(pos < num) {
+    vfs_inode_t *ino = entries[pos++].inode;
+    
+    char *name = vmm_automap_user_page(current_context, pmm_alloc());//TODO!!!
+    strcpy(name, ino->name);
+    dentry->name = name;
+    dentry->id = ino->stat.id;
+    *ebx = dentry;
+  } else {
+    pos = 0;
+    *ebx = NULL;
+  }
 }
 
 void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {

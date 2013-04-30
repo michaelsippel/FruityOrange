@@ -26,11 +26,10 @@ int main(void) {
     return -1;
   }
   
-  //dirent_t dentry;
-  //read(d, &dentry, sizeof(dirent_t));
-  //while( read(d, &dentry, sizeof(dirent_t)) ) {
-  //  printf("\t%s\n", dentry.name);
-  //}
+  dirent_t *dentry;
+  while( dentry = readdir(d) ) {
+    printf("\t%s\n", dentry->name);
+  }
   
   close(d);
   

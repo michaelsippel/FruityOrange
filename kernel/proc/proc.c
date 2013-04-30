@@ -214,8 +214,8 @@ int proc_kill(proc_t *proc) {
   proc->next->prev = proc->prev;
   
   // free data
-//   free(proc->cpu);
-//   free(proc);
+  free(proc->kernel_stack);
+  free(proc);
   
   return 0;
 }

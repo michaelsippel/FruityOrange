@@ -10,7 +10,7 @@ INC = -I ../../include -I ../../include/user
 
 ASFLAGS = -m32 $(INC)
 CFLAGS = -m32 -Wall -fno-stack-protector -fno-builtin -nostdinc $(INC)
-LDFLAGS = -melf_i386 -T../../lib/std_link.ld
+LDFLAGS = -melf_i386 -flto -T../../lib/std_link.ld
 
 $(SRC): $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $^ ../../lib/start.o $(LIBS)
