@@ -21,5 +21,6 @@ concha
 mkinitrd
 sys_init
 ls
+cat
 *.lst~
 
