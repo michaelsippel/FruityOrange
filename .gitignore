@@ -22,5 +22,6 @@ mkinitrd
 sys_init
 ls
 cat
+cp
 *.lst~
 

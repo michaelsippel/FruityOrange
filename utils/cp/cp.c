@@ -1,5 +1,5 @@
 /**
- *  utils/cat/cat.c
+ *  utils/cp/cp.c
  *
  *  (C) Copyright 2013 Michael Sippel
  *
@@ -20,25 +20,26 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-  if(argc < 1) {
-    printf("Usage: %s [file]\n", "cat");//argv[0]);
+  if(argc < 2) {
+    printf("Usage: %s [source] [destination]\n", "cp");//argv[0]);
     return -1;
   }
   
-  int f = open(argv[0], O_RDONLY, 0);// TODO
-  if(f == NULL) {
+  int src = open(argv[0], O_RDONLY, 0);
+  int dest = open(argv[1], O_WRONLY, 0);
+  if(src == NULL || dest == NULL) {
     printf("Error.\n");
     return -1;
   }
   
-  char c = 0;
+  char i = 0;
   do {
-    read(f, &c, 1);
-    printf("%c", c);
-  } while(c);
+    read(src, &i, 1);
+    write(dest, &i, 1);
+  } while(i);
   
-  //printf("\n");
-  close(f);
+  close(src);
+  close(dest);  
   
   return 0;
 }
