@@ -63,21 +63,17 @@ void *malloc(size_t bytes) {
   }
   
   alloc_block_t *node = first_block;
-  
   // search for free nodes
   while(node != NULL) {
     if(node->size >= bytes) { // is enough space?
-      if(node->prev == NULL) {
-        heap_increase(1);
-      }
-      node->prev->next = node->next;
-      if(node->next != NULL) {
-        node->next->prev = node->prev;
-      }
+      if(node->prev != NULL) node->prev->next = node->next;
+      if(node->next != NULL) node->next->prev = node->prev;
       
       node->prev = NULL;
-      node->next = NULL;
-      
+      node->next = NULL;     
+
+      heap_increase(1);      
+
       return node->base;
     } else {
       node = node->next;
@@ -86,7 +82,7 @@ void *malloc(size_t bytes) {
   
   node = heap_increase((bytes+sizeof(alloc_block_t)+PAGE_SIZE)/PAGE_SIZE);
   if(node != NULL) {
-    return node->base;
+    return malloc(bytes);
   }
   
   return NULL;

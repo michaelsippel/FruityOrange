@@ -103,7 +103,7 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   
   parent = current_proc->fd[fd].inode;  
   dirent_t *dentry = vmm_automap_user_page(current_context, pmm_alloc());//TODO!!!  
-
+  
   vfs_dentry_t *entries = vfs_read(parent, 0);  
   int num = parent->length / sizeof(vfs_dentry_t);  
   

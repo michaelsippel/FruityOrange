@@ -147,10 +147,10 @@ proc_t *proc_fork(proc_t *parent) {
   child->ppid = ++parent->child_count;
   child->status = ACTIVE;
   child->used_mem_pages = parent->used_mem_pages;
-  child->work_dir = parent->work_dir;  
+  child->work_dir = parent->work_dir;
   
   debug(PROC_DEBUG, "proc_fork(): forked pid %d from pid %d\n", child->pid, parent->pid);  
-
+  
   return child;
 }
 
