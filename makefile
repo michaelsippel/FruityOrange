@@ -12,6 +12,7 @@ kernel:
 
 mods:
 	$(MAKE) -C concha
+	$(MAKE) -C tractius
 	$(MAKE) -C init	
 	$(MAKE) -C test
 	$(MAKE) -C utils
@@ -35,6 +36,7 @@ clean:
 	$(MAKE) -C utils clean
 	$(MAKE) -C lib clean
 	$(MAKE) -C concha clean
+	$(MAKE) -C tractius clean
 	$(MAKE) -C init clean
 
 .PHONY: all kernel lib clean qemu

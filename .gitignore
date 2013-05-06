@@ -18,6 +18,7 @@ kernel
 kernel/kernel
 test
 concha
+tractius
 mkinitrd
 sys_init
 ls

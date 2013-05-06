@@ -35,6 +35,14 @@ static int x = 0, y = 0;
 #define PUTC(c) video_mem[(x++) + (y*80)] = ( c | (color << 8) );
 #define NEWLINE y ++; x = 0;
 
+#define ANSI_STATUS_SUCCESS    0x0
+#define ANSI_STATUS_INVALID    0x1
+#define ANSI_STATUS_INCOMPLETE 0x2
+
+char ansi_buf[16];
+int ansi_length = 0;
+int ansi_status = 0;
+
 void videotext_control(void) {
   if(x > videotext_width) {
     NEWLINE;
@@ -59,25 +67,96 @@ int putchar(char chr) {
   return 0;
 }
 
-int puts(const char *str) {
-  int i = 0;
+int parse_ansi(char *buf, int len) {
+  int i;
+  int n1 = 0, n2 = 0;
+  int have_n1 = 0, have_n2 = 0;
+  int have_delemiter = 0;
+  if(len == 0) return ANSI_STATUS_INCOMPLETE;
+  if(buf[0] != '\033') return ANSI_STATUS_INVALID;
+  if(len == 1) return ANSI_STATUS_INCOMPLETE;
+  if(buf[1] != '[') return ANSI_STATUS_INVALID;
+  if(len == 2) return ANSI_STATUS_INCOMPLETE;
 
-  while(*str) {
-    switch(*str){
-      case '\n':
-	NEWLINE;
-	break;
-      case '\t':
-	while(++x % TABULATOR_SIZE != 0);
-	break;
-      case '\r':
-	x--;
-	PUTC(' ');
-	x--;
-	break;
+  for(i = 2; i < len; i++) {
+    switch(buf[i]) {
+      case '0' ... '9':
+        if(!have_delemiter) {
+          n1 *= 10;
+          n1 += buf[i] - '0';
+          have_n1 = 1;
+        } else {
+          n2 *= 10;
+          n2 += buf[i] - '0';
+          have_n2 = 1;
+        }
+        break;
+      case ';':
+        if(have_delemiter) return ANSI_STATUS_INVALID;
+        have_delemiter = 1;
+        break;
+      
+      case 'm': // color
+        if(have_n1) {
+          if(have_n2) {
+            setBackgroundColor(n1);
+            setForegroundColor(n2);
+          } else {
+            setColor(n1);
+          }
+          return ANSI_STATUS_SUCCESS;
+        } else {
+          return ANSI_STATUS_INVALID;
+        }
+        break;
+      case 'J':
+        if(have_delemiter || !have_n1 || have_n2 || n1 != 2)
+          return ANSI_STATUS_INVALID;
+        
+        clearscreen();
+        return ANSI_STATUS_SUCCESS;
       default:
-	PUTC(*str);
-	break;
+        return ANSI_STATUS_INVALID;
+    }
+  }  
+  
+  return ANSI_STATUS_INCOMPLETE;
+}
+
+int puts(const char *str) {
+  int i = 0, j = 0;
+  
+  while(*str != '\0') {
+    if(*str == '\033' || ansi_length > 0) {
+      ansi_buf[ansi_length++] = *str;
+      ansi_status = parse_ansi(ansi_buf, ansi_length);
+      switch(ansi_status) {
+        case ANSI_STATUS_INCOMPLETE:
+          if(ansi_length <= sizeof(ansi_buf)) {
+            break;
+          }
+        case ANSI_STATUS_INVALID:
+          for(j = 0; j < ansi_length; j++) PUTC(ansi_buf[i]);
+        case ANSI_STATUS_SUCCESS:
+          ansi_length = 0;
+      }
+    } else {
+      switch(*str) {
+        case '\n':
+	  NEWLINE;
+	  break;
+        case '\t':
+	  while(++x % TABULATOR_SIZE != 0);
+	  break;
+        case '\r':
+	  x--;
+	  PUTC(' ');
+	  x--;
+	  break;
+        default:
+	  PUTC(*str);
+	  break;
+      }
     }
     videotext_control();
     i++;
@@ -140,7 +219,7 @@ void setForegroundColor(uint8_t fcolor) {
   color = ( (color&0xf0) | fcolor );
 }
 
-void setBackgroundcolor(uint8_t bcolor) {
+void setBackgroundColor(uint8_t bcolor) {
   color = ( (color&0x0f) | (bcolor << 4) );
 }
 
@@ -149,5 +228,8 @@ void clearscreen(void) {
   for( i = 0; i < (videotext_width * videotext_height); i++){
     video_mem[i] = color << 8;
   }
+  x = 0;
+  y = 0;
   setCursor(0, 0);
 }
+
