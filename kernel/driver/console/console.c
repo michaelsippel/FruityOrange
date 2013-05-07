@@ -96,6 +96,16 @@ int parse_ansi(char *buf, int len) {
         have_delemiter = 1;
         break;
       
+      case 'H':      
+        if(have_n1 && have_n2 && have_delemiter) {
+          x = n2 - 1;
+          y = n1 - 1;
+          setCursor(x, y);
+          return ANSI_STATUS_SUCCESS;
+        } else {
+          return ANSI_STATUS_INVALID;
+        }
+        break;
       case 'm': // color
         if(have_n1) {
           if(have_n2) {

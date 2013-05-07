@@ -21,33 +21,61 @@
 #include <string.h>
 #include <stdlib.h>
 
-char text[25][80];
+char text[24][81];
+int key = 0;
+int x = 0, y = 0;
+
+#define NEWLINE y++; x = 0;
+#define TAB_SIZE 8
 
 int main(void) {
-  int key = 0;
-  int x = 0, y = 0;
+  int i;
   
   while(key != 'q') {
-    clear();
+    puts("\033[2J");
     print();
     
-    key = getch();
-    text[y][x++] = key;
+    key = getch();    
+
+    switch(key) {
+      case '\n': // newline
+        NEWLINE;
+        break;
+      case '\t':
+        for(i = 0; i < TAB_SIZE; i++) {
+          text[y][x++] = ' ';
+        }
+      case '\r': // delete
+        text[y][--x] = ' ';
+        break;
+      default:
+        text[y][x++] = key;
+        break;
+    }
+    
+    if(x >= 80) {
+      NEWLINE;
+    } else if(x < 0) {
+      if(y > 0) {
+        x = 79;
+        y--;
+      } else {
+        x = 0;
+      }
+    }
   }
+  
   printf("\n");
   return 0;
 }
 
-void clear(void) {
-  puts("\033[2J");
-}
-
 void print(void) {
-  printf("\033[6;15mTractius                                                                        \n");
+  printf("\033[6;15mTractius                                                                [%d|%d] \n", x, y);
   puts("\033[7m");
   int i;
-  for(i = 0; i < 25; i++) {
-    printf("%s", text[i]);
+  for(i = 0; i < 23; i++) {
+    printf("%s\n", text[i]);
   }
+  printf("\033[%d;%dH", y+2, x+1);
 }
 
