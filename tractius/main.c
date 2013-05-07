@@ -22,22 +22,14 @@
 #include <stdlib.h>
 
 char text[24][81];
-int key = 0;
 int x = 0, y = 0;
 
 #define NEWLINE y++; x = 0;
 #define TAB_SIZE 8
 
-int main(void) {
+void insert_char(int key) {
   int i;
-  
-  while(key != 'q') {
-    puts("\033[2J");
-    print();
-    
-    key = getch();    
-
-    switch(key) {
+  switch(key) {
       case '\n': // newline
         NEWLINE;
         break;
@@ -63,6 +55,28 @@ int main(void) {
         x = 0;
       }
     }
+}
+
+int main(int argc, char **argv) {
+  int fd, c;
+  int key = 0;
+  
+  if(argc > 0) {
+    fd = open(argv[0], O_RDONLY, 0);
+    if(fd != NULL) {
+      do {
+        read(fd, &c, 1);
+        insert_char(c);
+      } while(c);
+    }
+  }
+  
+  while(key != 'q') {
+    puts("\033[2J");
+    print();
+    
+    key = getch();    
+    insert_char(key);
   }
   
   printf("\n");
