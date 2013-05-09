@@ -1,6 +1,8 @@
 SRCS = $(shell find -name '*.[cS]')
 OBJS = $(addsuffix .o,$(basename $(SRCS)))
 
+COM_OBJ = $(shell ar -t ../common/commonlibc.a)
+
 CC = gcc
 LD = ld
 

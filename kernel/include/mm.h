@@ -120,7 +120,12 @@ extern vmm_context_t *kernel_context;
 #endif
 
 // heap
+
+#define HEAP_MODUS_USER   1
+#define HEAP_MODUS_KERNEL 0
+
 void init_heap(void);
+void heap_change_mode(int new_modus);
 void *malloc(size_t bytes);
 void *calloc(size_t num, size_t size);
 void *realloc(void *ptr, size_t bytes);

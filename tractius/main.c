@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+char path[256];
 char text[24][81];
 int x = 0, y = 0;
 
@@ -62,6 +63,7 @@ int main(int argc, char **argv) {
   int key = 0;
   
   if(argc > 0) {
+    strcpy(path, argv[0]);
     fd = open(argv[0], O_RDONLY, 0);
     if(fd != NULL) {
       do {
@@ -69,6 +71,8 @@ int main(int argc, char **argv) {
         insert_char(c);
       } while(c);
     }
+  } else {
+    strcpy(path, "Untitled.txt");
   }
   
   while(key != 'q') {
@@ -84,12 +88,17 @@ int main(int argc, char **argv) {
 }
 
 void print(void) {
-  printf("\033[6;15mTractius                                                                [%d|%d] \n", x, y);
-  puts("\033[7m");
   int i;
+  char str[80];
+  sprintf(str, "[%s|%d|%d]", path, x, y);
+  printf("\033[6;15mTractius                                                                        \n", str);
+  printf("\033[1;%dH%s\n", 80-strlen(str), str);
+  
+  puts("\033[7m");
   for(i = 0; i < 23; i++) {
     printf("%s\n", text[i]);
   }
+  
   printf("\033[%d;%dH", y+2, x+1);
 }
 

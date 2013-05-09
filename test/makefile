@@ -1,7 +1,7 @@
 SRCS = $(shell find -name '*.[cS]')
 OBJS = $(addsuffix .o,$(basename $(SRCS)))
 
-LIBS = ../lib/user/userlibc.a ../lib/common/commonlibc.a 
+LIBS = ../lib/libc.a
 IMGSRC = ../build/image
 SRC = test
 DEST = $(IMGSRC)/$(SRC)
@@ -13,7 +13,7 @@ CFLAGS = -m32 -Wall -fno-stack-protector -fno-builtin -nostdinc $(INC)
 LDFLAGS = -melf_i386 -T../lib/std_link.ld
 
 $(SRC): $(OBJS)
-	$(LD) $(LDFLAGS) -o $@ $^ ../lib/start.o $(LIBS)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 	cp $(SRC) $(DEST)
 
 %.o: %.c

@@ -101,8 +101,10 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   vfs_inode_t *parent;
   fd_t fd = *ebx;
   
+  heap_change_mode(HEAP_MODUS_USER);
+  
   parent = current_proc->fd[fd].inode;  
-  dirent_t *dentry = vmm_automap_user_page(current_context, pmm_alloc());//TODO!!!  
+  dirent_t *dentry = vmm_automap_user_page(current_context, pmm_alloc());//malloc(sizeof(dirent_t));  
   
   vfs_dentry_t *entries = vfs_read(parent, 0);  
   int num = parent->length / sizeof(vfs_dentry_t);  
@@ -110,7 +112,7 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   if(pos < num) {
     vfs_inode_t *ino = entries[pos++].inode;
     
-    char *name = vmm_automap_user_page(current_context, pmm_alloc());//TODO!!!
+    char *name = vmm_automap_user_page(current_context, pmm_alloc());//malloc(strlen(ino->name));
     strcpy(name, ino->name);
     dentry->name = name;
     dentry->id = ino->stat.id;
@@ -119,6 +121,8 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     pos = 0;
     *ebx = NULL;
   }
+  
+  heap_change_mode(HEAP_MODUS_KERNEL);  
 }
 
 void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -153,7 +157,7 @@ void syscall_seek(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     case SEEK_SET: // absolute
       current_proc->fd[fd].pos = off;
       break;
-    case SEEK_CUR: // relative from begin
+    case SEEK_CUR: // relative from current position
       current_proc->fd[fd].pos += off;
       break;
     case SEEK_END: // relative from end

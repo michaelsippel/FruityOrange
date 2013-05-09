@@ -1,14 +1,14 @@
+OBJS = $(shell find -name '*.o')
+
 all:
 	make -C common
-	make -C user	
-	gcc -m32 -c -o start.o start.S
+	make -C user
+	ar -rcs libc.a $(OBJS)
 
 clean:
 	make -C common clean
 	make -C user clean
-	rm start.o
+	rm libc.a
 
-
-
-
+.PHONY: clean
 

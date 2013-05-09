@@ -23,19 +23,53 @@
 #include <mm.h>
 
 static alloc_block_t *first_block = NULL;
+static alloc_block_t *first_user_block = NULL;
+static int modus = HEAP_MODUS_KERNEL;
 
 void init_heap(void) {
   uintptr_t addr = vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
   first_block = addr;
   first_block->base = addr + sizeof(alloc_block_t);
   first_block->size = PAGE_SIZE - sizeof(alloc_block_t);
+  
   first_block->next = NULL;
   first_block->prev = NULL;
+  
+  addr = vmm_automap_user_page(current_context, (uintptr_t) pmm_alloc());
+  first_user_block = addr;
+  first_user_block->base = addr + sizeof(alloc_block_t);
+  first_user_block->size = PAGE_SIZE - sizeof(alloc_block_t);
+  
+  first_user_block->next = NULL;
+  first_user_block->prev = NULL;
+}
+
+void heap_change_mode(int new_modus) {
+  modus = new_modus;
+}
+
+void insert_block(alloc_block_t *block) {
+  if(modus == HEAP_MODUS_USER) {
+    block->next = first_user_block;
+    block->prev = NULL;
+    first_user_block->prev = block;
+    first_user_block = block;
+  } else {
+    block->next = first_block;
+    block->prev = NULL;
+    first_block->prev = block;
+    first_block = block;
+  }
 }
 
 alloc_block_t *heap_increase(size_t pages) {
   uintptr_t paddr = NULL;
-  uintptr_t vaddr = vmm_find(current_context, pages, VADDR_KERNEL_HEAP_START, VADDR_KERNEL_HEAP_END);
+  uintptr_t vaddr = NULL;
+  
+  if(modus == HEAP_MODUS_USER)
+    vaddr = vmm_find(current_context, pages, VADDR_USER_START, VADDR_USER_END);
+  else
+    vaddr = vmm_find(current_context, pages, VADDR_KERNEL_HEAP_START, VADDR_KERNEL_HEAP_END);
   
   int i;
   for(i = 0; i < pages; i++) {
@@ -43,37 +77,33 @@ alloc_block_t *heap_increase(size_t pages) {
     vmm_map_page(current_context, vaddr + i*PAGE_SIZE, paddr, VMM_KERNEL_FLAGS);
   }
   
-  alloc_block_t *node = first_block;
   alloc_block_t *new  = vaddr;
   
   new->size = pages*PAGE_SIZE - sizeof(alloc_block_t);
   new->base = vaddr + sizeof(alloc_block_t);
   
-  new->prev = NULL;
-  new->next = first_block;
-  first_block->prev = new;
-  first_block = new;
+  // insert into list
+  insert_block(new);
   
   return new;
 }
 
 void *malloc(size_t bytes) {
   if( bytes <= PAGE_SIZE && bytes > (PAGE_SIZE - sizeof(alloc_block_t)) ) {
-    return vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
+    if(modus == HEAP_MODUS_USER)
+      return vmm_automap_user_page(current_context, (uintptr_t) pmm_alloc());
+    else
+      return vmm_automap_kernel_page(current_context, (uintptr_t) pmm_alloc());
   }
   
-  alloc_block_t *node = first_block;
+  alloc_block_t *node = first_block->next;
   // search for free nodes
   while(node != NULL) {
     if(node->size >= bytes) { // is enough space?
-      if(node->prev != NULL) node->prev->next = node->next;
-      if(node->next != NULL) node->next->prev = node->prev;
+      // remove from list
+      node->prev->next = node->next;
+      node->next->prev = node->prev;
       
-      node->prev = NULL;
-      node->next = NULL;     
-
-      heap_increase(1);      
-
       return node->base;
     } else {
       node = node->next;
@@ -106,10 +136,9 @@ void *realloc(void *ptr, size_t bytes) {
 void free(void *ptr) {
   if((uintptr_t)ptr & (~PAGE_MASK)) {
     alloc_block_t *node = (alloc_block_t*) ptr - sizeof(alloc_block_t);
-    node->prev = NULL;
-    node->next = first_block;
-    first_block->prev = node;
-    first_block = node;
+    
+    // insert into list
+    insert_block(node);
   } else {
     vmm_unmap_page(current_context, (uintptr_t) ptr);
   }
