@@ -46,9 +46,10 @@ int read(fd_t fd, void *buf, size_t len) {
 }
 
 dirent_t *readdir(fd_t fd) {
-  dirent_t *d = NULL;
-  asm volatile("int $0x30" : "=b" (d) : "a" (SYSCALL_READDIR), "b" (fd));
-  return d;
+  dirent_t d;
+  dirent_t *ret;
+  asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_READDIR), "b" (fd), "c" (&d));
+  return ret;
 }
 
 int lseek(fd_t fd, int off, int whence) {

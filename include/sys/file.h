@@ -36,7 +36,7 @@ typedef struct file FILE;
 
 typedef struct dirent {
   int id;
-  char *name;
+  char name[256];
 } dirent_t;
 
 #endif

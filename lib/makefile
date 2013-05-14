@@ -3,7 +3,10 @@ OBJS = $(shell find -name '*.o')
 all:
 	make -C common
 	make -C user
-	ar -rcs libc.a $(OBJS)
+	make -C . libc.a
+
+libc.a: $(OBJS)
+	ar -rcs $@ $^
 
 clean:
 	make -C common clean

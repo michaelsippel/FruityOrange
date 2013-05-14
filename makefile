@@ -31,10 +31,10 @@ qemu: cdrom-img
 	qemu-system-i386 -d int,cpu_reset -cdrom cdrom.iso
 
 clean:
+	$(MAKE) -C lib clean
 	$(MAKE) -C kernel clean
 	$(MAKE) -C test clean
 	$(MAKE) -C utils clean
-	$(MAKE) -C lib clean
 	$(MAKE) -C concha clean
 	$(MAKE) -C tractius clean
 	$(MAKE) -C init clean
