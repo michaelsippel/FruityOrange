@@ -37,7 +37,7 @@ vmm_context_t *kernel_context;
 static bool paging_enabled = FALSE;
 static uint32_t cr0;
 
-void init_vmm(void) {
+void init_vmm(multiboot_info_t *mb_info) {
   uintptr_t kernel_context_paddr = (uintptr_t) pmm_alloc();
   kernel_context = (void*) kernel_context_paddr + VADDR_KERNEL_START;
   memclr(kernel_context, PAGE_SIZE);
@@ -49,10 +49,22 @@ void init_vmm(void) {
   kernel_context->pagedir = pagedir;
   kernel_context->pagedir_paddr = pagedir_paddr;
   
-  vmm_map_area(kernel_context, (uintptr_t) 0, (uintptr_t) 0, KERNEL_PAGES, VMM_KERNEL_FLAGS);
   vmm_map_area(kernel_context, VADDR_KERNEL_START, (uintptr_t) 0, KERNEL_PAGES, VMM_KERNEL_FLAGS);// kernel
   vmm_map_area(kernel_context, VIDEOMEM_START, VIDEOMEM_START, VIDEOMEM_PAGES, VMM_KERNEL_FLAGS);// videomemory (0xB8000 - 0xBFFFF)
- 
+  // multiboot
+  vmm_map_page(kernel_context, (uintptr_t)mb_info & PAGE_MASK, ((uintptr_t)mb_info& PAGE_MASK) - VADDR_KERNEL_START, VMM_KERNEL_FLAGS); 
+  vmm_map_page(kernel_context, mb_info->mbs_mods_addr & PAGE_MASK, mb_info->mbs_mods_addr & PAGE_MASK, VMM_KERNEL_FLAGS);
+  int i;
+  uintptr_t addr;
+  multiboot_module_t *modules = (void*) mb_info->mbs_mods_addr;
+  for(i = 0; i < mb_info->mbs_mods_count; i++) {
+    addr = modules[i].mod_start & PAGE_MASK;
+    while(addr < modules[i].mod_end) {
+      vmm_map_page(kernel_context, addr, addr, VMM_KERNEL_FLAGS);
+      addr += PAGE_SIZE;
+    }
+  }
+  
   void *pd = vmm_automap_kernel_page(kernel_context, pagedir_paddr);
   void *ct = vmm_automap_kernel_page(kernel_context, kernel_context_paddr);
   kernel_context->pagedir = pd;

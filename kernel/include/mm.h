@@ -86,13 +86,13 @@ void syscall_malloc_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_mfree_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 // pmm
-void init_pmm(struct multiboot_info *mb_info);
+void init_pmm(multiboot_info_t *mb_info);
 void *pmm_alloc(void);
 void pmm_free(void *ptr);
 void pmm_mark_used(void *ptr);
 
 // vmm
-void init_vmm(void);
+void init_vmm(multiboot_info_t *mb_info);
 inline void vmm_enable(void);
 inline void vmm_disable(void);
 vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index, uint8_t flags);
@@ -120,12 +120,7 @@ extern vmm_context_t *kernel_context;
 #endif
 
 // heap
-
-#define HEAP_MODUS_USER   1
-#define HEAP_MODUS_KERNEL 0
-
 void init_heap(void);
-void heap_change_mode(int new_modus);
 void *malloc(size_t bytes);
 void *calloc(size_t num, size_t size);
 void *realloc(void *ptr, size_t bytes);

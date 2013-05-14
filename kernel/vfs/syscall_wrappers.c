@@ -101,8 +101,6 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   vfs_inode_t *parent;
   fd_t fd = *ebx;
   
-  heap_change_mode(HEAP_MODUS_USER);
-  
   parent = current_proc->fd[fd].inode;  
   dirent_t *dentry = vmm_automap_user_page(current_context, pmm_alloc());//malloc(sizeof(dirent_t));  
   
@@ -121,8 +119,6 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     pos = 0;
     *ebx = NULL;
   }
-  
-  heap_change_mode(HEAP_MODUS_KERNEL);  
 }
 
 void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {

@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 char path[256];
-char text[24][81];
+char text[23][81];
 int x = 0, y = 0;
 
 #define NEWLINE y++; x = 0;
@@ -75,15 +75,24 @@ int main(int argc, char **argv) {
     strcpy(path, "Untitled.txt");
   }
   
-  while(key != 'q') {
+  while(1) {
     puts("\033[2J");
     print();
     
-    key = getch();    
-    insert_char(key);
+    key = getch();
+    if(key != 0) {  
+      insert_char(key);
+    } else {
+      key = getch();
+      switch(key) {
+        case 'q':
+          printf("\033[25;1H\n");
+          return 0;
+      }
+    }
   }
   
-  printf("\n");
+  printf("\033[25;1H\n");
   return 0;
 }
 
@@ -91,14 +100,14 @@ void print(void) {
   int i;
   char str[80];
   sprintf(str, "[%s|%d|%d]", path, x, y);
-  printf("\033[6;15mTractius                                                                        \n", str);
+  printf("\033[6;15m Tractius                                                                       \n");
   printf("\033[1;%dH%s\n", 80-strlen(str), str);
   
   puts("\033[7m");
   for(i = 0; i < 23; i++) {
     printf("%s\n", text[i]);
   }
-  
+  printf(" \033[6;15m AltGr+q - Quit                                                               \033[0;7m");
   printf("\033[%d;%dH", y+2, x+1);
 }
 
