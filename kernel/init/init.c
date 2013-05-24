@@ -58,6 +58,8 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x06);
   printf("The Fruity-kernel is starting now...\n");
   setColor(0x07);
+  dinip("Initalizing PIT... ");
+    init_pit(PIT_FREQ);endini();
   kinip("Initalizing pmm... ");
     init_pmm(mb_info);endini();
   kinip("Initalizing paging... ");
@@ -70,34 +72,20 @@ void init(struct multiboot_info *mb_info) {
     init_heap();endini();
   kinip("Initalizing syscalltable... ");
     init_syscalltable();endini();
-  kinip("Register mm syscalls... ");
-    mm_init_syscalls();endini();
-  kinip("Initalizing scheduler... ");
-    init_scheduler();endini();
-  kinip("Initalizing VFS... ");
-    init_vfs();endini();
-  
-  
   dinip("Initalizing terminal... ");
     init_console();endini();
-  dinip("Initalizing PIT... ");
-    init_pit(PIT_FREQ);endini();
   sti();
   dinip("Initalizing CMOS... ");
     init_cmos();endini();
   dinip("Initalizing keyboard... ");
     init_keyboard();endini();
   cli();
-  
-  cmos_time_t *time = get_cmos_time();
-  tm_t tm = mktm(time);
-  time_t time_stamp = mktime(tm);
-  tm_t new_tm = gmtime(time_stamp);
-  
-  printf("\nTimestamp: %d\n", time_stamp);
-  
-  printf("Date: %d/%d/%d  ", new_tm.mday, new_tm.mon, new_tm.year);
-  printf("Time: %d:%d:%d (UTC)\n", new_tm.hour, new_tm.min, new_tm.sec);
+  kinip("Register mm syscalls... ");
+    mm_init_syscalls();endini();
+  kinip("Initalizing scheduler... ");
+    init_scheduler();endini();
+  kinip("Initalizing VFS... ");
+    init_vfs();endini();
   
   setColor(0x06);
   printf("The kernel is successful started!\n");
@@ -116,7 +104,7 @@ void init(struct multiboot_info *mb_info) {
     }
     
     printf("Loading initial ramdisk...\n");
-    vfs_load_initrd(mods[0]);
+    vfs_load_initrd(mods[0]);  
     
     if(mod_count > 1) {
       loaded_elf_t *elf = load_elf32(mods[1], vmm_create_context(), "init");
@@ -127,6 +115,8 @@ void init(struct multiboot_info *mb_info) {
   } else {
     printf("error: no modules found!\n");
   }
+  setColor(0x07);
+  clearscreen();
   sti();
   while(1) {
     printf("%c", getch());

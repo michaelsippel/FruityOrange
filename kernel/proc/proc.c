@@ -197,6 +197,10 @@ int proc_exit(proc_t *proc, int status) {
     }
   }
   
+  if(proc->pid == 1) {
+    printf("Init exited.\n");
+  }
+  
   // TODO
   proc_kill(proc);
   

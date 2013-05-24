@@ -29,25 +29,22 @@ int command_cd(uint8_t argc, uint8_t **argv) {
     int ret = chdir(argv[0]);
     if(ret < 0) {
       if(ret == -1) {
-	printf("\'%s\' ist kein Verzeichnis!\n", argv[0]);
+	printf("\'%s\' is no directory!\n", argv[0]);
       } else {
-	printf("Verzeichnis nicht gefunden!\n");
+	printf("No such file or directory!\n");
       }
-    } else {
-//       printf("nach \'%s\' gewechselt.\n", argv[0]);
     }
-  } else {
-    printf("Kein Pfad angegeben!\n");
   }
+  
   return 0;
 }
 
 int command_help(uint8_t argc, uint8_t **argv) {
   printf(
     "Concha - Help\n"
-    "\tcd - Verzeichnich wechseln\n"
-    "\thelp - diese Hilfe\n"
-    "\texit - shell verlassen\n"
+    "\tcd - change directory\n"
+    "\thelp - this help\n"
+    "\texit - exit shell\n"
   );
   return 0;
 }

@@ -35,7 +35,7 @@ void initrd_read_dir(initrd_dentry_t *entries, int num, vfs_inode_t *vfs_parent)
     strcpy(name, ino->name);
     
     vfs_inode_t *vfs_ino = vfs_create_inode(name, ino->mode, vfs_parent);
-    vfs_ino->length = ino->length;  
+    vfs_ino->length = ino->length;
     
     void *file_start = initrd_ptr + ino->off;
     

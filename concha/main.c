@@ -93,7 +93,7 @@ void parse_cmd(char *str) {
   
   if(!found) {
     int fd;
-    if( (fd = open(cmd_str, O_RDWR, 0)) > 0 ) {
+    if( (fd = open(cmd_str, O_RDONLY, 0)) > 0 ) {
       close(fd);
       
       pid_t pid = fork();
@@ -103,7 +103,7 @@ void parse_cmd(char *str) {
         waitpid(pid);
       }
     } else {
-      printf("Unbekannter Befehl \'%s\'!\n\'help\' fuer Hilfe\n", cmd_str);
+      printf("Unknown command \'%s\'!\n\'help\' for help\n", cmd_str);
     }
   }
 }

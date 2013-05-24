@@ -45,7 +45,7 @@ void setCursor(int x, int y);
 void setColor(uint8_t ncolor);
 uint8_t getColor(void);
 void setForegroundColor(uint8_t fcolor);
-void setBackgroundcolor(uint8_t bcolor);
+void setBackgroundColor(uint8_t bcolor);
 void clearscreen(void);
 
 void putc_syscall_wrapper(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);

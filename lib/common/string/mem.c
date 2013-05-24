@@ -48,3 +48,4 @@ void *memclr(void *addr, size_t n) {
   while(n-- > 0) *tmp++ = 0;
   return addr;
 }
+

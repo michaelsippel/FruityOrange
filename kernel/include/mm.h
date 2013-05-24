@@ -75,6 +75,7 @@ typedef struct vmm_context {
 typedef struct alloc_block {
   size_t size;
   void *base;
+  int status;
   
   struct alloc_block *prev;
   struct alloc_block *next;
@@ -120,7 +121,14 @@ extern vmm_context_t *kernel_context;
 #endif
 
 // heap
+
+#define HEAP_STATUS_FREE 0
+#define HEAP_STATUS_USED 1
+
 void init_heap(void);
+void *heap_pages(size_t pages);
+alloc_block_t *heap_increase(size_t pages);
+alloc_block_t *heap_insert_block(alloc_block_t *block);
 void *malloc(size_t bytes);
 void *calloc(size_t num, size_t size);
 void *realloc(void *ptr, size_t bytes);

@@ -33,15 +33,7 @@ static uid_t uid = 0;
 static gid_t gid = 0;
 
 void init_vfs(void) {
-  root = malloc(sizeof(vfs_inode_t));
-  memclr(root, sizeof(vfs_inode_t));
-  root->name = "root";
-  root->stat.id = id_counter++;
-  root->stat.mode = S_MODE_DIR | S_IRUSR | S_IWUSR;
-  root->base = NULL;
-  root->length = 0;
-  root->parent = NULL;
-  
+  root = vfs_create_inode("root", S_MODE_DIR | S_IRUSR | S_IWUSR, NULL);
   vfs_init_syscalls();
 }
 
@@ -54,14 +46,17 @@ void vfs_inode_list(vfs_inode_t *parent) {
   if(parent == NULL) {
     parent = root;
   }
+  
   vfs_dentry_t *entries = vfs_read(parent, 0);
   int i;
+  
   int num = parent->length / sizeof(vfs_dentry_t);
   printf("inode-list from parent \"%s\" (%d)\n", parent->name, parent->stat.id);
   for(i = 0; i < num; i++) {
     vfs_dentry_t dentry = entries[i];
-    stat_t stat = dentry.inode->stat;
-    printf("\t%c%c%c%c%c%c%c%c%c%c %s\n",
+    vfs_inode_t *inode = dentry.inode;
+    stat_t stat = inode->stat;
+    printf("\t%c %c%c%c %c%c%c %c%c%c %s\n",
 	   (S_ISDIR(stat) ? 'd' : '-'),
 	   ((stat.mode & S_IRUSR) ? 'r' : '-'),
 	   ((stat.mode & S_IWUSR) ? 'w' : '-'),
@@ -147,8 +142,9 @@ int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
     
     uint8_t *nbase = (uint8_t*) inode->base + off;
     uint8_t *wbase = (uint8_t*) base;
+    
     while (i++ < bytes) {
-	*nbase++ = *wbase++;
+      *nbase++ = *wbase++;
     }
   } else {
     printf("[vfs] inode %d isn't writable! (0x%x)\n", inode->stat.id, inode);

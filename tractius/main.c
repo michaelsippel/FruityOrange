@@ -93,6 +93,8 @@ int main(int argc, char **argv) {
   }
   
   printf("\033[25;1H\n");
+  close(fd);
+  
   return 0;
 }
 

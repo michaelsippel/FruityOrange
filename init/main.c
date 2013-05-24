@@ -21,11 +21,16 @@
 #include <unistd.h>
 
 int main(void) {
-  printf("Init\n");
+  time_t t = time();
+  tm_t tm = gmtime(t);
+  printf("\033[0;6mWelcome to FruityOrange!\033[0;7m\n"
+         "%d/%d/%d\n"
+         "%d:%d:%d (UTC)\n", 
+         tm.mday, tm.mon, tm.year, 
+         tm.hour, tm.min, tm.sec);
   
   pid_t pid = fork();
   if(!pid) {
-    printf("starting shell...\n");
     exec("/concha", 0, 0);
   } else {
     waitpid(pid);
