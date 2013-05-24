@@ -39,6 +39,7 @@ void main(void) {
 void parse_cmd(char *str) {
   sh_cmd_t commands[] = {
     {"cd",   &command_cd},
+    {"cls",  &command_cls},
     {"help", &command_help},
     {"exit", &command_exit}
   };

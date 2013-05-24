@@ -29,6 +29,7 @@ typedef struct {
 void parse_cmd(char *str);
 
 int command_cd(uint8_t argc, uint8_t **argv);
+int command_cls(uint8_t argc, uint8_t **argv);
 int command_help(uint8_t argc, uint8_t **argv);
 int command_exit(uint8_t argc, uint8_t **argv);
 

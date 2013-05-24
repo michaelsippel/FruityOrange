@@ -39,10 +39,17 @@ int command_cd(uint8_t argc, uint8_t **argv) {
   return 0;
 }
 
+int command_cls(uint8_t argc, uint8_t **argv) {
+  printf("\033[2J");
+  
+  return 0;
+}
+
 int command_help(uint8_t argc, uint8_t **argv) {
   printf(
     "Concha - Help\n"
     "\tcd - change directory\n"
+    "\tcls - clear screen\n"
     "\thelp - this help\n"
     "\texit - exit shell\n"
   );
