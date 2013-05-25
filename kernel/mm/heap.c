@@ -25,7 +25,7 @@
 static alloc_block_t *first_block = NULL;
 
 void init_heap(void) {
-  //heap_increase(PAGE_SIZE);
+  // heap now will be installed automatically
 }
 
 void *heap_pages(size_t pages) {
@@ -46,11 +46,11 @@ void *heap_pages(size_t pages) {
 alloc_block_t *heap_insert_block(alloc_block_t *block) {
   if(first_block != NULL) {
     first_block->prev = block;
-    block->next = first_block;
-    block->prev = NULL;
   }
   
-  first_block = block;  
+  block->next = first_block;
+  block->prev = NULL;
+  first_block = block;
   
   return block;
 }
@@ -67,14 +67,13 @@ alloc_block_t *heap_increase(size_t bytes) {
   block->next = NULL;
   block->prev = NULL;
   
-  //heap_insert_block(block);
+  heap_insert_block(block);
   
   return block;
 }
 
-void *malloc(size_t bytes) {
+void *malloc(size_t bytes) { 
   alloc_block_t *block = first_block;
-  /* FIXME
   while(block != NULL) {
     if(block->size >= bytes && block->status == HEAP_STATUS_FREE) {
       block->status = HEAP_STATUS_USED;
@@ -83,7 +82,7 @@ void *malloc(size_t bytes) {
       block = block->next;
     }
   }
-  */
+  
   block = heap_increase(bytes);
   if(block != NULL) {
     block->status = HEAP_STATUS_USED;
@@ -100,12 +99,16 @@ void *calloc(size_t num, size_t size) {
 }
 
 void *realloc(void *ptr, size_t bytes) {
-  void *nptr = malloc(bytes);
+  void *nptr;
+  alloc_block_t *block = ptr - sizeof(alloc_block_t);
   
-  if(nptr != NULL) {
-    alloc_block_t *block = ptr - sizeof(alloc_block_t);
-    memmove(nptr, ptr, block->size);
-    free(ptr);
+  if(bytes > block->size) {
+    nptr = malloc(bytes);
+    
+    if(nptr != NULL) {
+      memmove(nptr, ptr, block->size);
+      free(ptr);
+    }
   }
   
   return nptr;

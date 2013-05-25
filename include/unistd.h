@@ -35,7 +35,7 @@
 #define O_RDWR   0x04 /* read and write */
 #define O_APPEND 0x08 /* append at end of file */
 #define O_TRUNC  0x10 /* clear the file */
-#define O_CREAT  0x20 /* create the file*/
+#define O_CREAT  0x20 /* create the file */
 #define O_EXCL   0x40 /* forced file creation. if it already exist: fail */
 
 #ifndef _NO_USER_INC
@@ -43,3 +43,4 @@
 #endif
 
 #endif
+

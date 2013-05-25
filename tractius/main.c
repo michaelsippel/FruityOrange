@@ -55,21 +55,32 @@ void insert_char(int key) {
       } else {
         x = 0;
       }
-    }
+  }
+}
+
+void save(int fd) {
+  if(fd == -1) {
+    fd = open(path, O_RDWR | O_CREAT, 0);
+  }
+  
+  // TODO
 }
 
 int main(int argc, char **argv) {
-  int fd, c;
+  int fd = -1, c;
   int key = 0;
   
   if(argc > 0) {
     strcpy(path, argv[0]);
-    fd = open(argv[0], O_RDONLY, 0);
-    if(fd != NULL) {
+    fd = open(argv[0], O_RDWR | O_CREAT, 0);
+    if(fd >= 0) {
       do {
         read(fd, &c, 1);
         insert_char(c);
       } while(c);
+    } else {
+      printf("\033[4;15mtractius: File not found!\033[0;7m\n");
+      return;
     }
   } else {
     strcpy(path, "Untitled.txt");
@@ -88,6 +99,9 @@ int main(int argc, char **argv) {
         case 'q':
           printf("\033[25;1H\n");
           return 0;
+        case 's':
+          save(fd);
+          break;
       }
     }
   }
@@ -109,7 +123,7 @@ void print(void) {
   for(i = 0; i < 23; i++) {
     printf("%s\n", text[i]);
   }
-  printf(" \033[6;15m AltGr+q - Quit                                                               \033[0;7m");
+  printf(" \033[6;15m AltGr  +q-Quit  +s-Save                                                      \033[0;7m");
   printf("\033[%d;%dH", y+2, x+1);
 }
 

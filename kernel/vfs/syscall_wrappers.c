@@ -45,7 +45,10 @@ void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   
   if(inode == NULL) { 
     if(oflags & O_CREAT) {// create inode
-      // TODO
+      // TODO: what if here is a path with subdirs given?
+      char *name = malloc(strlen(path));
+      strcpy(name, path);
+      inode = vfs_create_inode(name, mode, vfs_root());
     } else {
       *ebx = -1;
       return;

@@ -43,7 +43,7 @@ void parse_cmd(char *str) {
     {"help", &command_help},
     {"exit", &command_exit}
   };
-  int num_cmd = 3;
+  int num_cmd = 4;
   int i=0, j=0, k=0;
   
   char cmd_str[100];
