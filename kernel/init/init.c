@@ -90,7 +90,7 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x06);
   printf("The kernel is successful started!\n");
   setColor(0x0f);
-  
+
   int mod_count = mb_info->mbs_mods_count;
   if(mod_count > 0) {
     multiboot_module_t *modules = (multiboot_module_t*) mb_info->mbs_mods_addr;

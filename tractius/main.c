@@ -97,19 +97,17 @@ int main(int argc, char **argv) {
       key = getch();
       switch(key) {
         case 'q':
-          printf("\033[25;1H\n");
+          printf("\033[2J");
+          close(fd);
           return 0;
         case 's':
           save(fd);
           break;
       }
     }
-  }
+  }  
   
-  printf("\033[25;1H\n");
-  close(fd);
-  
-  return 0;
+  return -1;
 }
 
 void print(void) {

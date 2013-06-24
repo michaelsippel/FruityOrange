@@ -26,9 +26,13 @@
 #define PAGE_SIZE 4096
 #define PAGE_MASK 0xfff
 
+#define HEAP_STATUS_FREE 0
+#define HEAP_STATUS_USED 1
+
 typedef struct alloc_block {
   size_t size;
   void *base;
+  int status;
   
   struct alloc_block *prev;
   struct alloc_block *next;

@@ -31,11 +31,14 @@ void init_heap(void) {
 void *heap_pages(size_t pages) {
   uintptr_t vaddr = vmm_find(current_context, pages, VADDR_KERNEL_HEAP_START, VADDR_KERNEL_HEAP_END);
   uintptr_t paddr = NULL;
+    
+  //printf("[heap]: %d pages, 0x%x found.\n", pages, vaddr);
   
   if(vaddr != NULL) {
     int i;
     for(i = 0; i < pages; i++) {
       paddr = pmm_alloc();
+      //printf("[heap] mapping 0x%x to 0x%x\n", vaddr + i*PAGE_SIZE, paddr);
       vmm_map_page(current_context, vaddr + i*PAGE_SIZE, paddr, VMM_KERNEL_FLAGS);
     }
   }
@@ -67,12 +70,16 @@ alloc_block_t *heap_increase(size_t bytes) {
   block->next = NULL;
   block->prev = NULL;
   
-  heap_insert_block(block);
+  //heap_insert_block(block);
   
   return block;
 }
 
-void *malloc(size_t bytes) { 
+void *malloc(size_t bytes) {
+  size_t pages = ( bytes + PAGE_SIZE ) / PAGE_SIZE;
+  
+  return heap_pages(pages);
+  
   alloc_block_t *block = first_block;
   while(block != NULL) {
     if(block->size >= bytes && block->status == HEAP_STATUS_FREE) {
@@ -100,22 +107,22 @@ void *calloc(size_t num, size_t size) {
 
 void *realloc(void *ptr, size_t bytes) {
   void *nptr;
-  alloc_block_t *block = ptr - sizeof(alloc_block_t);
+  //alloc_block_t *block = ptr - sizeof(alloc_block_t);
   
-  if(bytes > block->size) {
+  //if(bytes > block->size) {
     nptr = malloc(bytes);
     
     if(nptr != NULL) {
-      memmove(nptr, ptr, block->size);
+      memmove(nptr, ptr, bytes);
       free(ptr);
     }
-  }
+  //}
   
   return nptr;
 }
 
 void free(void *ptr) {
-  alloc_block_t *block = ptr - sizeof(alloc_block_t);
-  block->status = HEAP_STATUS_FREE;
+  //alloc_block_t *block = ptr - sizeof(alloc_block_t);
+  //block->status = HEAP_STATUS_FREE;
 }
 

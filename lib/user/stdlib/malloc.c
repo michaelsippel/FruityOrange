@@ -34,64 +34,54 @@ void free_pages(uintptr_t ptr, size_t num) {
   asm volatile("int $0x30" : : "a" (SYSCALL_MFREE), "b" (ptr), "c" (num));
 }
 
-void init_heap(void) {
-  uintptr_t addr = alloc_pages(1);
-  first_block = addr;
-  first_block->base = addr + sizeof(alloc_block_t);
-  first_block->size = PAGE_SIZE - sizeof(alloc_block_t);
-  first_block->next = NULL;
-  first_block->prev = NULL;
+alloc_block_t *heap_insert_block(alloc_block_t *block) {
+  if(first_block != NULL) {
+    first_block->prev = block;
+  }
+  
+  block->next = first_block;
+  block->prev = NULL;
+  first_block = block;
+  
+  return block;
 }
 
-alloc_block_t *heap_increase(size_t pages) {
-  alloc_block_t *node = first_block;
-  alloc_block_t *new  = alloc_pages(pages);
+alloc_block_t *heap_increase(size_t bytes) {
+  size_t pages = ( bytes + sizeof(alloc_block_t) + PAGE_SIZE ) / PAGE_SIZE;
   
-  new->size = pages*PAGE_SIZE - sizeof(alloc_block_t);
-  new->base = new + sizeof(alloc_block_t);
+  uintptr_t vaddr = (uintptr_t) alloc_pages(pages);
+  alloc_block_t *block = vaddr;
+  block->size = bytes;
+  block->base = vaddr + sizeof(alloc_block_t);
+  block->status = HEAP_STATUS_FREE;
   
-  new->prev = NULL;
-  new->next = first_block;
-  first_block->prev = new;
-  first_block = new;
+  block->next = NULL;
+  block->prev = NULL;
   
-  return new;
+  //heap_insert_block(block);
+  
+  return block;
 }
 
 void *malloc(size_t bytes) {
-  if( bytes <= PAGE_SIZE && bytes > (PAGE_SIZE - sizeof(alloc_block_t)) ) {
-    return alloc_pages(1);
-  }
+  size_t pages = ( bytes + PAGE_SIZE ) / PAGE_SIZE;
   
-  alloc_block_t *node = first_block;
+  return alloc_pages(pages);
   
-  if(node == NULL) {
-    init_heap();
-  }
-  
-  // search for free nodes
-  while(node != NULL) {
-    if(node->size >= bytes) { // is enough space?
-      if(node->prev == NULL) {
-        heap_increase(1);
-      }
-      node->prev->next = node->next;
-      if(node->next != NULL) {
-        node->next->prev = node->prev;
-      }
-      
-      node->prev = NULL;
-      node->next = NULL;
-      
-      return node->base;
+  alloc_block_t *block = first_block;
+  while(block != NULL) {
+    if(block->size >= bytes && block->status == HEAP_STATUS_FREE) {
+      block->status = HEAP_STATUS_USED;
+      return block->base;
     } else {
-      node = node->next;
+      block = block->next;
     }
   }
   
-  node = heap_increase((bytes+sizeof(alloc_block_t)+PAGE_SIZE)/PAGE_SIZE);
-  if(node != NULL) {
-    return node->base;
+  block = heap_increase(bytes);
+  if(block != NULL) {
+    block->status = HEAP_STATUS_USED;
+    return block->base;
   }
   
   return NULL;
@@ -104,23 +94,23 @@ void *calloc(size_t num, size_t size) {
 }
 
 void *realloc(void *ptr, size_t bytes) {
-  void *nptr = malloc(bytes);
-  alloc_block_t *nd = ptr - sizeof(alloc_block_t);
-  memmove(nptr, ptr, nd->size);
-  free(ptr);
+  void *nptr;
+  //alloc_block_t *block = ptr - sizeof(alloc_block_t);
+  
+  //if(bytes > block->size) {
+    nptr = malloc(bytes);
+    
+    if(nptr != NULL) {
+      memmove(nptr, ptr, bytes);
+      free(ptr);
+    }
+  //}
   
   return nptr;
 }
 
 void free(void *ptr) {
-  if((uintptr_t)ptr & (~PAGE_MASK)) {
-    alloc_block_t *node = (alloc_block_t*) ptr - sizeof(alloc_block_t);
-    node->prev = NULL;
-    node->next = first_block;
-    first_block->prev = node;
-    first_block = node;
-  } else {
-    free_pages(ptr, 1);
-  }
+  //alloc_block_t *block = ptr - sizeof(alloc_block_t);
+  //block->status = HEAP_STATUS_FREE;
 }
 

@@ -26,8 +26,8 @@ int main(int argc, char **argv) {
   }
   
   int f = open(argv[0], O_RDONLY, 0);// TODO
-  if(f == NULL) {
-    printf("Error.\n");
+  if(f < 0) {
+    printf("File not Found!\n");
     return -1;
   }
   

@@ -58,8 +58,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->ticks_util_wake = -1;
   proc->status = ACTIVE;
   
-  proc->num_fd = 1;
-  proc->fd = calloc(proc->num_fd, sizeof(fd_st_t));
+  proc->num_fd = 0;
   //#define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
   //proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
   //proc->fd[1].inode = vfs_create_inode("stdin",  MODE, NULL);
@@ -118,9 +117,7 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
 }
 
 fd_t proc_get_unused_fd(proc_t *proc) {
-  proc->fd = realloc(proc->fd, proc->num_fd++);
-  
-  return proc->num_fd-1;
+  return ++proc->num_fd;
 }
 
 pid_t get_pid(void) {

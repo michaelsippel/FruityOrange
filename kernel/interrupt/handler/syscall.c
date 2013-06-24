@@ -26,10 +26,10 @@
 #include <syscall.h>
 
 #define MAX_SYSCALLS 0x30
-static syscall_t **syscall_table;
+static syscall_t *syscall_table[MAX_SYSCALLS];
 
 void init_syscalltable(void) {
-  syscall_table = calloc(sizeof(syscall_t*), MAX_SYSCALLS);
+  //syscall_table = calloc(sizeof(syscall_t*), MAX_SYSCALLS);
 }
 
 void setup_syscall(uint32_t id, const char *name, SYSCALL_HANDLER) {
