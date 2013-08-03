@@ -47,7 +47,6 @@ irq_stub 0x2F // 2. ATA / ATAPI / (E)IDE
 .extern common_eoi
 
 common_irq_handler:
-  cli
   push %gs
   push %fs
   push %es
@@ -85,8 +84,6 @@ common_irq_handler:
   pop %fs
   pop %gs
   
-  sti
-  // interrupt number is already at the stack
-  call common_eoi
   add $8, %esp
+  
   iret

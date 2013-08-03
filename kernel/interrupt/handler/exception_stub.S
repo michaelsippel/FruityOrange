@@ -107,7 +107,6 @@ common_exc_handler:
   pop %fs
   pop %gs
   
-  // interrupt number is already at the stack
-  call common_eoi
   add $8, %esp
+  
   iret

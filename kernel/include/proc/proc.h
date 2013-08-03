@@ -31,8 +31,6 @@
 #define PROC_STATUS_SLEEP   0x1
 #define PROC_STATUS_ZOMBIE  0x2
 
-#define MAX_OPEN_FILES 10
-
 typedef enum proc_status {
   ACTIVE = PROC_STATUS_ACTIVE,
   SLEEP = PROC_STATUS_SLEEP,
@@ -55,7 +53,7 @@ typedef struct proc {
   cpu_state_t *cpu;
   vmm_context_t *context;
   unsigned int num_fd;
-  fd_st_t fd[MAX_OPEN_FILES];
+  fd_st_t *fd;
   vfs_inode_t *work_dir;
   
   size_t used_mem_pages;

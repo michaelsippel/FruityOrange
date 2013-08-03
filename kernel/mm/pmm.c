@@ -82,25 +82,25 @@ void init_pmm(multiboot_info_t *mb_info) {
   // 6. the video-ram and NULL
   pmm_mark_used((void*)0xB8000);
   pmm_mark_used((void*)0);
-
+  
   can_do_fast_alloc = 0;
 }
 
 void *pmm_alloc(void) {
-  int i, j, k=0;
+  int i, j;
   uintptr_t addr;
   if(can_do_fast_alloc) {
-    debug(PMM_DEBUG, "pmm_alloc(): doing fast alloc");
+    debug(PMM_DEBUG, "pmm_alloc(): doing fast alloc\n");
     can_do_fast_alloc = FALSE;
     pmm_mark_used((void*) last_free_ptr);
     return (void*) last_free_ptr;
   } else {
     for(i = 0; i < BITMAP_SIZE; i++) {
-      if(bitmap[i]) {
-	for(j = 0; j < sizeof(uint32_t); j++,k++) {
+      if(bitmap[i] != 0) {
+	for(j = 0; j < 32; j++) {
 	  if(bitmap[i] & (1 << j)) {
 	    bitmap[i] &= ~(1 << j);
-	    addr = (uintptr_t) k * PAGE_SIZE;
+	    addr = (uintptr_t) ( (i * 32 + j) * PAGE_SIZE);
 	    return (void*) addr;
 	  }
 	}
@@ -131,3 +131,4 @@ void pmm_mark_used(void *ptr) {
   
   bitmap[i] &= ~(1 << j);
 }
+

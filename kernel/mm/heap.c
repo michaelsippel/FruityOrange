@@ -22,6 +22,8 @@
 
 #include <mm.h>
 
+#define HEAP_DEBUG 0
+
 static alloc_block_t *first_block = NULL;
 
 void init_heap(void) {
@@ -31,14 +33,11 @@ void init_heap(void) {
 void *heap_pages(size_t pages) {
   uintptr_t vaddr = vmm_find(current_context, pages, VADDR_KERNEL_HEAP_START, VADDR_KERNEL_HEAP_END);
   uintptr_t paddr = NULL;
-    
-  //printf("[heap]: %d pages, 0x%x found.\n", pages, vaddr);
   
   if(vaddr != NULL) {
     int i;
     for(i = 0; i < pages; i++) {
       paddr = pmm_alloc();
-      //printf("[heap] mapping 0x%x to 0x%x\n", vaddr + i*PAGE_SIZE, paddr);
       vmm_map_page(current_context, vaddr + i*PAGE_SIZE, paddr, VMM_KERNEL_FLAGS);
     }
   }
@@ -70,14 +69,13 @@ alloc_block_t *heap_increase(size_t bytes) {
   block->next = NULL;
   block->prev = NULL;
   
-  //heap_insert_block(block);
+  heap_insert_block(block);
   
   return block;
 }
 
 void *malloc(size_t bytes) {
-  size_t pages = ( bytes + PAGE_SIZE ) / PAGE_SIZE;
-  
+  size_t pages = NUM_PAGES(bytes);
   return heap_pages(pages);
   
   alloc_block_t *block = first_block;
@@ -100,8 +98,9 @@ void *malloc(size_t bytes) {
 }
 
 void *calloc(size_t num, size_t size) {
-  void *ptr = malloc(num * size);
-  memset(ptr, 0, num * size);
+  int bytes = num * size;
+  void *ptr = malloc(bytes);
+  memset(ptr, 0, bytes);
   return ptr;
 }
 

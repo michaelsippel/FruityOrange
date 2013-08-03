@@ -50,7 +50,7 @@ cpu_state_t *handle_syscall(cpu_state_t *cpu) {
   if(syscall_table[cpu->eax] == NULL) {
     printf("Undefined Syscall on 0x%x\n", cpu->eax);
   } else {
-    syscall_table[cpu->eax]->handler(&new_cpu->ebx, &new_cpu->ecx, &new_cpu->edx);
+    syscall_table[cpu->eax]->handler(&cpu->ebx, &cpu->ecx, &cpu->edx);
   }
   
   return new_cpu;

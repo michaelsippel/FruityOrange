@@ -90,7 +90,11 @@ void init(struct multiboot_info *mb_info) {
   setColor(0x06);
   printf("The kernel is successful started!\n");
   setColor(0x0f);
-
+/* test
+  while(1) {
+    create_proc(0, "test", current_context, DPL_USERMODE);
+  }  
+*/
   int mod_count = mb_info->mbs_mods_count;
   if(mod_count > 0) {
     multiboot_module_t *modules = (multiboot_module_t*) mb_info->mbs_mods_addr;
@@ -104,7 +108,7 @@ void init(struct multiboot_info *mb_info) {
     }
     
     printf("Loading initial ramdisk...\n");
-    vfs_load_initrd(mods[0]);  
+    vfs_load_initrd(mods[0]);
     
     if(mod_count > 1) {
       loaded_elf_t *elf = load_elf32(mods[1], vmm_create_context(), "init");

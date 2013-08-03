@@ -21,7 +21,6 @@
 
 .global int_handler0x30
 int_handler0x30:
-  cli
   push $0
   push $0x30
   
@@ -62,8 +61,6 @@ int_handler0x30:
   pop %fs
   pop %gs
   
-  sti
-  // interrupt number is already at the stack
-  call common_eoi
   add $8, %esp
+  
   iret

@@ -1,20 +1,20 @@
 /**
- *  kernel/proc/scheduler.c
+ * kernel/proc/scheduler.c
  *
- *  (C) Copyright 2012-2013 Michael Sippel
+ * (C) Copyright 2012-2013 Michael Sippel
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #define _SCHEDULER_C
 
@@ -46,9 +46,9 @@ void activate_proc(proc_t *proc) {
 
 void schedule(void) {
 #define LOOK_FOR_ACTIVE_PROC() \
-  do { \
-    current_proc = current_proc->next; \
-  } while(current_proc->status != ACTIVE);
+do { \
+current_proc = current_proc->next; \
+} while(current_proc->status != ACTIVE);
   
   
   if(current_proc != NULL) {
@@ -56,11 +56,11 @@ void schedule(void) {
     do {
       p = p->next;
       if(p->status == SLEEP &&
-	p->ticks_util_wake != -1) {
-	if(--p->ticks_util_wake == 0) {
-	  p->ticks_util_wake = -1;
-	  proc_wake(p);
-	}
+        p->ticks_util_wake != -1) {
+        if(--p->ticks_util_wake == 0) {
+          p->ticks_util_wake = -1;
+          proc_wake(p);
+        }
       }
     } while(p != current_proc);
     
@@ -76,4 +76,5 @@ void schedule(void) {
   }
   common_eoi(0x20);
 }
+
 

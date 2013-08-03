@@ -49,6 +49,8 @@ extern const void kernel_end_virt;
 #define KERNEL_SIZE ((uintptr_t) &kernel_end_phys)
 #define KERNEL_PAGES ((KERNEL_SIZE+PAGE_SIZE) / PAGE_SIZE)
 
+#define NUM_PAGES(n) ((((n) + ~PAGE_MASK) & PAGE_MASK) / PAGE_SIZE)
+
 #define VADDR_USER_START ((uintptr_t) 0x00001000)
 #define VADDR_USER_END   ((uintptr_t) 0xbfffffff)
 #define VADDR_KERNEL_START ((uintptr_t) 0xc0000000)

@@ -31,7 +31,7 @@
 #define PIC_EOI         0x20
 
 
-void init_pic(void){
+void init_pic(void) {
   outb(PIC_MASTER_COMM,PIC_INIT);
   outb(PIC_SLAVE_COMM,PIC_INIT);
   
@@ -48,18 +48,19 @@ void init_pic(void){
   outb(PIC_SLAVE_DATA,  0x0);
 }
 
-void send_eoi(uint8_t irq){
-  if (irq >= 8){
-        outb(PIC_SLAVE_COMM, PIC_EOI);
+void send_eoi(uint8_t irq) {
+  if (irq >= 8) {
+    outb(PIC_SLAVE_COMM, PIC_EOI);
   }
   outb(PIC_MASTER_COMM, PIC_EOI);
 }
 
-void common_eoi(uint32_t intrpt){
-  if(intrpt >= 0x20 && intrpt <= 0x2f){
-    if (intrpt >= 0x28){
+void common_eoi(uint32_t intrpt) {
+  if(intrpt >= 0x20 && intrpt <= 0x2f) {
+    if (intrpt >= 0x28) {
       outb(PIC_SLAVE_COMM, PIC_EOI);
     }
     outb(PIC_MASTER_COMM, PIC_EOI);
   }
 }
+

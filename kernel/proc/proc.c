@@ -32,7 +32,7 @@
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 
-#define PROC_DEBUG 0
+#define PROC_DEBUG 1
 
 static pid_t proc_count = 0;
 static size_t kernel_stack_size = 0x1000;
@@ -43,6 +43,9 @@ proc_t *first_proc = NULL;
 proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t dpl) {
   // Process structure
   proc_t *proc = malloc(sizeof(proc_t));
+ /* while(proc->name == -1) {
+    proc = malloc(sizeof(proc_t));
+  }*/
   proc->name = name;
   proc->context = context;
   proc->used_mem_pages = 0;
@@ -58,11 +61,13 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->ticks_util_wake = -1;
   proc->status = ACTIVE;
   
-  proc->num_fd = 0;
-  //#define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
-  //proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
-  //proc->fd[1].inode = vfs_create_inode("stdin",  MODE, NULL);
-  //proc->fd[2].inode = vfs_create_inode("stderr", MODE, NULL);
+  proc->num_fd = 30;
+
+  proc->fd = calloc(sizeof(fd_st_t), proc->num_fd);/*
+  #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
+  proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
+  proc->fd[1].inode = vfs_create_inode("stdin",  MODE, NULL);
+  proc->fd[2].inode = vfs_create_inode("stderr", MODE, NULL);*/
   
   proc->work_dir = vfs_root();
   
@@ -127,14 +132,14 @@ pid_t get_pid(void) {
 proc_t *proc_fork(proc_t *parent) {
   vmm_context_t *context = vmm_fork(parent->context);
   proc_t *child = create_proc(0, parent->name, context, parent->dpl);
-  memcpy(child->kernel_stack, parent->kernel_stack, PAGE_SIZE);  
+  memcpy(child->kernel_stack, parent->kernel_stack, kernel_stack_size);
   
   if(parent->dpl) {
     child->cpu->esp = child->user_stack + (parent->cpu->esp - parent->user_stack);
     void *cur_stack = vmm_automap_kernel_page(current_context, parent->user_stack_phys);
     void *new_stack = vmm_automap_kernel_page(current_context, child->user_stack_phys);
     
-    memcpy((uintptr_t)new_stack, (uintptr_t)cur_stack, PAGE_SIZE);
+    memcpy((uintptr_t)new_stack, (uintptr_t)cur_stack, user_stack_size);
     
     vmm_unmap_page(current_context, (uintptr_t)cur_stack);
     vmm_unmap_page(current_context, (uintptr_t)new_stack);
@@ -146,7 +151,7 @@ proc_t *proc_fork(proc_t *parent) {
   child->used_mem_pages = parent->used_mem_pages;
   child->work_dir = parent->work_dir;
   
-  debug(PROC_DEBUG, "proc_fork(): forked pid %d from pid %d\n", child->pid, parent->pid);  
+  debug(PROC_DEBUG, "proc_fork(): forked pid %d from pid %d\n", child->pid, parent->pid);
   
   return child;
 }

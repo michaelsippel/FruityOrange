@@ -36,7 +36,7 @@ int main(void) {
     waitpid(pid);
     printf("shell exited.\n");
   }
-  
+
   return 0;
 }
 

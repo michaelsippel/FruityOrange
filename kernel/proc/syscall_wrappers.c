@@ -82,7 +82,6 @@ void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
       
       .eflags = 0x202,
     };
-    
     current_proc->name = elf->name;
     current_proc->context = elf->context;
     current_proc->dpl = elf->dpl;

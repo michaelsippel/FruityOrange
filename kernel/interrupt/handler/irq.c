@@ -49,5 +49,8 @@ cpu_state_t* handle_irq(cpu_state_t *cpu) {
     irq_handler[cpu->intr - 0x20]();
   }
   
+  common_eoi(cpu->intr);
+  
   return new_cpu;
 }
+

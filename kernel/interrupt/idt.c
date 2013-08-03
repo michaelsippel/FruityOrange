@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define _NEW_CPU_STRUCT
+#define _NEW_CPU_STATE_STRUCT
 #include <interrupt.h>
 #include "handler.h"
 
@@ -139,3 +139,4 @@ void set_cpu_state(cpu_state_t *cpu) {
 cpu_state_t *get_cpu_state(void) {
   return new_cpu;
 }
+
