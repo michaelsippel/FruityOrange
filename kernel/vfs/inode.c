@@ -94,6 +94,7 @@ vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent
   }
   
   inode->stat.mode = mode;
+  inode->stat.size = inode->length;
   inode->stat.id = id_counter++;
   inode->stat.atime =
   inode->stat.mtime =
@@ -132,6 +133,7 @@ int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
   if (writable) {
     if( (off + bytes) > inode->length) {
       inode->length = off + bytes;
+      inode->stat.size = inode->length;
     }
     
     if (inode->base == NULL) {

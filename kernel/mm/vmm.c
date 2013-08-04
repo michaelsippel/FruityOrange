@@ -34,7 +34,7 @@
 
 vmm_context_t *current_context;
 vmm_context_t *kernel_context;
-static bool paging_enabled = FALSE;
+static int paging_initalized = 0;
 static uint32_t cr0;
 
 void init_vmm(multiboot_info_t *mb_info) {
@@ -72,26 +72,27 @@ void init_vmm(multiboot_info_t *mb_info) {
   
   current_context = kernel_context;
   asm volatile("mov %0, %%cr3" : : "r" (pagedir_paddr));
+  paging_initalized = 1;
 }
 
 inline void vmm_enable(void) {
   asm volatile("mov %%cr0, %0" : "=r" (cr0));
   cr0 |= (1 << 31);
   asm volatile("mov %0, %%cr0" : : "r" (cr0));
-  paging_enabled = TRUE;
+  paging_initalized = 1;
 }
 
 inline void vmm_disable(void) {
   asm volatile("mov %%cr0, %0" : "=r" (cr0));
   cr0 &= ~(1 << 31);
   asm volatile("mov %0, %%cr0" : : "r" (cr0));
-  paging_enabled = FALSE;
+  paging_initalized = 0;
 }
 
 vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index, uint8_t flags) {
+  static int count = 0;
   vmm_pt_t pagetable = pmm_alloc();
   context->pagedir[index] = (uint32_t) pagetable | VMM_WRITE | VMM_PRESENT | flags;
-  
   pagetable = vmm_get_pagetable(context, index, flags);
   memclr(pagetable, PAGE_SIZE);
   
@@ -103,7 +104,7 @@ vmm_pt_t vmm_get_pagetable(vmm_context_t *context, int index, uint8_t flags) {
   
   context->pagedir[index] |= flags;
   
-  if(paging_enabled) {
+  if(paging_initalized) {
     if(context != current_context) {
       pagetable = (vmm_pt_t) vmm_automap_kernel_page(current_context, (uintptr_t) PT_PADDR(context, index));
     } else {
@@ -194,7 +195,7 @@ int vmm_map_page(vmm_context_t *context, uintptr_t vaddr, uintptr_t paddr, uint8
     if(context == current_context) {
       vmm_flush_tlb(vaddr);
     } else {
-      if(paging_enabled) {
+      if(paging_initalized) {
 	vmm_unmap_page(current_context, (uintptr_t) pagetable);
       }
     }
@@ -243,14 +244,14 @@ int vmm_unmap_area(vmm_context_t *context, uintptr_t vaddr, size_t pages) {
 
 void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_t limit_high) {
   #define PAGES_FOUND(l) \
-	  if(vaddr == (uintptr_t)NULL) { \
-	    page = pd_index * PT_SIZE + pt_index; \
-	    vaddr = page * PAGE_SIZE; \
-	  } \
-	  pages_found += l; \
-	  if(pages_found >= num) { \
-	    return (void*) vaddr; \
-	  }
+    if(vaddr == (uintptr_t)NULL) { \
+      page = pd_index * PT_SIZE + pt_index; \
+      vaddr = page * PAGE_SIZE; \
+    } \
+    pages_found += l; \
+    if(pages_found >= num) { \
+      return (void*) vaddr; \
+    }
   
   uintptr_t vaddr = (uintptr_t) NULL;
   uintptr_t page = 0;
@@ -267,14 +268,15 @@ void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_
       pt = vmm_get_pagetable(context, pd_index, 0);
       
       uint32_t pt_end = (pd_index == pd_index_end) ? pt_index_end : PT_SIZE; // last pd entry
-      for(pt_index = 0; pt_index < pt_end; pt_index++) {
-	if(! ((uint32_t)pt[pt_index] & VMM_PRESENT) ) {
-	  PAGES_FOUND(1);
-	} else {
-	  pages_found = 0;
-	  vaddr = (uintptr_t)NULL;
-	}
+      for(;pt_index < pt_end; pt_index++) {
+        if(! ((uint32_t)pt[pt_index] & VMM_PRESENT) ) {
+          PAGES_FOUND(1);
+        } else {
+          pages_found = 0;
+          vaddr = (uintptr_t)NULL;
+        }
       }
+      pt_index = 0;
     } else {
       PAGES_FOUND(PT_SIZE);
     }

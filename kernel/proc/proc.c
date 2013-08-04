@@ -59,12 +59,13 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->ticks_util_wake = -1;
   proc->status = ACTIVE;
   
-  proc->num_fd = 30;
-  proc->fd = calloc(sizeof(fd_st_t), proc->num_fd);/*
-  #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
-  proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
-  proc->fd[1].inode = vfs_create_inode("stdin",  MODE, NULL);
-  proc->fd[2].inode = vfs_create_inode("stderr", MODE, NULL);*/
+  proc->num_fd = 0;
+  proc->fd = NULL;
+  //proc->fd = calloc(sizeof(fd_st_t*), 3);
+  //#define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
+  //proc->fd[0]->inode = vfs_create_inode("stdout", MODE, NULL);
+  //proc->fd[1]->inode = vfs_create_inode("stdin",  MODE, NULL);
+  //proc->fd[2]->inode = vfs_create_inode("stderr", MODE, NULL);
   
   proc->work_dir = vfs_root();
   
@@ -119,7 +120,27 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
 }
 
 fd_t proc_get_unused_fd(proc_t *proc) {
-  return ++proc->num_fd;
+  int id = 0;
+  int found = 0;
+  while(id < proc->num_fd) {
+    if(proc->fd[id] == NULL) {
+      found = 1;
+      break;
+    } else {
+      id++;
+    }
+  }
+  
+  if(!found) {
+    id = ++proc->num_fd;
+    if(proc->fd == NULL)
+      proc->fd = malloc(sizeof(fd_st_t*));
+    else
+      proc->fd = realloc(proc->fd, sizeof(fd_st_t*) * proc->num_fd);
+  }
+  
+  proc->fd[id] = malloc(sizeof(fd_st_t));
+  return id;
 }
 
 pid_t get_pid(void) {

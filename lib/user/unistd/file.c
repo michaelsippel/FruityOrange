@@ -52,6 +52,10 @@ dirent_t *readdir(fd_t fd) {
   return ret;
 }
 
+void fstat(fd_t fd, stat_t *buf) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_FSTAT), "b" (fd), "c" (buf));
+}
+
 int lseek(fd_t fd, int off, int whence) {
   int ret;
   asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_SEEK), "b" (fd), "c" (off), "d" (whence));

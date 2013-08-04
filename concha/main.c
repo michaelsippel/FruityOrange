@@ -94,7 +94,8 @@ void parse_cmd(char *str) {
   
   if(!found) {
     int fd;
-    if( (fd = open(cmd_str, O_RDONLY, 0)) > 0 ) {
+    fd = open(cmd_str, O_RDONLY, 0);
+    if(! (fd < 0) ) {
       close(fd);
       
       /*pid_t pid = fork();

@@ -53,7 +53,7 @@ typedef struct proc {
   cpu_state_t *cpu;
   vmm_context_t *context;
   unsigned int num_fd;
-  fd_st_t *fd;
+  fd_st_t **fd;
   vfs_inode_t *work_dir;
   
   size_t used_mem_pages;

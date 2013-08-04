@@ -32,6 +32,7 @@ void close(fd_t fd);
 int write(fd_t fd, const void *buf, size_t len);
 int read(fd_t fd, void *buf, size_t len);
 dirent_t *readdir(fd_t fd);
+void fstat(fd_t fd, stat_t *buf);
 int lseek(fd_t fd, int off, int whence);
 int chdir(const char *path);
 char *getcwd(char *buf, size_t len);

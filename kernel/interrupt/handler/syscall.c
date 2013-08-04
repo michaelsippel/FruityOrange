@@ -25,7 +25,7 @@
 #include <interrupt.h>
 #include <syscall.h>
 
-#define MAX_SYSCALLS 0x30
+#define MAX_SYSCALLS 0xFF
 static syscall_t *syscall_table[MAX_SYSCALLS];
 
 void init_syscalltable(void) {

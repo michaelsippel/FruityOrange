@@ -16,29 +16,38 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stddef.h>
 
 int main(int argc, char **argv) {
   if(argc < 1) {
-    printf("Usage: %s [file]\n", "cat");//argv[0]);
+    printf("Usage: %s [file 1] [file 2] ...\n", "cat");//argv[0]);
     return -1;
   }
   
-  int f = open(argv[0], O_RDONLY, 0);// TODO
-  if(f < 0) {
-    printf("File not Found!\n");
-    return -1;
-  }
-  
-  char c = 0;
-  do {
-    read(f, &c, 1);
-    printf("%c", c);
-  } while(c);
-  
-  //printf("\n");
-  close(f);
+  int i;
+  //stat_t stat;
+  //for(i = 0; i < argc; i++) {
+    fd_t f = open(argv[0], O_RDONLY, 0);
+    //if(f < 0) {
+    //  printf("File not Found(%d)!\n", 0);
+      //continue;
+    //}
+    //printf("asd");
+    //fstat(f, &stat);
+    //size_t len = stat.size;
+    
+    //char c;
+    //do {
+      //read(f, &c, 1);
+      //printf("%c", c);
+      //len--;
+    //} while(c);
+    
+    close(f);
+  //}
   
   return 0;
 }

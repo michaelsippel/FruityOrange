@@ -33,6 +33,7 @@ void vfs_init_syscalls(void) {
   setup_syscall(SYSCALL_CHDIR, "chdir", &syscall_chdir);
   setup_syscall(SYSCALL_GETCWD, "getcwd", &syscall_getcwd);
   setup_syscall(SYSCALL_READDIR, "readdir", &syscall_readdir);
+  setup_syscall(SYSCALL_FSTAT, "fstat", &syscall_fstat);
 }
 
 void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -64,17 +65,18 @@ void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     memclr(inode->base, inode->length);
   }
   
-  current_proc->fd[fd].inode = inode;
-  current_proc->fd[fd].flags = oflags;
-  current_proc->fd[fd].mode = mode;
-  current_proc->fd[fd].pos = 0;
+  current_proc->fd[fd]->inode = inode;
+  current_proc->fd[fd]->flags = oflags;
+  current_proc->fd[fd]->mode = mode;
+  current_proc->fd[fd]->pos = 0;
   
   *ebx = fd;
 }
 
 void syscall_close(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   fd_t fd = *ebx;
-  memclr(&current_proc->fd[fd], sizeof(fd_st_t));
+  //free(current_proc->fd[fd]);
+  //current_proc->fd[fd] = NULL;
 }
 
 void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -82,14 +84,14 @@ void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   void *buf = (void*) *ecx;
   size_t len = *edx;
   
-  if(current_proc->fd[fd].flags & O_RDONLY ||
-     current_proc->fd[fd].flags & O_RDWR) 
+  if(current_proc->fd[fd]->flags & O_RDONLY ||
+     current_proc->fd[fd]->flags & O_RDWR) 
   {
-    vfs_inode_t *inode = current_proc->fd[fd].inode;
-    void *read = vfs_read(inode, current_proc->fd[fd].pos);
+    vfs_inode_t *inode = current_proc->fd[fd]->inode;
+    void *read = vfs_read(inode, current_proc->fd[fd]->pos);
     if(read != NULL) {
       memcpy((void*)buf, read, len);
-      current_proc->fd[fd].pos += len;
+      current_proc->fd[fd]->pos += len;
       *ebx = len;
     } else {
       *ebx = -1;
@@ -104,7 +106,7 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   vfs_inode_t *parent;
   fd_t fd = *ebx;
   
-  parent = current_proc->fd[fd].inode;  
+  parent = current_proc->fd[fd]->inode;  
   dirent_t *dentry = *ecx;
   
   vfs_dentry_t *entries = vfs_read(parent, 0);  
@@ -128,17 +130,17 @@ void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   const void *buf = (const void*) *ecx;
   size_t len = *edx;
   
-  if(current_proc->fd[fd].flags & O_WRONLY ||
-     current_proc->fd[fd].flags & O_RDWR) 
+  if(current_proc->fd[fd]->flags & O_WRONLY ||
+     current_proc->fd[fd]->flags & O_RDWR) 
   {
-    if(! current_proc->fd[fd].flags & O_APPEND) {
-      current_proc->fd[fd].pos = 0;
-      current_proc->fd[fd].flags |= O_APPEND;
+    if(! current_proc->fd[fd]->flags & O_APPEND) {
+      current_proc->fd[fd]->pos = 0;
+      current_proc->fd[fd]->flags |= O_APPEND;
     }
-    vfs_inode_t *inode = current_proc->fd[fd].inode;
-    *ebx = vfs_write(inode, current_proc->fd[fd].pos, buf, len);
+    vfs_inode_t *inode = current_proc->fd[fd]->inode;
+    *ebx = vfs_write(inode, current_proc->fd[fd]->pos, buf, len);
     if(((int)*ebx) > 0) {
-      current_proc->fd[fd].pos += len;
+      current_proc->fd[fd]->pos += len;
     }
   } else {
     *ebx = -1;
@@ -150,23 +152,23 @@ void syscall_seek(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   int off = *ecx;
   int whence = *edx;
   
-  current_proc->fd[fd].flags |= O_APPEND;
+  current_proc->fd[fd]->flags |= O_APPEND;
   switch(whence) {
     case SEEK_SET: // absolute
-      current_proc->fd[fd].pos = off;
+      current_proc->fd[fd]->pos = off;
       break;
     case SEEK_CUR: // relative from current position
-      current_proc->fd[fd].pos += off;
+      current_proc->fd[fd]->pos += off;
       break;
     case SEEK_END: // relative from end
-      current_proc->fd[fd].pos = current_proc->fd[fd].inode->length - off;
+      current_proc->fd[fd]->pos = current_proc->fd[fd]->inode->length - off;
       break;
     default: // ???
       *ebx = -1;
       return;
   }
   
-  *ebx = current_proc->fd[fd].pos;
+  *ebx = current_proc->fd[fd]->pos;
 }
 
 void syscall_chdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -190,5 +192,13 @@ void syscall_getcwd(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   size_t len = *ecx;
   
   vfs_generate_path(buf, len, current_proc->work_dir);
+}
+
+void syscall_fstat(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  fd_t fd = *ebx;
+  stat_t *buf = *ecx;
+  
+  vfs_inode_t *inode = current_proc->fd[fd]->inode;
+  memcpy(buf, &inode->stat, sizeof(stat_t));
 }
 
