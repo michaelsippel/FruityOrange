@@ -28,7 +28,23 @@ int main(void) {
   
   dirent_t *dentry;
   while( dentry = readdir(d) ) {
-    printf("\t%s\n", dentry->name);
+    int color = S_ISDIR(dentry->stat) ? 0x9 : 0xF;
+    printf("%c%c%c%c%c%c%c%c%c%c \033[0;%dm%s\033[0;7m\n",
+	   (S_ISDIR(dentry->stat) ? 'd' : '-'),
+	   ((dentry->stat.mode & S_IRUSR) ? 'r' : '-'),
+	   ((dentry->stat.mode & S_IWUSR) ? 'w' : '-'),
+	   ((dentry->stat.mode & S_IXUSR) ? 'x' : '-'),
+	   
+	   ((dentry->stat.mode & S_IRGRP) ? 'r' : '-'),
+	   ((dentry->stat.mode & S_IWGRP) ? 'w' : '-'),
+	   ((dentry->stat.mode & S_IXGRP) ? 'x' : '-'),
+	   
+	   ((dentry->stat.mode & S_IROTH) ? 'r' : '-'),
+	   ((dentry->stat.mode & S_IWOTH) ? 'w' : '-'),
+	   ((dentry->stat.mode & S_IXOTH) ? 'x' : '-'),
+	   color,
+	   dentry->name
+    );
   }
   
   close(d);

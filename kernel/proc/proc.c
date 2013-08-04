@@ -32,7 +32,7 @@
 #include <proc/scheduler.h>
 #include <proc/proc.h>
 
-#define PROC_DEBUG 1
+#define PROC_DEBUG 0
 
 static pid_t proc_count = 0;
 static size_t kernel_stack_size = 0x1000;

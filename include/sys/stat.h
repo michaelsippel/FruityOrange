@@ -21,7 +21,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <unistd.h>
 #include <time.h>
 
 #define S_MODE_DIR 0x1
@@ -59,3 +58,4 @@ typedef struct stat {
 } stat_t;
 
 #endif
+

@@ -118,7 +118,6 @@ void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     new_p->status = ACTIVE;
     
     *ebx = new_p->ppid;
-    printf("new_p->eip = 0x%x\n", new_p->cpu->eip);
   }
 }
 

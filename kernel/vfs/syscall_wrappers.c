@@ -114,6 +114,7 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     vfs_inode_t *ino = entries[pos++].inode;
     
     strcpy(dentry->name, ino->name);
+    memcpy(&dentry->stat, &ino->stat, sizeof(stat_t));
     dentry->id = ino->stat.id;
     *ebx = dentry;
   } else {
