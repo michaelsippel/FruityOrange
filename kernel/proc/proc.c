@@ -43,9 +43,7 @@ proc_t *first_proc = NULL;
 proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t dpl) {
   // Process structure
   proc_t *proc = malloc(sizeof(proc_t));
- /* while(proc->name == -1) {
-    proc = malloc(sizeof(proc_t));
-  }*/
+  
   proc->name = name;
   proc->context = context;
   proc->used_mem_pages = 0;
@@ -62,7 +60,6 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->status = ACTIVE;
   
   proc->num_fd = 30;
-
   proc->fd = calloc(sizeof(fd_st_t), proc->num_fd);/*
   #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
   proc->fd[0].inode = vfs_create_inode("stdout", MODE, NULL);
@@ -194,13 +191,13 @@ int proc_exit(proc_t *proc, int status) {
   
   if(proc->parent) {
     if(proc->parent->waitpid == proc->ppid) {
-      proc->parent->waitpid = 0;
+      proc->parent->waitpid = -1;
       proc_wake(proc->parent);
     }
   }
   
   if(proc->pid == 1) {
-    printf("Init exited.\n");
+    printf("Init terminated.\n");
   }
   
   // TODO

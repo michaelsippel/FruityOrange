@@ -70,7 +70,7 @@ loaded_elf_t *load_elf32(void *image, vmm_context_t *context, const char *name) 
   ph = (elf32_program_header_t*) (((uintptr_t) image) + header->ph_offset);
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
-      pages = (ph->file_size + PAGE_SIZE) / PAGE_SIZE;
+      pages = NUM_PAGES(ph->file_size)+1;
       uintptr_t dest = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
       
       for(j = 0; j < pages; j++) {
@@ -84,18 +84,18 @@ loaded_elf_t *load_elf32(void *image, vmm_context_t *context, const char *name) 
 	memcpy((void*) dest, (void*) src, PAGE_SIZE);
       }
       
-      memclr((void*) dest + ph->file_size, ph->mem_size - ph->file_size);
+      //memclr((void*) dest + ph->file_size, ph->mem_size - ph->file_size);
       vmm_unmap_page(context, dest);
     }
   }
   
-  loaded_elf_t elf;
-  elf.entry = (void*) header->entry;
-  elf.name = name;
-  elf.context = context;
-  elf.dpl = DPL_USERMODE;
+  loaded_elf_t *elf = malloc(sizeof(loaded_elf_t));
+  elf->entry = (void*) header->entry;
+  elf->name = name;
+  elf->context = context;
+  elf->dpl = DPL_USERMODE;
   
-  return &elf;
+  return elf;
 }
 
 proc_t *run_elf32(loaded_elf_t *elf) {

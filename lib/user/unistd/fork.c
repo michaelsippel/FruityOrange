@@ -33,3 +33,9 @@ void exec(const char *path, int argc, char **argv) {
   asm volatile("int $0x30" : : "a" (SYSCALL_EXEC), "b" (path), "c" (argc), "d" (argv));
 }
 
+pid_t exec_extern(const char *path, int argc, char **argv) {
+  pid_t pid;
+  asm volatile("int $0x30" : "=b" (pid) : "a" (SYSCALL_EXEC_EXTERN), "b" (path), "c" (argc), "d" (argv));
+  return pid;
+}
+

@@ -79,8 +79,7 @@ void init_pmm(multiboot_info_t *mb_info) {
     }
   }
   
-  // 6. the video-ram and NULL
-  pmm_mark_used((void*)0xB8000);
+  // 6. NULL
   pmm_mark_used((void*)0);
   
   can_do_fast_alloc = 0;

@@ -131,6 +131,7 @@ void init_heap(void);
 void *heap_pages(size_t pages);
 alloc_block_t *heap_increase(size_t pages);
 alloc_block_t *heap_insert_block(alloc_block_t *block);
+alloc_block_t *heap_find_block(void *ptr);
 void *malloc(size_t bytes);
 void *calloc(size_t num, size_t size);
 void *realloc(void *ptr, size_t bytes);

@@ -93,6 +93,7 @@ void syscall_usleep(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_fork(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_waitpid(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 #endif
 

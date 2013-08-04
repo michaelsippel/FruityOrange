@@ -38,6 +38,7 @@ char *getcwd(char *buf, size_t len);
 pid_t fork(void);
 void waitpid(pid_t pid);
 void exec(const char *path, int argc, char **argv);
+pid_t exec_extern(const char *path, int argc, char **argv);
 
 #endif
 

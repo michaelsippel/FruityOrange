@@ -34,6 +34,7 @@ void scheduler_init_syscalls(void) {
   setup_syscall(SYSCALL_FORK, "fork", &syscall_fork);
   setup_syscall(SYSCALL_WAITPID, "waitpid", &syscall_waitpid);
   setup_syscall(SYSCALL_EXEC, "exec", &syscall_exec);
+  setup_syscall(SYSCALL_EXEC_EXTERN, "exec extern", &syscall_exec_extern);
 }
 
 void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -59,13 +60,13 @@ void syscall_waitpid(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   const char *path = *ebx;
   int argc = *ecx;
-  char **argv = *edx;  
+  char **argv = *edx;
   
   vfs_inode_t *file = vfs_path_lookup(path);
   if(file == NULL) {
     printf("File not found!\n");
   } else {
-    loaded_elf_t *elf = load_elf32(file->base, current_context, "exec");    
+    loaded_elf_t *elf = load_elf32(file->base, current_context, file->name);    
     current_proc->name = elf->name;
     current_proc->context = elf->context;
     current_proc->used_mem_pages = 0;
@@ -95,6 +96,29 @@ void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
       current_proc->cpu->cs = _USER_CS;
       current_proc->cpu->ss = _USER_SS;
     }
+    printf("exec(): EIP:0x%x\n", current_proc->cpu->eip);
+  }
+}
+
+void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  const char *path = *ebx;
+  int argc = *ecx;
+  char **argv = *edx;
+  
+  vfs_inode_t *file = vfs_path_lookup(path);
+  if(file == NULL) {
+    printf("File not found!\n");
+  } else {
+    loaded_elf_t *elf = load_elf32(file->base, vmm_fork(current_context), file->name);
+    proc_t *new_p = run_elf32(elf);
+    new_p->cpu->eax = argc;
+    new_p->cpu->ebx = argv;
+    new_p->parent = current_proc;
+    new_p->ppid = ++current_proc->child_count;
+    new_p->status = ACTIVE;
+    
+    *ebx = new_p->ppid;
+    printf("new_p->eip = 0x%x\n", new_p->cpu->eip);
   }
 }
 

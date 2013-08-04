@@ -39,6 +39,7 @@
 #define SYSCALL_WAITPID 0x11 /* wait for pid */
 #define SYSCALL_EXEC    0x12 /* exec */
 #define SYSCALL_READDIR 0x13 /* read directory entries */
+#define SYSCALL_EXEC_EXTERN 0x14 /* execute file in new process */
 
 #endif
 

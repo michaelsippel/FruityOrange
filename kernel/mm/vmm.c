@@ -129,9 +129,8 @@ vmm_context_t *vmm_create_context(void) {
   context->pagedir = pagedir;
   context->pagedir_paddr = pd_paddr;
   
-  // copy kernelmappings
-  memcpy(context->pagedir, current_context->pagedir, 0x1000);
-  pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | VMM_PRESENT | VMM_WRITE;
+  vmm_update_context(context);
+  //pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | VMM_PRESENT | VMM_WRITE;
   
   return context;
 }

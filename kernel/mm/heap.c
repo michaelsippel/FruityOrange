@@ -57,8 +57,21 @@ alloc_block_t *heap_insert_block(alloc_block_t *block) {
   return block;
 }
 
+alloc_block_t *heap_find_block(void *ptr) {
+  alloc_block_t *block = first_block;
+  while(block != NULL) {
+    if(block->base == ptr) {
+      return block;
+    } else {
+      block = block->next;
+      printf("next");
+    }
+  }
+  return NULL;
+}
+
 alloc_block_t *heap_increase(size_t bytes) {
-  size_t pages = ( bytes + sizeof(alloc_block_t) + PAGE_SIZE ) / PAGE_SIZE;
+  size_t pages = NUM_PAGES(bytes + sizeof(alloc_block_t));
   
   uintptr_t vaddr = (uintptr_t) heap_pages(pages);
   alloc_block_t *block = vaddr;
@@ -75,9 +88,8 @@ alloc_block_t *heap_increase(size_t bytes) {
 }
 
 void *malloc(size_t bytes) {
-  size_t pages = NUM_PAGES(bytes);
-  return heap_pages(pages);
-  
+  return heap_pages(NUM_PAGES(bytes));
+
   alloc_block_t *block = first_block;
   while(block != NULL) {
     if(block->size >= bytes && block->status == HEAP_STATUS_FREE) {
@@ -106,8 +118,8 @@ void *calloc(size_t num, size_t size) {
 
 void *realloc(void *ptr, size_t bytes) {
   void *nptr;
-  //alloc_block_t *block = ptr - sizeof(alloc_block_t);
-  
+  //alloc_block_t *block = heap_find_block(ptr);
+  //
   //if(bytes > block->size) {
     nptr = malloc(bytes);
     
@@ -121,7 +133,7 @@ void *realloc(void *ptr, size_t bytes) {
 }
 
 void free(void *ptr) {
-  //alloc_block_t *block = ptr - sizeof(alloc_block_t);
+  //alloc_block_t *block = heap_find_block(ptr);
   //block->status = HEAP_STATUS_FREE;
 }
 

@@ -97,12 +97,14 @@ void parse_cmd(char *str) {
     if( (fd = open(cmd_str, O_RDONLY, 0)) > 0 ) {
       close(fd);
       
-      pid_t pid = fork();
+      /*pid_t pid = fork();
       if(!pid) {
         exec(cmd_str, argc, argv);
       } else {
         waitpid(pid);
-      }
+      }*/
+      pid_t pid = exec_extern(cmd_str, argc, argv);
+      waitpid(pid);
     } else {
       printf("Unknown command \'%s\'!\n\'help\' for help\n", cmd_str);
     }
