@@ -130,7 +130,7 @@ vmm_context_t *vmm_create_context(void) {
   context->pagedir_paddr = pd_paddr;
   
   vmm_update_context(context);
-  //pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | VMM_PRESENT | VMM_WRITE;
+  pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) pd_paddr | VMM_PRESENT | VMM_WRITE;
   
   return context;
 }

@@ -70,7 +70,7 @@ loaded_elf_t *load_elf32(void *image, vmm_context_t *context, const char *name) 
   ph = (elf32_program_header_t*) (((uintptr_t) image) + header->ph_offset);
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
-      pages = NUM_PAGES(ph->file_size)+1;
+      pages = NUM_PAGES(ph->mem_size);
       uintptr_t dest = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
       
       for(j = 0; j < pages; j++) {

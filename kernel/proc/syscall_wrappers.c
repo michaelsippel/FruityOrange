@@ -109,7 +109,7 @@ void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   if(file == NULL) {
     printf("File not found!\n");
   } else {
-    loaded_elf_t *elf = load_elf32(file->base, vmm_fork(current_context), file->name);
+    loaded_elf_t *elf = load_elf32(file->base, vmm_create_context(), file->name);
     proc_t *new_p = run_elf32(elf);
     new_p->cpu->eax = argc;
     new_p->cpu->ebx = argv;
