@@ -158,6 +158,7 @@ inline void vmm_update_context(vmm_context_t *context) {
   uintptr_t kpd = (uintptr_t) (current_context->pagedir + START);
   size_t len = END - START;
   memcpy((void*) upd, (void*) kpd, len * sizeof(vmm_pt_t));
+  context->pagedir[PD_INDEX(PAGE_INDEX(VADDR_PT_START))] = (uint32_t) context->pagedir_paddr | VMM_PRESENT | VMM_WRITE;
 }
 
 inline void vmm_activate_context(vmm_context_t *context) {
@@ -265,7 +266,7 @@ void *vmm_find(vmm_context_t *context, size_t num, uintptr_t limit_low, uintptr_
   
   while(pd_index <= pd_index_end) {
     if(context->pagedir[pd_index] & VMM_PRESENT) {
-      pt = vmm_get_pagetable(context, pd_index, 0);
+      pt = vmm_get_pagetable(context, pd_index, VMM_KERNEL_FLAGS);
       
       uint32_t pt_end = (pd_index == pd_index_end) ? pt_index_end : PT_SIZE; // last pd entry
       for(;pt_index < pt_end; pt_index++) {
@@ -348,3 +349,4 @@ uintptr_t vmm_paddr(vmm_context_t *context, uintptr_t vaddr) {
   
   return paddr;
 }
+

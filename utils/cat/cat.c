@@ -26,29 +26,30 @@ int main(int argc, char **argv) {
     printf("Usage: %s [file 1] [file 2] ...\n", "cat");//argv[0]);
     return -1;
   }
-  
+  /*
   int i;
-  //stat_t stat;
+  stat_t stat;
   //for(i = 0; i < argc; i++) {
+    printf("%x\n", &argv);
     fd_t f = open(argv[0], O_RDONLY, 0);
-    //if(f < 0) {
-    //  printf("File not Found(%d)!\n", 0);
+    if(f < 0) {
+      printf("File not Found(%d)!\n", 0);
       //continue;
-    //}
+    }
     //printf("asd");
-    //fstat(f, &stat);
-    //size_t len = stat.size;
+    fstat(f, &stat);
+    size_t len = stat.size;
     
-    //char c;
-    //do {
-      //read(f, &c, 1);
-      //printf("%c", c);
-      //len--;
-    //} while(c);
+    char c;
+    do {
+      read(f, &c, 1);
+      printf("%c", c);
+      len--;
+    } while(c);
     
     close(f);
   //}
-  
+  */
   return 0;
 }
 

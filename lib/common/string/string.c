@@ -82,8 +82,7 @@ char *strtok(char *string, char *delimiters) {
   }
   
   char *ret = malloc(j+1);
-  memcpy(ret, string, j);
-  ret[j] = '\0';
+  strcpy(ret, string);
   
   s = NULL;
   return ret;

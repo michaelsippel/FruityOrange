@@ -31,16 +31,20 @@ void mm_init_syscalls(void) {
 }
 
 void syscall_malloc_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  uintptr_t vaddr = (uintptr_t) vmm_find(current_context, *ebx, VADDR_USER_START, VADDR_USER_END);
-  *ecx = vaddr;
+  size_t pages = *ebx;
+  
+  uintptr_t vaddr_start = vmm_find(current_context, pages, VADDR_USER_HEAP_START, VADDR_USER_HEAP_END);
   
   int i;
-  for(i = 0; i < *ebx; i++, vaddr += PAGE_SIZE) {
-    uintptr_t paddr = (uintptr_t) pmm_alloc();
+  for(i = 0; i < pages; i++) {
+    uintptr_t vaddr = vaddr_start + i*PAGE_SIZE;
+    uintptr_t paddr = pmm_alloc();
     vmm_map_page(current_context, vaddr, paddr, VMM_USER_FLAGS);
+    memset(vaddr, 0, PAGE_SIZE);
   }
   
-  current_proc->used_mem_pages += *ebx;
+  *ecx = vaddr_start;
+  current_proc->used_mem_pages += pages;
 }
 
 void syscall_mfree_pages(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {

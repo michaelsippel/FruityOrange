@@ -28,6 +28,7 @@ int main(void) {
          "%d:%d:%d (UTC)\n", 
          tm.mday, tm.mon, tm.year, 
          tm.hour, tm.min, tm.sec);
+
   /*
   pid_t pid = fork();
   if(!pid) {

@@ -28,8 +28,7 @@ inline int putchar(const char c) {
 }
 
 inline int puts(const char *s) {
-  int len = 0;
-  while(s[len++] != '\0');
+  int len = strlen(s);
   asm volatile("int $0x30" : : "a" (SYSCALL_PUTS), "b" (s), "c" (len));
   
   return len;

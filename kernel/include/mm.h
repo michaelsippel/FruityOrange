@@ -53,6 +53,8 @@ extern const void kernel_end_virt;
 
 #define VADDR_USER_START ((uintptr_t) 0x00001000)
 #define VADDR_USER_END   ((uintptr_t) 0xbfffffff)
+#define VADDR_USER_HEAP_START ((uintptr_t) 0xa0000000)
+#define VADDR_USER_HEAP_END   ((uintptr_t) 0xafffffff)
 #define VADDR_KERNEL_START ((uintptr_t) 0xc0000000)
 #define VADDR_KERNEL_END   ((uintptr_t) 0xffffffff)
 #define VADDR_KERNEL_HEAP_START ((uintptr_t) 0xe0000000)
