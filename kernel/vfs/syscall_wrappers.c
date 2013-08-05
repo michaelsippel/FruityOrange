@@ -133,12 +133,12 @@ void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   if(current_proc->fd[fd]->flags & O_WRONLY ||
      current_proc->fd[fd]->flags & O_RDWR) 
   {
-    if(! current_proc->fd[fd]->flags & O_APPEND) {
+    if(! (current_proc->fd[fd]->flags & O_APPEND) ) {
       current_proc->fd[fd]->pos = 0;
       current_proc->fd[fd]->flags |= O_APPEND;
     }
     vfs_inode_t *inode = current_proc->fd[fd]->inode;
-    *ebx = vfs_write(inode, current_proc->fd[fd]->pos, buf, len);
+    *ebx = vfs_write(inode, current_proc->fd[fd]->pos+1, buf, len);
     if(((int)*ebx) > 0) {
       current_proc->fd[fd]->pos += len;
     }

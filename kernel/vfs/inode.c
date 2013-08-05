@@ -113,7 +113,6 @@ vfs_dentry_t *vfs_create_dentry(vfs_inode_t *inode) {
 }
 
 int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
-  int i = 0;
   int writable = 0;
   if ((inode->stat.uid == uid) &&
       (inode->stat.mode & S_IWUSR)) 
@@ -143,17 +142,14 @@ int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
     
     uint8_t *nbase = (uint8_t*) inode->base + off;
     uint8_t *wbase = (uint8_t*) base;
-    
-    while (i++ < bytes) {
-      *nbase++ = *wbase++;
-    }
+    memcpy(nbase, wbase, bytes);
     
     inode->stat.size = inode->length;
   } else {
-    printf("[vfs] inode %d isn't writable! (0x%x)\n", inode->stat.id, inode);
+    printf("[vfs] inode %d (\"%s\") isn't writable! (0x%x)\n", inode->stat.id, inode->name, inode);
   }
   
-  return i-1;
+  return bytes;
 }
 
 void *vfs_read(vfs_inode_t *inode, int off) {

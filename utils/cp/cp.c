@@ -20,23 +20,28 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-  if(argc < 2) {
-    printf("Usage: %s [source] [destination]\n", "cp");//argv[0]);
+  if(argc < 3) {
+    printf("Usage: %s [source] [destination]\n", argv[0]);
     return -1;
   }
   
-  int src = open(argv[0], O_RDONLY, 0);
-  int dest = open(argv[1], O_WRONLY, 0);
-  if(src == NULL || dest == NULL) {
+  int src = open(argv[1], O_RDONLY, 0);
+  int dest = open(argv[2], O_WRONLY | O_CREAT, 0x1ff0);
+  if(src < 0 || dest < 0) {
     printf("Error.\n");
     return -1;
   }
   
+  stat_t stat;
+  fstat(src, &stat);
+  int len = stat.size;
   char i = 0;
-  do {
+  
+  while(len > 0) {
     read(src, &i, 1);
     write(dest, &i, 1);
-  } while(i);
+    len--;
+  }
   
   close(src);
   close(dest);  
