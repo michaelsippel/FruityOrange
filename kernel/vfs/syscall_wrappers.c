@@ -75,8 +75,8 @@ void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 
 void syscall_close(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   fd_t fd = *ebx;
-  //free(current_proc->fd[fd]);
-  //current_proc->fd[fd] = NULL;
+  free(current_proc->fd[fd]);
+  current_proc->fd[fd] = NULL;
 }
 
 void syscall_read(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {

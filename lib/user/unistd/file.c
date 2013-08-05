@@ -24,7 +24,7 @@
 #include <unistd.h>
 
 fd_t open(const char *path, int oflags, mode_t mode) {
-  int ret;
+  fd_t ret;
   asm volatile("int $0x30" : "=b" (ret) : "a" (SYSCALL_OPEN), "b" (path), "c" (oflags), "d" (mode));
   return ret;
 }

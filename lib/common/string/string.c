@@ -22,13 +22,13 @@
 
 #include <string.h>
 
-size_t strlen(char *s){
+size_t strlen(char *s) {
     int i;
     for(i=0;*s!='\0';s++,i++);
     return(i);
 }
 
-void cut(char *s,int pos,char *os1,char *os2){
+void cut(char *s,int pos,char *os1,char *os2) {
   int i = 0;
   while(i<pos) {*os1++ = *s++;i++;}
   os1[i] = '\0';
@@ -36,7 +36,7 @@ void cut(char *s,int pos,char *os1,char *os2){
   os2[i] = '\0';
 }
 
-void insert(char *s,int pos,char *is){
+void insert(char *s,int pos,char *is) {
   size_t i,j;
   char *bufferU = 0,*buffer = 0;
   cut(s,pos,bufferU,buffer);
@@ -44,13 +44,13 @@ void insert(char *s,int pos,char *is){
   for(i=0;buffer[i]!='\0';i++,j++)s[j] = buffer[i];
 }
 
-void replace(char *s,int pos, char *rs){
+void replace(char *s,int pos, char *rs) {
   int i,j;
   for(i=pos,j=0;rs[j]!='\0';i++,j++)s[i]=rs[j];
   s[i] = '\0';
 }
 
-void strcpy(char *dest, const char *src){
+void strcpy(char *dest, const char *src) {
   while((*dest++ = *src++));
 }
 
@@ -88,7 +88,7 @@ char *strtok(char *string, char *delimiters) {
   return ret;
 }
 
-char *strcat(char *dest, const char *src){
+char *strcat(char *dest, const char *src) {
     while (*dest) dest++;
     
     do{
@@ -98,9 +98,9 @@ char *strcat(char *dest, const char *src){
     return dest;
 }
 
-int strcmp(char *str1, char *str2){
+int strcmp(char *str1, char *str2) {
       int i = 0;
-      while(str1[i] != '\0' && str2[i] != '\0'){
+      while(str1[i] != '\0' && str2[i] != '\0') {
           if(str1[i] != str2[i]){
               return FALSE;
               break;

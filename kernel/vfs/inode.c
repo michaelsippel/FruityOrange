@@ -133,7 +133,6 @@ int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
   if (writable) {
     if( (off + bytes) > inode->length) {
       inode->length = off + bytes;
-      inode->stat.size = inode->length;
     }
     
     if (inode->base == NULL) {
@@ -148,6 +147,8 @@ int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
     while (i++ < bytes) {
       *nbase++ = *wbase++;
     }
+    
+    inode->stat.size = inode->length;
   } else {
     printf("[vfs] inode %d isn't writable! (0x%x)\n", inode->stat.id, inode);
   }

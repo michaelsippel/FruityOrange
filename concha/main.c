@@ -75,18 +75,14 @@ void parse_cmd(char *str) {
   }
   
   char **argv = calloc(sizeof(char*), argc);
-  argv[0] = cmd_str;
-  char del[] = {' ', '\t'};
+  char del[] = " ";
+  argv[0] = strtok(str, del);
+  for(k = 1; k < argc; k++) {
+    argv[k] = strtok(NULL, del);
+  }
   
-  if(argc > 1) {
-    argv[1] = strtok(arg_str, del);
-    for(k = 2; k < argc; k++) {
-      argv[k] = strtok(NULL, del);
-    }
-    
-    while( (argc > 0) && argv[argc - 1] == NULL) {
-      argc--;
-    }
+  while( (argc > 0) && argv[argc - 1] == NULL) {
+    argc--;
   }
   
   int found = 0;
@@ -103,15 +99,15 @@ void parse_cmd(char *str) {
     fd = open(cmd_str, O_RDONLY, 0);
     if(! (fd < 0) ) {
       close(fd);
-      /*
+      
       pid_t pid = fork();
       if(!pid) {
         exec(cmd_str, argc, argv);
       } else {
         waitpid(pid);
-      }*/
-      pid_t pid = exec_extern(cmd_str, argc, argv);
-      waitpid(pid);
+      }
+      //pid_t pid = exec_extern(cmd_str, argc, argv);
+      //waitpid(pid);
     } else {
       printf("Unknown command \'%s\'!\n\'help\' for help\n", cmd_str);
     }
