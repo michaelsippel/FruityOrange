@@ -22,47 +22,71 @@
 #include <stdlib.h>
 
 char path[256];
-char text[23][81];
+
+#define SIZE_X 80
+#define SIZE_Y 23
+char display_text[SIZE_Y][SIZE_X+1];
+
+#define TEXT_BLOCK_SIZE 0x1000
+int text_length = 0;
+int text_blocks = 0;
+char *text;
 int x = 0, y = 0;
 
-#define NEWLINE y++; x = 0;
 #define TAB_SIZE 8
 
-void insert_char(int key) {
+void insert_char(char c) {
+  static old_blocks = 0;
+  text_length++;
+
+  old_blocks = text_blocks;
+  text_blocks = text_length / TEXT_BLOCK_SIZE;
+  if(text_blocks > text_blocks)
+    text = realloc(text, text_blocks * TEXT_BLOCK_SIZE);
+
+
+  y += x / SIZE_X;
+  x %= SIZE_X;
+  if(c != '\n') display_text[y][x] = c;
+  text[text_length-1] = c;
+}
+
+void insert_key(int key) {
   int i;
   switch(key) {
-      case '\n': // newline
-        NEWLINE;
-        break;
-      case '\t':
-        for(i = 0; i < TAB_SIZE; i++) {
-          text[y][x++] = ' ';
-        }
-      case '\r': // delete
-        text[y][--x] = ' ';
-        break;
-      default:
-        text[y][x++] = key;
-        break;
-    }
-    
-    if(x >= 80) {
-      NEWLINE;
-    } else if(x < 0) {
-      if(y > 0) {
-        x = 79;
-        y--;
-      } else {
-        x = 0;
+    case '\n': // newline
+      insert_char('\n');
+      y++;
+      x = 0;
+      break;
+    case '\t':
+      for(i = 0; i < TAB_SIZE; i++) {
+        insert_char(' ');
+        x++;
       }
+      break;
+    case '\r': // delete
+      x--;
+      insert_char(' ');
+      break;
+    default:
+      insert_char(key);
+      x++;
+      break;
   }
 }
 
 void save(int fd) {
   if(fd == -1) {
-    fd = open(path, O_RDWR | O_CREAT, 0);
+    fd = open(path, O_RDWR | O_CREAT, 0x1ff0);
   }
-  
+
+  int i;
+  for(i = 0; i < text_length; i++) {
+    write(fd, text, 1);
+    text++;
+  }  
+
   // TODO
 }
 
@@ -70,14 +94,21 @@ int main(int argc, char **argv) {
   int fd = -1, c;
   int key = 0;
   
-  if(argc > 0) {
-    strcpy(path, argv[0]);
-    fd = open(argv[0], O_RDWR | O_CREAT, 0);
+  text = malloc(TEXT_BLOCK_SIZE);
+  text_blocks = 1;
+  
+  if(argc > 1) {
+    strcpy(path, argv[1]);
+    fd = open(argv[1], O_RDWR | O_CREAT, 0x1ff0);
     if(fd >= 0) {
-      do {
+      stat_t stat;
+      fstat(fd, &stat);
+      int len = stat.size;
+      while(len > 0) {
         read(fd, &c, 1);
-        insert_char(c);
-      } while(c);
+        insert_key(c);
+        len--;
+      }
     } else {
       printf("\033[4;15mtractius: File not found!\033[0;7m\n");
       return;
@@ -92,13 +123,13 @@ int main(int argc, char **argv) {
     
     key = getch();
     if(key != 0) {  
-      insert_char(key);
+      insert_key(key);
     } else {
       key = getch();
       switch(key) {
         case 'q':
           printf("\033[2J");
-          close(fd);
+          if(fd >= 0) close(fd);
           return 0;
         case 's':
           save(fd);
@@ -113,13 +144,13 @@ int main(int argc, char **argv) {
 void print(void) {
   int i;
   char str[80];
-  sprintf(str, "[%s|%d|%d]", path, x, y);
+  sprintf(&str, "[%s|%d|%d]", path, x, y);
   printf("\033[6;15m Tractius                                                                       \n");
   printf("\033[1;%dH%s\n", 80-strlen(str), str);
   
   puts("\033[7m");
   for(i = 0; i < 23; i++) {
-    printf("%s\n", text[i]);
+    printf("%s\n", display_text[i]);
   }
   printf(" \033[6;15m AltGr  +q-Quit  +s-Save                                                      \033[0;7m");
   printf("\033[%d;%dH", y+2, x+1);

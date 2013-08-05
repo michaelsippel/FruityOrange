@@ -84,7 +84,7 @@ loaded_elf_t *load_elf32(void *image, vmm_context_t *context, const char *name) 
 	memcpy((void*) dest, (void*) src, PAGE_SIZE);
       }
       
-      //memclr((void*) dest + ph->file_size, ph->mem_size - ph->file_size);
+      memclr((void*) dest + ph->file_size, ph->mem_size - ph->file_size);
       vmm_unmap_page(context, dest);
     }
   }
