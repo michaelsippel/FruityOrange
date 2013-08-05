@@ -48,16 +48,21 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
   ptr = (char*) strtok(path, delimiter);
   while(ptr != NULL) {
     for(i = 0; i < num; i++) {
-      if(strcmp((const char*)ptr, (char*)entries[i].inode->name)) {
+      if(strcmp(entries[i].inode->name, ptr)) {
         inode = entries[i].inode;
         if(S_ISDIR(inode->stat)) {
-          // TODO
+          ptr = (char*) strtok(NULL, delimiter);
+          if(ptr == NULL) {
+            return inode;
+          }
+          
+          num = parent->length / sizeof(vfs_dentry_t);
+          vfs_dentry_t *entries = vfs_read(parent, 0);
         } else {
           return inode;
         }
       }
     }
-    ptr = (char*) strtok(NULL, delimiter);
   }
   
   return NULL;
@@ -94,3 +99,4 @@ void vfs_generate_path(char *buf, size_t bytes, vfs_inode_t *parent) {
     strcpy(buf,"/");
   }
 }
+
