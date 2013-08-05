@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <driver/cmos.h>
 #include <driver/console.h>

@@ -18,7 +18,9 @@
  */
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
+#include <driver/console.h>
 #include <mm.h>
 #include <vfs.h>
 #include <proc/scheduler.h>
@@ -43,10 +45,10 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
   char delimiter[] = "/";
   char *ptr;
   
-  ptr = strtok(path, delimiter);
+  ptr = (char*) strtok(path, delimiter);
   while(ptr != NULL) {
     for(i = 0; i < num; i++) {
-      if(strcmp(ptr, entries[i].inode->name)) {
+      if(strcmp((const char*)ptr, (char*)entries[i].inode->name)) {
         inode = entries[i].inode;
         if(S_ISDIR(inode->stat)) {
           // TODO
@@ -55,7 +57,7 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
         }
       }
     }
-    ptr = strtok(NULL, delimiter);
+    ptr = (char*) strtok(NULL, delimiter);
   }
   
   return NULL;
@@ -66,7 +68,7 @@ void vfs_generate_path(char *buf, size_t bytes, vfs_inode_t *parent) {
   
   vfs_inode_t *inode = parent;
   while(inode != vfs_root()) {
-    len += strlen(inode->name) + 1;
+    len += strlen((char*)inode->name) + 1;
     inode = inode->parent;
   }
   
@@ -82,8 +84,8 @@ void vfs_generate_path(char *buf, size_t bytes, vfs_inode_t *parent) {
     
     inode = parent;
     while(inode != vfs_root()) {
-      buf -= strlen(inode->name);
-      memcpy(buf, inode->name, strlen(inode->name));
+      buf -= strlen((char*)inode->name);
+      strcpy(buf, inode->name);
       
       *--buf = '/';
       inode = inode->parent;

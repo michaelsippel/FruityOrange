@@ -81,10 +81,12 @@ extern proc_t *first_proc;
 loaded_elf_t *load_elf32(void *image, vmm_context_t *context, const char *name);
 proc_t *run_elf32(loaded_elf_t *elf);
 proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t dpl);
+void proc_waitpid(proc_t *proc, pid_t pid);
 int proc_sleep(proc_t *proc);
 int proc_wake(proc_t *proc);
 int proc_exit(proc_t *proc, int status);
 int proc_kill(proc_t *proc);
+proc_t *proc_fork(proc_t *parent);
 fd_t proc_get_unused_fd(proc_t *proc);
 pid_t get_pid(void);
 

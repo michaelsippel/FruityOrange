@@ -90,7 +90,6 @@ inline void vmm_disable(void) {
 }
 
 vmm_pt_t vmm_create_pagetable(vmm_context_t *context, int index, uint8_t flags) {
-  static int count = 0;
   vmm_pt_t pagetable = pmm_alloc();
   context->pagedir[index] = (uint32_t) pagetable | VMM_WRITE | VMM_PRESENT | flags;
   pagetable = vmm_get_pagetable(context, index, flags);
@@ -144,7 +143,7 @@ vmm_context_t *vmm_fork(vmm_context_t *context) {
     if(context->pagedir[i]) {
       vmm_pt_t *new_pt = vmm_create_pagetable(new_context, i, VMM_USER_FLAGS);
       vmm_pt_t *pt     = vmm_get_pagetable(context, i, VMM_USER_FLAGS);
-      memcpy(new_pt, pt, PAGE_SIZE);
+      memcpy((void*)new_pt, (void*)pt, PAGE_SIZE);
     }
   }
   

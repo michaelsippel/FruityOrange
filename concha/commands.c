@@ -19,17 +19,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "concha.h"
 
 extern char *path;
 
 int command_cd(uint8_t argc, uint8_t **argv) {
-  if(argc > 0) {
-    int ret = chdir(argv[0]);
+  if(argc > 1) {
+    int ret = chdir((const char*)argv[1]);
     if(ret < 0) {
       if(ret == -1) {
-	printf("\'%s\' is no directory!\n", argv[0]);
+	printf("\'%s\' is no directory!\n", argv[1]);
       } else {
 	printf("No such file or directory!\n");
       }

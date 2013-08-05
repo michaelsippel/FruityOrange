@@ -50,9 +50,9 @@ alloc_block_t *heap_increase(size_t bytes) {
   size_t pages = ( bytes + sizeof(alloc_block_t) + PAGE_SIZE ) / PAGE_SIZE;
   
   uintptr_t vaddr = (uintptr_t) alloc_pages(pages);
-  alloc_block_t *block = vaddr;
+  alloc_block_t *block = (alloc_block_t*) vaddr;
   block->size = bytes;
-  block->base = vaddr + sizeof(alloc_block_t);
+  block->base = (void*) vaddr + sizeof(alloc_block_t);
   block->status = HEAP_STATUS_FREE;
   
   block->next = NULL;

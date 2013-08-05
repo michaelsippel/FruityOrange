@@ -35,8 +35,79 @@ int x = 0, y = 0;
 
 #define TAB_SIZE 8
 
+void print(void);
+void insert_char(char c);
+void insert_key(int key);
+void save(int fd);
+
+int main(int argc, char **argv) {
+  int fd = -1, c;
+  int key = 0;
+  
+  text = malloc(TEXT_BLOCK_SIZE);
+  text_blocks = 1;
+  
+  if(argc > 1) {
+    strcpy(path, argv[1]);
+    fd = open(argv[1], O_RDWR | O_CREAT, 0x1ff0);
+    if(fd >= 0) {
+      stat_t stat;
+      fstat(fd, &stat);
+      int len = stat.size;
+      while(len > 0) {
+        read(fd, &c, 1);
+        insert_key(c);
+        len--;
+      }
+    } else {
+      printf("\033[4;15mtractius: File not found!\033[0;7m\n");
+      return -1;
+    }
+  } else {
+    strcpy(path, "Untitled.txt");
+  }
+  
+  while(1) {
+    puts("\033[2J");
+    print();
+    
+    key = getch();
+    if(key != 0) {  
+      insert_key(key);
+    } else {
+      key = getch();
+      switch(key) {
+        case 'q':
+          printf("\033[2J");
+          if(fd >= 0) close(fd);
+          return 0;
+        case 's':
+          save(fd);
+          break;
+      }
+    }
+  }  
+  
+  return -1;
+}
+
+void print(void) {
+  int i;
+  char str[80];
+  sprintf((char*)str, "[%s|%d|%d]", path, x, y);
+  printf("\033[6;15m Tractius                                                                       \n");
+  printf("\033[1;%dH%s\n", 80-strlen(str), str);
+  
+  puts("\033[7m");
+  for(i = 0; i < 23; i++) {
+    printf("%s\n", display_text[i]);
+  }
+  printf(" \033[6;15m AltGr  +q-Quit  +s-Save                                                      \033[0;7m");
+  printf("\033[%d;%dH", y+2, x+1);
+}
+
 void insert_char(char c) {
-  static old_blocks = 0;
+  static int old_blocks = 0;
   text_length++;
 
   old_blocks = text_blocks;
@@ -88,71 +159,5 @@ void save(int fd) {
   }  
 
   // TODO
-}
-
-int main(int argc, char **argv) {
-  int fd = -1, c;
-  int key = 0;
-  
-  text = malloc(TEXT_BLOCK_SIZE);
-  text_blocks = 1;
-  
-  if(argc > 1) {
-    strcpy(path, argv[1]);
-    fd = open(argv[1], O_RDWR | O_CREAT, 0x1ff0);
-    if(fd >= 0) {
-      stat_t stat;
-      fstat(fd, &stat);
-      int len = stat.size;
-      while(len > 0) {
-        read(fd, &c, 1);
-        insert_key(c);
-        len--;
-      }
-    } else {
-      printf("\033[4;15mtractius: File not found!\033[0;7m\n");
-      return;
-    }
-  } else {
-    strcpy(path, "Untitled.txt");
-  }
-  
-  while(1) {
-    puts("\033[2J");
-    print();
-    
-    key = getch();
-    if(key != 0) {  
-      insert_key(key);
-    } else {
-      key = getch();
-      switch(key) {
-        case 'q':
-          printf("\033[2J");
-          if(fd >= 0) close(fd);
-          return 0;
-        case 's':
-          save(fd);
-          break;
-      }
-    }
-  }  
-  
-  return -1;
-}
-
-void print(void) {
-  int i;
-  char str[80];
-  sprintf(&str, "[%s|%d|%d]", path, x, y);
-  printf("\033[6;15m Tractius                                                                       \n");
-  printf("\033[1;%dH%s\n", 80-strlen(str), str);
-  
-  puts("\033[7m");
-  for(i = 0; i < 23; i++) {
-    printf("%s\n", display_text[i]);
-  }
-  printf(" \033[6;15m AltGr  +q-Quit  +s-Save                                                      \033[0;7m");
-  printf("\033[%d;%dH", y+2, x+1);
 }
 

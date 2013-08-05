@@ -37,7 +37,7 @@ void vfs_init_syscalls(void) {
 }
 
 void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
-  const char *path = (char*) *ebx;
+  const char *path = (const char*) *ebx;
   int oflags = *ecx;
   mode_t mode = *edx;
   
@@ -47,7 +47,7 @@ void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   if(inode == NULL) { 
     if(oflags & O_CREAT) {// create inode
       // TODO: what if here is a path with subdirs given?
-      char *name = malloc(strlen(path));
+      char *name = malloc(strlen((char*)path));
       strcpy(name, path);
       inode = vfs_create_inode(name, mode, vfs_root());
     } else {
@@ -107,7 +107,7 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   fd_t fd = *ebx;
   
   parent = current_proc->fd[fd]->inode;  
-  dirent_t *dentry = *ecx;
+  dirent_t *dentry = (dirent_t*) *ecx;
   
   vfs_dentry_t *entries = vfs_read(parent, 0);  
   int num = parent->length / sizeof(vfs_dentry_t);  
@@ -118,10 +118,10 @@ void syscall_readdir(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     strcpy(dentry->name, ino->name);
     memcpy(&dentry->stat, &ino->stat, sizeof(stat_t));
     dentry->id = ino->stat.id;
-    *ebx = dentry;
+    *ebx = (uint32_t) dentry;
   } else {
     pos = 0;
-    *ebx = NULL;
+    *ebx = (uint32_t) NULL;
   }
 }
 
@@ -196,7 +196,7 @@ void syscall_getcwd(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
 
 void syscall_fstat(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   fd_t fd = *ebx;
-  stat_t *buf = *ecx;
+  stat_t *buf = (stat_t*) *ecx;
   
   vfs_inode_t *inode = current_proc->fd[fd]->inode;
   memcpy(buf, &inode->stat, sizeof(stat_t));

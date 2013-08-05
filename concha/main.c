@@ -18,10 +18,12 @@
  */
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "concha.h"
 
-void main(void) {
+int main(int argc, char **argv) {
   char buf[100];
   char path[100];
   
@@ -34,6 +36,8 @@ void main(void) {
     gets(buf);
     parse_cmd(buf);
   }
+
+  return 0;
 }
 
 void parse_cmd(char *str) {
@@ -74,11 +78,11 @@ void parse_cmd(char *str) {
     }
   }
   
-  char **argv = calloc(sizeof(char*), argc);
+  uint8_t **argv = calloc(sizeof(uint8_t*), argc);
   char del[] = " ";
-  argv[0] = strtok(str, del);
+  argv[0] = (uint8_t*) strtok(str, del);
   for(k = 1; k < argc; k++) {
-    argv[k] = strtok(NULL, del);
+    argv[k] = (uint8_t*) strtok(NULL, del);
   }
   
   while( (argc > 0) && argv[argc - 1] == NULL) {
@@ -87,7 +91,7 @@ void parse_cmd(char *str) {
   
   int found = 0;
   for(i = 0; i < num_cmd; i++) {
-    if( strcmp(cmd_str, commands[i].name) ) {
+    if( strcmp((const char*)cmd_str, (char*)commands[i].name) ) {
       commands[i].handler(argc, argv);
       found = 1;
       break;
@@ -102,7 +106,7 @@ void parse_cmd(char *str) {
       
       pid_t pid = fork();
       if(!pid) {
-        exec(cmd_str, argc, argv);
+        exec(cmd_str, argc, (char**)argv);
       } else {
         waitpid(pid);
       }

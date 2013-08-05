@@ -31,13 +31,13 @@ void init_heap(void) {
 }
 
 void *heap_pages(size_t pages) {
-  uintptr_t vaddr = vmm_find(current_context, pages, VADDR_KERNEL_HEAP_START, VADDR_KERNEL_HEAP_END);
-  uintptr_t paddr = NULL;
+  uintptr_t vaddr = (uintptr_t) vmm_find(current_context, pages, VADDR_KERNEL_HEAP_START, VADDR_KERNEL_HEAP_END);
+  uintptr_t paddr = (uintptr_t) NULL;
   
-  if(vaddr != NULL) {
+  if(vaddr != (uintptr_t)NULL) {
     int i;
     for(i = 0; i < pages; i++) {
-      paddr = pmm_alloc();
+      paddr = (uintptr_t) pmm_alloc();
       vmm_map_page(current_context, vaddr + i*PAGE_SIZE, paddr, VMM_KERNEL_FLAGS);
     }
   }
@@ -64,7 +64,6 @@ alloc_block_t *heap_find_block(void *ptr) {
       return block;
     } else {
       block = block->next;
-      printf("next");
     }
   }
   return NULL;
@@ -76,11 +75,11 @@ alloc_block_t *heap_increase(size_t bytes) {
   uintptr_t vaddr = (uintptr_t) heap_pages(pages);
   alloc_block_t *block = vaddr;
   block->size = bytes;
-  block->base = vaddr + sizeof(alloc_block_t);
+  block->base = (void*) (vaddr + sizeof(alloc_block_t));
   block->status = HEAP_STATUS_FREE;
   
-  block->next = NULL;
-  block->prev = NULL;
+  block->next = (alloc_block_t*) NULL;
+  block->prev = (alloc_block_t*) NULL;
   
   heap_insert_block(block);
   

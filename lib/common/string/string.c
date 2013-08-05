@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #include <string.h>
 
@@ -54,7 +55,7 @@ void strcpy(char *dest, const char *src) {
   while((*dest++ = *src++));
 }
 
-char *strtok(char *string, char *delimiters) {
+char *strtok(const char *string, char *delimiters) {
   static char *s = NULL;
   static int num_del = 0;
   if(string != NULL) {
@@ -71,7 +72,7 @@ char *strtok(char *string, char *delimiters) {
     for(i = 0; i < num_del; i++) {
       if(*s == delimiters[i]) {
         s++;
-        char *ret = malloc(j+1);
+        char *ret = (char*) malloc(j+1);
         memcpy(ret, string, j);
         ret[j] = '\0';
         return ret;
@@ -81,7 +82,7 @@ char *strtok(char *string, char *delimiters) {
     j++;
   }
   
-  char *ret = malloc(j+1);
+  char *ret = (char*) malloc(j+1);
   strcpy(ret, string);
   
   s = NULL;
@@ -98,7 +99,7 @@ char *strcat(char *dest, const char *src) {
     return dest;
 }
 
-int strcmp(char *str1, char *str2) {
+int strcmp(const char *str1, char *str2) {
       int i = 0;
       while(str1[i] != '\0' && str2[i] != '\0') {
           if(str1[i] != str2[i]){

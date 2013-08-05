@@ -31,6 +31,7 @@
 #include <debug/debug.h>
 #include <proc/scheduler.h>
 #include <proc/proc.h>
+#include <driver/console.h>
 
 #define PROC_DEBUG 0
 
@@ -150,14 +151,14 @@ pid_t get_pid(void) {
 proc_t *proc_fork(proc_t *parent) {
   vmm_context_t *context = vmm_fork(parent->context);
   proc_t *child = create_proc(0, parent->name, context, parent->dpl);
-  memcpy(child->kernel_stack, parent->kernel_stack, kernel_stack_size);
+  memcpy((void*)child->kernel_stack, (void*)parent->kernel_stack, kernel_stack_size);
   
   if(parent->dpl) {
     child->cpu->esp = child->user_stack + (parent->cpu->esp - parent->user_stack);
     void *cur_stack = vmm_automap_kernel_page(current_context, parent->user_stack_phys);
     void *new_stack = vmm_automap_kernel_page(current_context, child->user_stack_phys);
     
-    memcpy((uintptr_t)new_stack, (uintptr_t)cur_stack, user_stack_size);
+    memcpy((void*)new_stack, (void*)cur_stack, user_stack_size);
     
     vmm_unmap_page(current_context, (uintptr_t)cur_stack);
     vmm_unmap_page(current_context, (uintptr_t)new_stack);
@@ -238,8 +239,8 @@ int proc_kill(proc_t *proc) {
   proc->next->prev = proc->prev;
   
   // free data
-  free(proc->kernel_stack);
-  free(proc);
+  free((void*)proc->kernel_stack);
+  free((void*)proc);
   
   return 0;
 }
