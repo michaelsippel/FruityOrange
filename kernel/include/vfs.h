@@ -49,20 +49,6 @@ typedef struct fd {
   int pos;
 } fd_st_t;
 
-typedef struct initrd_inode {
-  const char name[256];
-  uint32_t mode;
-  uint32_t length;
-  
-  uint32_t off;
-  uint32_t parent_off;
-} initrd_inode_t;
-
-typedef struct initrd_dentry {
-  const char name[256];
-  uint32_t off;
-} initrd_dentry_t;
-
 void init_vfs(void);
 void vfs_load_initrd(void *initrd);
 vfs_inode_t *vfs_root(void);

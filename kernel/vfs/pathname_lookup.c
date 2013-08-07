@@ -29,6 +29,10 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
   vfs_inode_t *parent = vfs_root();
   vfs_inode_t *inode = NULL;
   
+  if(strcmp(path, ".")) return current_proc->work_dir;
+  if(strcmp(path, "..")) return current_proc->work_dir->parent;
+  if(strcmp(path, "/")) return vfs_root();  
+  
   if(path[0] != '/') {
     parent = current_proc->work_dir;
   } else {
@@ -38,33 +42,29 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
   vfs_dentry_t *entries = vfs_read(parent, 0);
   int i, num = parent->length / sizeof(vfs_dentry_t);
   
-  if(strcmp(path, ".")) return current_proc->work_dir;
-  if(strcmp(path, "..")) return current_proc->work_dir->parent;
-  if(strcmp(path, "/")) return vfs_root();
-  
   char delimiter[] = "/";
   char *ptr;
   
   ptr = (char*) strtok(path, delimiter);
-  while(ptr != NULL) {
-    for(i = 0; i < num; i++) {
-      if(strcmp(entries[i].inode->name, ptr)) {
-        inode = entries[i].inode;
-        if(S_ISDIR(inode->stat)) {
-          ptr = (char*) strtok(NULL, delimiter);
-          if(ptr == NULL) {
-            return inode;
-          }
-          
-          num = parent->length / sizeof(vfs_dentry_t);
-          vfs_dentry_t *entries = vfs_read(parent, 0);
-        } else {
+  for(i = 0; i < num; i++) {
+    if(strcmp(entries[i].inode->name, ptr)) {
+      inode = entries[i].inode;
+      if(S_ISDIR(inode->stat)) {
+        ptr = (char*) strtok(NULL, delimiter);
+        if(ptr == NULL) {
           return inode;
         }
+        
+        parent = inode;
+        num = parent->length / sizeof(vfs_dentry_t);
+        vfs_dentry_t *entries = vfs_read(parent, 0);
+        i = 0;
+      } else {
+       return inode;
       }
     }
   }
-  
+    
   return NULL;
 }
 

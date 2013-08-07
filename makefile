@@ -1,7 +1,8 @@
 KERNEL = ./kernel/kernel
 IMAGE = ./build/image
+INITRD = $(IMAGE)/initrd.tar
 
-all: lib kernel mods
+all: lib kernel mods initrd
 
 lib:
 	$(MAKE) -C lib
@@ -16,16 +17,18 @@ mods:
 	$(MAKE) -C init	
 	$(MAKE) -C test
 	$(MAKE) -C utils
-	$(MAKE) -C mkinitrd
+
+initrd:
+	tar -C $(IMAGE) --format=gnu -cf initrd.tar .
+	cp initrd.tar $(INITRD)
+	rm initrd.tar
 
 floppy-img: all
 	#TODO
 
 cdrom-img: all
-	cp ./mkinitrd/initrd.img ./build/image/initrd.img
 	mkisofs -R -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o cdrom.iso $(IMAGE)
-	$(MAKE) -C mkinitrd clean
-	rm $(IMAGE)/initrd.img
+	rm $(INITRD)
 
 qemu: cdrom-img
 	qemu-system-i386 -d int,cpu_reset -cdrom cdrom.iso

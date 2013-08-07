@@ -1,7 +1,7 @@
 /**
- *  include/stdint.h
+ *  lib/common/tar.c
  *
- *  (C) Copyright 2012 Michael Sippel
+ *  (C) Copyright 2013 Michael Sippel
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,27 +16,34 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STDINT_H
-#define _STDINT_H
+#include <tar.h>
 
-// Signed
-typedef signed char		int8_t;
-typedef short int		int16_t;
-typedef int			int32_t;
-//typedef long int		int64_t;
-__extension__
-typedef long long int		int64_t;
+int tar_getsize(const char *in) {
+  int size = 0;
+  int i;
+  int count = 1;
+  
+  for (i = 11; i > 0; i--, count *= 8) {
+    size += ((in[i - 1] - '0') * count);
+  }
+  
+  return size;
+}
 
-// Unsigned
-typedef unsigned char		uint8_t;
-typedef unsigned short int	uint16_t;
-typedef unsigned int		uint32_t;
-//typedef unsigned long int	uint64_t;
-__extension__
-typedef unsigned long long int	uint64_t;
-
-typedef unsigned int		uintptr_t;
-
-
-#endif
+int tar_get_num_entries(void *addr) {
+  int i = -1;
+  
+  tar_header_t *header = (tar_header_t*)addr;
+  while(header->name[0]) {
+    header = (tar_header_t*)addr;
+    int size = tar_getsize(header->size);
+    addr += ((size / TAR_SIZE) + 1) * TAR_SIZE;
+    if(size % TAR_SIZE) {
+      addr += TAR_SIZE;
+    }
+    i++;
+  }
+  
+  return i;
+}
 

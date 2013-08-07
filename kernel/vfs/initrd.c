@@ -21,44 +21,60 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
+#include <tar.h>
 
 #include <driver/console.h>
 #include <vfs.h>
 
-static void *initrd_ptr;
-
-void initrd_read_dir(initrd_dentry_t *entries, int num, vfs_inode_t *vfs_parent) {
-  int i;
+void vfs_load_initrd(void *initrd) {
+  int num = tar_get_num_entries(initrd);
+  tar_header_t *headers[num];
   
+  int i;
   for(i = 0; i < num; i++) {
-    initrd_inode_t *ino = initrd_ptr + entries[i].off;
-    char *name = malloc(strlen((char*)ino->name)+1);
-    strcpy(name, ino->name);
+    headers[i] = initrd;
     
-    vfs_inode_t *vfs_ino = vfs_create_inode(name, ino->mode, vfs_parent);
-    vfs_ino->length = ino->length;
-    vfs_ino->stat.size = ino->length;
+    int size = tar_getsize(headers[i]->size);
+
+    if(i == 0) goto next;
     
-    void *file_start = initrd_ptr + ino->off;
+    char *path = headers[i]->name+1;
+    int path_len = strlen(path);
     
-    if(ino->mode & S_MODE_DIR) {
-      int d_num = ino->length / sizeof(initrd_inode_t);
-      initrd_dentry_t *d_entries = file_start;
-      
-      //initrd_read_dir(d_entries, d_num, vfs_ino);
-    } else {
-      vfs_ino->base = file_start;
+    char *filename = NULL;
+    
+    char del[] = "/";
+    char *str = strtok(path, del);
+    
+    while(str != NULL) {
+      if(str[0] != '\0') {
+        filename = str;
+      }
+      str = strtok(NULL, del);
+    }
+    
+    char parent_path[100];
+    int parent_len = path_len - strlen(filename);
+    if(path[path_len-1] == '/') parent_len--;
+    memcpy(parent_path, path, parent_len);
+    parent_path[parent_len] = '\0';
+    
+    printf("%s;%s;%s\n", path, parent_path, filename);
+    vfs_inode_t *parent_inode = vfs_path_lookup(parent_path);
+    
+    if(path[path_len-1] == '/') { // DIR
+      vfs_create_inode(filename, S_MODE_DIR | 0x1ff0, parent_inode);
+    } else { // Regular
+      vfs_inode_t *inode = vfs_create_inode(filename, 0x1ff0, parent_inode);
+      vfs_write(inode, 0, initrd + TAR_SIZE, size);
+    }
+    
+next:
+    initrd += ((size / TAR_SIZE) + 1) * TAR_SIZE;
+    
+    if (size % TAR_SIZE) {
+      initrd += TAR_SIZE;
     }
   }
-}
-
-void vfs_load_initrd(void *initrd) {
-  initrd_ptr = initrd;
-  
-  initrd_inode_t *initrd_root = initrd;
-  int num = initrd_root->length / sizeof(initrd_inode_t);
-  initrd_dentry_t *entries = initrd + sizeof(initrd_inode_t);
-  
-  initrd_read_dir(entries, num, vfs_root());
 }
 

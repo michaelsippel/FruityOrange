@@ -54,10 +54,11 @@ void vfs_inode_list(vfs_inode_t *parent) {
   int num = parent->length / sizeof(vfs_dentry_t);
   printf("inode-list from parent \"%s\" (%d)\n", parent->name, parent->stat.id);
   for(i = 0; i < num; i++) {
+    int j;
     vfs_dentry_t dentry = entries[i];
     vfs_inode_t *inode = dentry.inode;
     stat_t stat = inode->stat;
-    printf("\t%c %c%c%c %c%c%c %c%c%c %s\n",
+    printf("%c %c%c%c %c%c%c %c%c%c %s\n",
 	   (S_ISDIR(stat) ? 'd' : '-'),
 	   ((stat.mode & S_IRUSR) ? 'r' : '-'),
 	   ((stat.mode & S_IWUSR) ? 'w' : '-'),
@@ -73,6 +74,9 @@ void vfs_inode_list(vfs_inode_t *parent) {
 	   
 	   dentry.inode->name
     );
+    if(S_ISDIR(stat)) {
+      vfs_inode_list(inode);
+    }
   }
 }
 
@@ -87,7 +91,7 @@ vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent
     if(parent->stat.mode & S_MODE_DIR) {
       inode->parent = parent;
       vfs_dentry_t *entry = vfs_create_dentry(inode);
-      vfs_write(inode->parent, parent->length, entry, sizeof(vfs_dentry_t));
+      vfs_write(parent, parent->length, entry, sizeof(vfs_dentry_t));
     } else {
       printf("[vfs] parent inode is no directory!\n");
       return NULL;
@@ -131,21 +135,24 @@ int vfs_write(vfs_inode_t *inode, int off, const void *base, size_t bytes) {
   }
   
   if (writable) {
+    int old_len = inode->length;
     if( (off + bytes) > inode->length) {
       inode->length = off + bytes;
+      inode->stat.size = inode->length;
     }
     
     if (inode->base == NULL) {
       inode->base = malloc(inode->length);
     } else {
-      inode->base = realloc(inode->base, inode->length);
+      int pages_new = NUM_PAGES(inode->length);
+      int pages_old = NUM_PAGES(old_len);
+      if(pages_new > pages_old)
+        inode->base = realloc(inode->base, inode->length);
     }
     
     uint8_t *nbase = (uint8_t*) inode->base + off;
     uint8_t *wbase = (uint8_t*) base;
     memcpy(nbase, wbase, bytes);
-    
-    inode->stat.size = inode->length;
   } else {
     printf("[vfs] inode %d (\"%s\") isn't writable! (0x%x)\n", inode->stat.id, inode->name, inode);
   }

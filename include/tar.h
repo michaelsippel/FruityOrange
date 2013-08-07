@@ -1,5 +1,5 @@
 /**
- *  mkinitrd/types.h
+ *  include/tar.h
  *
  *  (C) Copyright 2013 Michael Sippel
  *
@@ -16,30 +16,38 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TYPES_H
-#define _TYPES_H
+#ifndef _TAR_H
+#define _TAR_H
 
 #include <stdint.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
-#define S_MODE_DIR 0x1
-#define S_MODE_CHR 0x2
-#define S_MODE_LNK 0x4
+#define TAR_SIZE 512
 
-typedef struct initrd_inode {
-  const char name[256];
-  uint32_t mode;
-  uint32_t length;
-  
-  uint32_t off;
-  uint32_t parent_off;
-} initrd_inode_t;
+#define TAR_TYPE_REG  0
+#define TAR_TYPE_LINK 1
+#define TAR_TYPE_SYM  2
 
-typedef struct initrd_dentry {
-  const char name[256];
-  uint32_t off;
-} initrd_dentry_t;
+typedef struct tar_header {
+  char name[100];
+  char mode[8];
+  char uid[8];
+  char gid[8];
+  char size[12];
+  char mtime[12];
+  char chksum[8];
+  char typeflag;
+  char linkname[100];
+  char magic[6];
+  char version[2];
+  char uname[32];
+  char gname[32];
+  char devmajor[8];
+  char devminor[8];
+  char prefix[155];
+} tar_header_t;
+
+int tar_getsize(const char *in);
+int tar_get_num_entries(void *address);
 
 #endif
 
