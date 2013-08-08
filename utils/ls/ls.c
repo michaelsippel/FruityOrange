@@ -19,10 +19,16 @@
 #include <unistd.h>
 #include <stdio.h>
 
-int main(void) {
-  int d = open(".", O_RDONLY, 0);
-  if(d == NULL) {
-    printf("Error.\n");
+int main(int argc, char **argv) {
+  int d;
+  if(argc > 1) {
+    d = open(argv[1], O_RDONLY, 0);
+  } else {
+    d = open(".", O_RDONLY, 0);
+  }
+  
+  if(d < 0) {
+    printf("File not found!\n");
     return -1;
   }
   
