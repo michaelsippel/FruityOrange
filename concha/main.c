@@ -104,7 +104,7 @@ void parse_cmd(char *str) {
     if(fd < 0) {
       char bin_path[100];
       memset(bin_path, 0, 100);
-      strcpy(bin_path, "/bin/");
+      strcpy(bin_path, getenv("PATH"));
       strcat(bin_path, cmd_str);
       strcpy(cmd_str, bin_path);
       fd = open(cmd_str, O_RDONLY, 0);

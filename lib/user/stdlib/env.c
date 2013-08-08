@@ -25,7 +25,7 @@ void putenv(char *name, char *value) {
 
 char *getenv(const char *name) {
   char buf[100];
-  asm volatile("int $0x30" : : "a" (SYSCALL_GETENV), "b" (name), "c" (buf));
+  asm volatile("int $0x30" : : "a" (SYSCALL_GETENV), "b" (name), "c" (&buf));
   return buf;
 }
 

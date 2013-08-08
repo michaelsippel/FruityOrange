@@ -120,6 +120,8 @@ void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     new_p->ppid = ++current_proc->child_count;
     new_p->status = ACTIVE;
     
+    proc_copy_env(current_proc, new_p);
+    
     *ebx = new_p->ppid;
   }
 }
@@ -146,6 +148,7 @@ void syscall_getenv(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
       strcpy(buf, env->value);
       return;
     }
+    env = env->next;
   }
 }
 

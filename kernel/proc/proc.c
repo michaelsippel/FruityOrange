@@ -149,6 +149,20 @@ pid_t get_pid(void) {
   return proc_count++;
 }
 
+void proc_copy_env(proc_t *parent, proc_t *child) {
+  env_t *env = parent->environment;
+  while(env != NULL) {
+    env_t *n_env = malloc(sizeof(env_t));
+    strcpy(n_env->name, env->name);
+    strcpy(n_env->value, env->value);
+    
+    n_env->next = child->environment;
+    child->environment = n_env;
+
+    env = env->next;
+  }
+}
+
 proc_t *proc_fork(proc_t *parent) {
   vmm_context_t *context = vmm_fork(parent->context);
   proc_t *child = create_proc(0, parent->name, context, parent->dpl);
@@ -170,6 +184,8 @@ proc_t *proc_fork(proc_t *parent) {
   child->status = ACTIVE;
   child->used_mem_pages = parent->used_mem_pages;
   child->work_dir = parent->work_dir;
+  
+  proc_copy_env(parent, child);  
   
   debug(PROC_DEBUG, "proc_fork(): forked pid %d from pid %d\n", child->pid, parent->pid);
   
