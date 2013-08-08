@@ -89,8 +89,9 @@ void vfs_generate_path(char *buf, size_t bytes, vfs_inode_t *parent) {
     
     inode = parent;
     while(inode != vfs_root()) {
-      buf -= strlen((char*)inode->name);
-      strcpy(buf, inode->name);
+      int len = strlen((char*)inode->name);
+      buf -= len;
+      memcpy(buf, inode->name, len);
       
       *--buf = '/';
       inode = inode->parent;
