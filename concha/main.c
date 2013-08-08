@@ -103,6 +103,7 @@ void parse_cmd(char *str) {
     fd = open(cmd_str, O_RDONLY, 0);
     if(fd < 0) {
       char bin_path[100];
+      memset(bin_path, 0, 100);
       strcpy(bin_path, "/bin/");
       strcat(bin_path, cmd_str);
       strcpy(cmd_str, bin_path);
