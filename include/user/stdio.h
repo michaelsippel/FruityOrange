@@ -19,6 +19,9 @@
 #ifndef _STDIO_H
 #define _STDIO_H
 
+#include <sys/file.h>
+#include <stddef.h>
+
 inline int putchar(const char ch);
 inline int puts(const char *s);
 int printf(char *format, ...);
@@ -26,4 +29,12 @@ int printf(char *format, ...);
 inline char getch(void);
 inline char *gets(char *s);
 
+FILE *fopen(const char path, char *modus);
+int fclose(FILE *file);
+size_t fread(void *buf, size_t size, size_t n, FILE *file);
+size_t fwrite(void *buf, size_t size, size_t n, FILE *file);
+void fseek(FILE *file, int off, int whence);
+int ftell(FILE *file);
+
 #endif
+
