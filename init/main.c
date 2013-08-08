@@ -38,10 +38,10 @@ int main(void) {
     printf("shell exited.\n");
   }
   */
-  pid_t pid = exec_extern("/concha", 0, 0);
+  pid_t pid = exec_extern("/bin/concha", 0, 0);
   waitpid(pid);
   printf("shell exited.\n");  
-  
+
   return 0;
 }
 

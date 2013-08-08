@@ -9,7 +9,7 @@ lib:
 
 kernel:
 	$(MAKE) -C kernel
-	cp $(KERNEL) $(IMAGE)/kernel
+	cp $(KERNEL) $(IMAGE)/boot/kernel
 
 mods:
 	$(MAKE) -C concha

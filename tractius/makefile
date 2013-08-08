@@ -4,7 +4,7 @@ OBJS = $(addsuffix .o,$(basename $(SRCS)))
 LIBS = ../lib/libc.a
 IMGSRC = ../build/image
 SRC = tractius
-DEST = $(IMGSRC)/$(SRC)
+DEST = $(IMGSRC)/bin/$(SRC)
 
 INC = -I ../include -I ../include/user
 

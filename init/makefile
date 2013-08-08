@@ -4,7 +4,7 @@ OBJS = $(addsuffix .o,$(basename $(SRCS)))
 LIBS = ../lib/libc.a 
 IMGSRC = ../build/image
 SRC = sys_init
-DEST = $(IMGSRC)/$(SRC)
+DEST = $(IMGSRC)/boot/$(SRC)
 
 INC = -I ../include -I ../include/user
 

@@ -55,13 +55,11 @@ void vfs_load_initrd(void *initrd) {
     
     char parent_path[100];
     int parent_len = path_len - strlen(filename);
-    if(path[path_len-1] == '/') parent_len--;
+    if(path[path_len-1] == '/' && (parent_len > 1)) parent_len --;
     memcpy(parent_path, path, parent_len);
     parent_path[parent_len] = '\0';
     
-    printf("%s;%s;%s\n", path, parent_path, filename);
     vfs_inode_t *parent_inode = vfs_path_lookup(parent_path);
-    
     if(path[path_len-1] == '/') { // DIR
       vfs_create_inode(filename, S_MODE_DIR | 0x1ff0, parent_inode);
     } else { // Regular
@@ -76,5 +74,8 @@ next:
       initrd += TAR_SIZE;
     }
   }
+
+  //vfs_inode_list(vfs_root());
+  //while(1);
 }
 

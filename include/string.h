@@ -30,6 +30,7 @@ void replace(char *s,int pos, char *rs);
 void strcpy(char *dest, const char *src);
 char *strtok(const char *string, char *delimiters);
 char *strcat(char *dest, const char *src);
+char *strchr(const char *s, char c);
 int strcmp(const char *str1, char *str2);
 
 void *memcpy(void *dest, const void *src, size_t n);

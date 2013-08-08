@@ -41,8 +41,8 @@ void syscall_open(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   int oflags = *ecx;
   mode_t mode = *edx;
   
-  fd_t fd = proc_get_unused_fd(current_proc);
   vfs_inode_t *inode = vfs_path_lookup(path);
+  fd_t fd = proc_get_unused_fd(current_proc);
   
   if(inode == NULL) { 
     if(oflags & O_CREAT) {// create inode

@@ -99,6 +99,16 @@ char *strcat(char *dest, const char *src) {
     return dest;
 }
 
+char *strchr(const char *s, char c) {
+  while(*s != c) {
+    if(!*s++) {
+      return NULL;
+    }
+  }
+  
+  return (char*) s;
+}
+
 int strcmp(const char *str1, char *str2) {
       int i = 0;
       while(str1[i] != '\0' && str2[i] != '\0') {

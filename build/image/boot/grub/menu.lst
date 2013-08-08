@@ -2,8 +2,8 @@
 timeout 0
 
 title FruityOrange
-    kernel /kernel
+    kernel /boot/kernel
     module /initrd.tar
-    module /sys_init
+    module /boot/sys_init
     boot
 

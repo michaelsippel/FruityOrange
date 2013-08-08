@@ -101,6 +101,14 @@ void parse_cmd(char *str) {
   if(!found) {
     int fd;
     fd = open(cmd_str, O_RDONLY, 0);
+    if(fd < 0) {
+      char bin_path[100];
+      strcpy(bin_path, "/bin/");
+      strcat(bin_path, cmd_str);
+      strcpy(cmd_str, bin_path);
+      fd = open(cmd_str, O_RDONLY, 0);
+    }
+    
     if(! (fd < 0) ) {
       close(fd);
       

@@ -107,7 +107,7 @@ void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   
   vfs_inode_t *file = vfs_path_lookup(path);
   if(file == NULL) {
-    printf("File not found!\n");
+    printf("File not found! (%s)\n", path);
   } else {
     vmm_context_t *context = vmm_create_context();
     loaded_elf_t *elf = load_elf32(file->base, context, file->name);

@@ -25,7 +25,7 @@
 #include <vfs.h>
 #include <proc/scheduler.h>
 
-vfs_inode_t *vfs_path_lookup(const char *path) {
+vfs_inode_t *vfs_path_lookup(char *path) {
   vfs_inode_t *parent = vfs_root();
   vfs_inode_t *inode = NULL;
   
@@ -39,33 +39,33 @@ vfs_inode_t *vfs_path_lookup(const char *path) {
     path++;
   }
   
-  vfs_dentry_t *entries = vfs_read(parent, 0);
-  int i, num = parent->length / sizeof(vfs_dentry_t);
+  int len = strlen(path);
+  if(path[len-1] == '/') {
+    path[len-1] = '\0';
+  }  
   
   char delimiter[] = "/";
-  char *ptr;
-  
-  ptr = (char*) strtok(path, delimiter);
-  for(i = 0; i < num; i++) {
-    if(strcmp(entries[i].inode->name, ptr)) {
-      inode = entries[i].inode;
-      if(S_ISDIR(inode->stat)) {
-        ptr = (char*) strtok(NULL, delimiter);
-        if(ptr == NULL) {
-          return inode;
-        }
-        
-        parent = inode;
-        num = parent->length / sizeof(vfs_dentry_t);
-        vfs_dentry_t *entries = vfs_read(parent, 0);
-        i = 0;
-      } else {
-       return inode;
+  char *str = (char*) strtok(path, delimiter);
+  while(str != NULL) {
+    int num = parent->length / sizeof(vfs_dentry_t);
+    vfs_dentry_t *entries = vfs_read(parent, 0);
+    int found = 0;
+    int i;
+    for(i = 0; i < num; i++) {
+      if(strcmp(str, entries[i].name)) {
+        parent = entries[i].inode;
+        found = 1;
       }
     }
+
+    if(!found) {
+      return NULL;
+    } else {
+      str = strtok(NULL, delimiter);
+    }
   }
-    
-  return NULL;
+  
+  return parent;
 }
 
 void vfs_generate_path(char *buf, size_t bytes, vfs_inode_t *parent) {

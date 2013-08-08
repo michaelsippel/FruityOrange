@@ -113,6 +113,7 @@ vfs_dentry_t *vfs_create_dentry(vfs_inode_t *inode) {
   
   dentry->id = inode->stat.id;
   dentry->inode = inode;
+  dentry->name = inode->name;
   
   return dentry;
 }
