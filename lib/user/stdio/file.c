@@ -23,7 +23,7 @@
 
 FILE *fopen(const char path, char *modus) {
   FILE *file = malloc(sizeof(FILE));
-
+  
   int m = 0;
   if(strchr(modus, "r") != NULL) { m = O_RDONLY; }
   if(strchr(modus, "w") != NULL) {
@@ -41,6 +41,10 @@ FILE *fopen(const char path, char *modus) {
   
   file->handle = open(path, m, 0);
   file->fpos = 0;
+  
+  stat_t stat;
+  fstat(file->handle, &stat);
+  file->alloc = stat.size;  
   
   return file;
 }
@@ -62,6 +66,17 @@ size_t fwrite(void *buf, size_t size, size_t n, FILE *file) {
 }
 
 void fseek(FILE *file, int off, int whence) {
+  switch(whence) {
+    case SEEK_SET: // absolute
+      file->fpos = off;
+      break;
+    case SEEK_CUR: // relative from current position
+      file->fpos += off;
+      break;
+    case SEEK_END: // relative from end
+      file->fpos = file->alloc - off;
+      break;
+  }
   lseek(file->handle, off, whence);
 }
 

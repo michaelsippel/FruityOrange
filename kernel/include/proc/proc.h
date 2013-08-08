@@ -37,6 +37,13 @@ typedef enum proc_status {
   ZOMBIE = PROC_STATUS_ZOMBIE
 } proc_status_t;
 
+typedef struct env {
+  char name[100];
+  char value[100];
+  
+  struct env *next;
+} env_t;
+
 typedef struct proc {
   const char *name;
   pid_t pid;
@@ -55,6 +62,8 @@ typedef struct proc {
   unsigned int num_fd;
   fd_st_t **fd;
   vfs_inode_t *work_dir;
+  
+  env_t *environment;  
   
   size_t used_mem_pages;
   unsigned long ticks;
@@ -96,6 +105,8 @@ void syscall_fork(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_waitpid(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_putenv(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void syscall_getenv(uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
 
 #endif
 

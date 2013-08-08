@@ -36,6 +36,8 @@ void scheduler_init_syscalls(void) {
   setup_syscall(SYSCALL_WAITPID, "waitpid", &syscall_waitpid);
   setup_syscall(SYSCALL_EXEC, "exec", &syscall_exec);
   setup_syscall(SYSCALL_EXEC_EXTERN, "exec extern", &syscall_exec_extern);
+  setup_syscall(SYSCALL_PUTENV, "putenv", &syscall_putenv);
+  setup_syscall(SYSCALL_GETENV, "getenv", &syscall_getenv);
 }
 
 void syscall_exit(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
@@ -119,6 +121,31 @@ void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     new_p->status = ACTIVE;
     
     *ebx = new_p->ppid;
+  }
+}
+
+void syscall_putenv(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  char *name = *ebx;
+  char *value = *ecx;
+  
+  env_t *env = malloc(sizeof(env_t));
+  strcpy(env->name, name);
+  strcpy(env->value, value);
+  
+  env->next = current_proc->environment;
+  current_proc->environment = env;
+}
+
+void syscall_getenv(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
+  char *name = *ebx;
+  char *buf = *ecx;  
+  
+  env_t *env = current_proc->environment;
+  while(env != NULL) {
+    if(strcmp(name, env->name)) {
+      strcpy(buf, env->value);
+      return;
+    }
   }
 }
 

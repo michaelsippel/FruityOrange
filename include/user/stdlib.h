@@ -47,4 +47,8 @@ void *calloc(size_t num, size_t size);
 void *realloc(void *ptr, size_t bytes);
 void free(void *ptr);
 
+void putenv(char *name, char *value);
+char *getenv(const char *name);
+
 #endif
+

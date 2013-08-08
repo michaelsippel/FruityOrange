@@ -69,7 +69,8 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   //proc->fd[2]->inode = vfs_create_inode("stderr", MODE, NULL);
   
   proc->work_dir = vfs_root();
-  
+  proc->environment = NULL;  
+
   // Stack
   uintptr_t kernel_stack = (uintptr_t) malloc(kernel_stack_size);
   

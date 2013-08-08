@@ -1,5 +1,5 @@
 /**
- *  concha/main.c
+ *  lib/user/stdlib/exit.c
  *
  *  (C) Copyright 2013 Michael Sippel
  *
@@ -17,31 +17,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sys/syscalls.h>
-#include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h>
 
-int main(void) {
-  time_t t = time();
-  tm_t tm = gmtime(t);
-  printf("\033[0;6mWelcome to FruityOrange!\033[0;7m\n"
-         "%d/%d/%d\n"
-         "%d:%d:%d (UTC)\n", 
-         tm.mday, tm.mon, tm.year, 
-         tm.hour, tm.min, tm.sec);
-  
-  /*
-  pid_t pid = fork();
-  if(!pid) {
-    exec("/concha", 0, 0);
-  } else {
-    waitpid(pid);
-    printf("shell exited.\n");
-  }
-  */
-  pid_t pid = exec_extern("/bin/concha", 0, 0);
-  waitpid(pid);
-  printf("shell exited.\n");  
+void putenv(char *name, char *value) {
+  asm volatile("int $0x30" : : "a" (SYSCALL_PUTENV), "b" (name), "c" (value));
+}
 
-  return 0;
+char *getenv(const char *name) {
+  char buf[100];
+  asm volatile("int $0x30" : : "a" (SYSCALL_GETENV), "b" (name), "c" (buf));
+  return buf;
 }
 
