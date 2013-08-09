@@ -86,7 +86,8 @@ vfs_inode_t *vfs_create_inode(const char *name, mode_t mode, vfs_inode_t *parent
   
   inode->name = name;
   inode->length = 0;
-  
+  inode->base = NULL;  
+
   if (parent != NULL) {
     if(parent->stat.mode & S_MODE_DIR) {
       inode->parent = parent;

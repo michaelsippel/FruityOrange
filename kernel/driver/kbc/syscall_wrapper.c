@@ -54,6 +54,7 @@ void syscall_step(void) {
     char mod = read_kbd_modus();
     
     char ch = translate_keycode(buf, mod);
+    vfs_write(current_proc->stdin, current_proc->stdin->length, &ch, 1);
     char *s = (char*) proc->cpu->ebx;
     
     static int i = 0;

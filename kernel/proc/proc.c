@@ -60,13 +60,15 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->ticks_util_wake = -1;
   proc->status = ACTIVE;
   
-  proc->num_fd = 0;
-  proc->fd = NULL;
-  //proc->fd = calloc(sizeof(fd_st_t*), 3);
-  //#define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
-  //proc->fd[0]->inode = vfs_create_inode("stdout", MODE, NULL);
-  //proc->fd[1]->inode = vfs_create_inode("stdin",  MODE, NULL);
-  //proc->fd[2]->inode = vfs_create_inode("stderr", MODE, NULL);
+  proc->num_fd = 3;
+  proc->fd = calloc(sizeof(fd_st_t*), 3);
+  #define MODE S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
+  proc->fd[0] = malloc(sizeof(fd_st_t));
+  proc->fd[1] = malloc(sizeof(fd_st_t));
+  proc->fd[2] = malloc(sizeof(fd_st_t));
+  proc->fd[0]->inode = proc->stdin  = vfs_create_inode("stdin", MODE, NULL);
+  proc->fd[1]->inode = proc->stdout = vfs_create_inode("stdout",  MODE, NULL);
+  proc->fd[2]->inode = proc->stderr = vfs_create_inode("stderr", MODE, NULL);
   
   proc->work_dir = vfs_root();
   proc->environment = NULL;  

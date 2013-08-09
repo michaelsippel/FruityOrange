@@ -65,6 +65,10 @@ typedef struct proc {
   
   env_t *environment;  
   
+  vfs_inode_t *stdin;
+  vfs_inode_t *stdout;
+  vfs_inode_t *stderr;  
+  
   size_t used_mem_pages;
   unsigned long ticks;
   unsigned long ticks_util_wake;

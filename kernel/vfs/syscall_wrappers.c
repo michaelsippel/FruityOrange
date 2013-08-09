@@ -130,6 +130,10 @@ void syscall_write(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   const void *buf = (const void*) *ecx;
   size_t len = *edx;
   
+  if(fd < 3) {
+    printf("%s", buf);
+  }
+  
   if(current_proc->fd[fd]->flags & O_WRONLY ||
      current_proc->fd[fd]->flags & O_RDWR) 
   {
