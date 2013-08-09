@@ -21,6 +21,17 @@
 
 #include <time.h>
 
+struct timeval {
+    time_t sec;
+    time_t usec;
+} timeval_t;
+
+struct timezone {
+    int minuteswest;
+    int dsttime;
+} timezone_t;
+
+int gettimeofday(struct timeval *tv, struct timezone *tz);
 time_t time(void);
 
 #endif

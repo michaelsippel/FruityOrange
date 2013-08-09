@@ -25,3 +25,18 @@ time_t time(void) {
   asm volatile("int $0x30" : "=b" (t) : "a" (SYSCALL_TIME));
   return t;
 }
+
+int gettimeofday(struct timeval *tv, struct timezone *tz) {
+  if(tv != NULL) {
+    tv->sec = time();
+    tv->usec = 0;
+  }
+  
+  if(tz != NULL) {
+    tz->minuteswest = 0;
+    tz->dsttime = 0;
+  }
+  
+  return 0;
+}
+
