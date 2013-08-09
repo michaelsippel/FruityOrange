@@ -21,19 +21,12 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <iostream.h>
 #include <mm.h>
 
 #define VIDEOMEM_START 0xB8000
 #define VIDEOMEM_END   0xBFFFF
 #define VIDEOMEM_SIZE  (VIDEOMEM_END - VIDEOMEM_START)
 #define VIDEOMEM_PAGES (VIDEOMEM_SIZE / PAGE_SIZE +1)
-
-typedef struct vterm {
-  char *name;
-  id_t id;
-  iostream_t *iostream;
-} vterm_t;
 
 void init_console(void);
 

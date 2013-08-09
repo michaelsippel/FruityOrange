@@ -79,7 +79,7 @@ void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     current_proc->status = ACTIVE;
     
     *current_proc->cpu = (cpu_state_t) {
-      .eax = (uint32_t)argc, .ebx = (uint32_t)argv, .ecx = 0, .edx = 0,
+      .eax = 0, .ebx = 0, .ecx = 0, .edx = 0,
       .esi = 0, .edi = 0, .ebp = 0,
       
       .eip = (uint32_t) elf->entry,
@@ -91,11 +91,13 @@ void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     current_proc->dpl = elf->dpl;
     
     if(elf->dpl) {
-      void *stack = vmm_automap_kernel_page(current_context, current_proc->user_stack_phys);
+      int *stack = vmm_automap_kernel_page(current_context, current_proc->user_stack_phys);
       memclr(stack, PAGE_SIZE);
+      stack[PAGE_SIZE/4 - 1] = argv;
+      stack[PAGE_SIZE/4 - 2] = argc;
       vmm_unmap_page(current_context, (uintptr_t) stack);
       
-      current_proc->cpu->esp = current_proc->user_stack + PAGE_SIZE;
+      current_proc->cpu->esp = current_proc->user_stack + PAGE_SIZE - 8;
       current_proc->cpu->cs = _USER_CS;
       current_proc->cpu->ss = _USER_SS;
     }
@@ -114,13 +116,17 @@ void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     vmm_context_t *context = vmm_create_context();
     loaded_elf_t *elf = load_elf32(file->base, context, file->name);
     proc_t *new_p = run_elf32(elf);
-    new_p->cpu->eax = (uint32_t) argc;
-    new_p->cpu->ebx = (uint32_t) argv;
     new_p->parent = current_proc;
     new_p->ppid = ++current_proc->child_count;
     new_p->status = ACTIVE;
     
     proc_copy_env(current_proc, new_p);
+    
+    int *stack = vmm_automap_kernel_page(current_context, new_p->user_stack_phys);
+    stack[PAGE_SIZE/4 - 1] = argv;
+    stack[PAGE_SIZE/4 - 2] = argc;
+    new_p->cpu->esp -= 8;
+    vmm_unmap_page(current_context, stack);    
     
     *ebx = new_p->ppid;
   }

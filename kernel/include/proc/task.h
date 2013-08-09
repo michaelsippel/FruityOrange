@@ -24,13 +24,11 @@
 
 #include <proc/proc.h>
 // #include <proc/thread.h>
-#include <iostream.h>
 
 struct thread;
 
 typedef struct task {
   proc_t *proc;
-  iostream_t *iostream;
   
   uint32_t num_threads;
   struct thread **threads;

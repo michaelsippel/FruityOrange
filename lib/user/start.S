@@ -17,12 +17,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .section .text
 .extern main
-.extern init_heap
 
 .global _start
 _start:
-    push %ebx // argv
-    push %eax // argc
     call main
     movl %eax, %ebx
     movl $0, %eax
