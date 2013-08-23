@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-FILE *fopen(const char path, char *modus) {
+FILE *fopen(const char *path, char *modus) {
   FILE *file = malloc(sizeof(FILE));
   
   int m = 0;
@@ -39,12 +39,14 @@ FILE *fopen(const char path, char *modus) {
     m |= O_RDWR;
   }
   
-  file->handle = open(path, m, 0);
-  file->fpos = 0;
-  
-  stat_t stat;
-  fstat(file->handle, &stat);
-  file->alloc = stat.size;  
+  file->handle = open(path, m, 0x7ff);
+  if(! (file->handle < 0)) {
+    file->fpos = 0;
+    
+    stat_t stat;
+    fstat(file->handle, &stat);
+    file->alloc = stat.size;
+  }
   
   return file;
 }
