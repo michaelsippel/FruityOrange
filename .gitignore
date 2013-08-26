@@ -14,8 +14,8 @@ Makefile~
 *.bin
 *.txt~
 kernel.txt
-kernel
 kernel/kernel
+build/image/boot/kernel
 test
 concha
 tractius
