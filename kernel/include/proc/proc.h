@@ -56,7 +56,8 @@ typedef struct proc {
   
   uintptr_t kernel_stack;
   uintptr_t user_stack;
-  uintptr_t user_stack_phys;
+  size_t stack_size;
+  
   cpu_state_t *cpu;
   vmm_context_t *context;
   unsigned int num_fd;

@@ -36,7 +36,7 @@
 #define PROC_DEBUG 0
 
 static pid_t proc_count = 0;
-static size_t kernel_stack_size = 0x1000;
+static size_t kernel_stack_size = 0x100000;
 static size_t user_stack_size   = 0x1000;
 
 proc_t *first_proc = NULL;
@@ -89,13 +89,17 @@ proc_t *create_proc(void *entry, const char *name, vmm_context_t *context, dpl_t
   proc->kernel_stack = kernel_stack;
   
   if(dpl) { // Usermode
-    uintptr_t user_stack_phys = (uintptr_t) pmm_alloc();
-    uintptr_t user_stack = (uintptr_t) vmm_automap_user_page(context, user_stack_phys);
+    int pages = NUM_PAGES(user_stack_size);
+    proc->stack_size = user_stack_size;
+    proc->user_stack = VADDR_USER_STACK_TOP - user_stack_size;
+    int i;
+    for(i = 0; i < pages; i++) {
+      uintptr_t vaddr = (uintptr_t) proc->user_stack - i*PAGE_SIZE;
+      uintptr_t paddr = (uintptr_t) pmm_alloc();
+      vmm_map_page(proc->context, vaddr, paddr, VMM_USER_FLAGS);
+    }
     
-    proc->user_stack_phys = user_stack_phys;
-    proc->user_stack = user_stack;
-    
-    proc_cpu_state->esp = user_stack + user_stack_size;
+    proc_cpu_state->esp = VADDR_USER_STACK_TOP;
     proc_cpu_state->cs = _USER_CS;
     proc_cpu_state->ss = _USER_SS;
   } else { // Kernelmode
@@ -171,14 +175,21 @@ proc_t *proc_fork(proc_t *parent) {
   memcpy((void*)child->kernel_stack, (void*)parent->kernel_stack, kernel_stack_size);
   
   if(parent->dpl) {
-    child->cpu->esp = child->user_stack + (parent->cpu->esp - parent->user_stack);
-    void *cur_stack = vmm_automap_kernel_page(current_context, parent->user_stack_phys);
-    void *new_stack = vmm_automap_kernel_page(current_context, child->user_stack_phys);
-    
-    memcpy((void*)new_stack, (void*)cur_stack, user_stack_size);
-    
-    vmm_unmap_page(current_context, (uintptr_t)cur_stack);
-    vmm_unmap_page(current_context, (uintptr_t)new_stack);
+    int p_pages = NUM_PAGES(parent->stack_size);
+    int i;
+    uintptr_t dest = vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
+    for(i = 1; i <= p_pages; i++) {
+      uintptr_t src = VADDR_USER_STACK_TOP - i*PAGE_SIZE;
+      uintptr_t paddr = vmm_paddr(context, src);
+      if(paddr == NULL) {
+        paddr = pmm_alloc();
+        child->user_stack -= PAGE_SIZE;
+        child->stack_size += PAGE_SIZE;
+      }
+      vmm_map_page(current_context, dest, paddr, VMM_KERNEL_FLAGS);
+      memcpy(dest, src, PAGE_SIZE);
+    }
+    vmm_unmap_page(current_context, dest);
   }
   
   child->parent = parent;

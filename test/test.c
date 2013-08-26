@@ -24,31 +24,6 @@
 #include <unistd.h>
 
 int main(void) {
-  printf("test:\n");
-
-  int i;
-  for(i = 0; i < 10; i++) {
-    char *ptr = malloc(10);
-    printf("malloc: 0x%x\n", ptr);
-    if(i % 2) {
-      free(ptr);
-    }
-  }
-  
-  printf("PATH = %s\n", getenv("PATH"));
-  
-  printf("open hello.txt...\n");
-  FILE *fp = fopen("hello.txt", "rw");
-  if(fp == NULL) {
-    printf("Error.\n");
-    return -1;
-  }
-  
-  char buf[100];
-  fread(&buf, 12, 1, fp);
-  printf("%s\n", buf);
-  
-  return 0;
   char name[100];
   char s_alter[3];
   char y_n;
@@ -80,7 +55,7 @@ int main(void) {
 		"der mal so Buchstabe fuer Buchstabe angezeigt wird.\n"
 		"Jetzt kommt gleich die Zeit...\n";
   
- // int i;
+  int i;
   for(i = 0; i < sizeof(text); i++) {
     usleep(100000);
     printf("%c", text[i]);

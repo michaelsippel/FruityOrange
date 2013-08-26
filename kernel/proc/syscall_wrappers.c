@@ -91,13 +91,11 @@ void syscall_exec(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     current_proc->dpl = elf->dpl;
     
     if(elf->dpl) {
-      int *stack = vmm_automap_kernel_page(current_context, current_proc->user_stack_phys);
-      memclr(stack, PAGE_SIZE);
-      stack[PAGE_SIZE/4 - 1] = argv;
-      stack[PAGE_SIZE/4 - 2] = argc;
-      vmm_unmap_page(current_context, (uintptr_t) stack);
+      uint32_t *stack = VADDR_USER_STACK_TOP;
+      *--stack = (uint32_t) argv;
+      *--stack = (uint32_t) argc;
       
-      current_proc->cpu->esp = current_proc->user_stack + PAGE_SIZE - 8;
+      current_proc->cpu->esp = VADDR_USER_STACK_TOP - 8;
       current_proc->cpu->cs = _USER_CS;
       current_proc->cpu->ss = _USER_SS;
     }
@@ -122,11 +120,10 @@ void syscall_exec_extern(uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     
     proc_copy_env(current_proc, new_p);
     
-    int *stack = vmm_automap_kernel_page(current_context, new_p->user_stack_phys);
-    stack[PAGE_SIZE/4 - 1] = argv;
-    stack[PAGE_SIZE/4 - 2] = argc;
+    uint32_t *stack = VADDR_USER_STACK_TOP;
+    *--stack = (uint32_t) argv;
+    *--stack = (uint32_t) argc;
     new_p->cpu->esp -= 8;
-    vmm_unmap_page(current_context, stack);    
     
     *ebx = new_p->ppid;
   }

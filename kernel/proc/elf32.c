@@ -27,7 +27,7 @@ loaded_elf_t *load_elf32(void *image, vmm_context_t *context, const char *name) 
   elf32_header_t *header = image;
   elf32_program_header_t *ph;
   int i, j;
-  size_t mem_pages, file_pages;
+  size_t mem_pages;
   
   // check ELF-Magic
   if(header->ident[EI_MAG0] == ELF_MAG0 &&
@@ -71,24 +71,22 @@ loaded_elf_t *load_elf32(void *image, vmm_context_t *context, const char *name) 
   for(i = 0; i < header->ph_entry_count; i++, ph++) {
     if(ph->type == EPT_LOAD) {
       mem_pages = NUM_PAGES(ph->mem_size);
-      file_pages = NUM_PAGES(ph->file_size);
-      uintptr_t dest = (uintptr_t) vmm_find(current_context, 1, VADDR_KERNEL_START, VADDR_KERNEL_END);
+      uintptr_t dest_start = (uintptr_t) vmm_find(current_context, mem_pages, VADDR_KERNEL_START, VADDR_KERNEL_END);
       
       for(j = 0; j < mem_pages; j++) {
 	uintptr_t paddr = (uintptr_t) pmm_alloc();
 	uintptr_t vaddr = (uintptr_t) ph->virt_addr + j*PAGE_SIZE;
 	uintptr_t src   = (uintptr_t) image + ph->offset + j*PAGE_SIZE;
-	
+	uintptr_t dest  = (uintptr_t) dest_start + j*PAGE_SIZE;
+        
 	vmm_map_page(context, vaddr, paddr, VMM_USER_FLAGS);
 	vmm_map_page(current_context, dest, paddr, VMM_USER_FLAGS);
 	
-        memset((void*) dest, 0, PAGE_SIZE);
-        if(j < file_pages) {
-          memcpy((void*) dest, (void*) src, PAGE_SIZE);
-        }
+        memcpy((void*) dest, (void*) src, PAGE_SIZE);
       }
+      memclr((void*)dest_start + ph->file_size, ph->mem_size - ph->file_size);
       
-      vmm_unmap_page(context, dest);
+      vmm_unmap_area(context, dest_start, mem_pages);
     }
   }
   
