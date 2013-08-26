@@ -29,6 +29,7 @@
 #include <driver/console.h>
 #include <multiboot.h>
 #include <mm.h>
+#include <interrupt.h>
 
 #define VMM_DEBUG 1
 
@@ -73,6 +74,9 @@ void init_vmm(multiboot_info_t *mb_info) {
   current_context = kernel_context;
   asm volatile("mov %0, %%cr3" : : "r" (pagedir_paddr));
   paging_initalized = 1;
+  
+  // pagefault handler
+  set_exception_handler(0xe, pagefault);
 }
 
 inline void vmm_enable(void) {

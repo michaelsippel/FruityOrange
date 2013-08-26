@@ -42,6 +42,7 @@ void send_eoi(uint8_t irq);
 void common_eoi(uint32_t intrpt);
 
 int set_irq_handler(int irq, void (*handler)(void));
+int set_exception_handler(int id, int (*handler)(uint32_t,uint32_t,uint32_t));
 void set_cpu_state(cpu_state_t *cpu);
 cpu_state_t *get_cpu_state(void);
 

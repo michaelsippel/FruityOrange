@@ -125,6 +125,8 @@ extern vmm_context_t *current_context;
 extern vmm_context_t *kernel_context;
 #endif
 
+int pagefault(uint32_t cr0, uint32_t cr2, uint32_t cr3);
+
 // heap
 
 #define HEAP_STATUS_FREE 0
