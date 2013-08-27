@@ -26,6 +26,9 @@
 #define RESERVED 0x08
 #define CODE     0x10
 
+#define EXIT     printf("kill process %s with pid %d...\n",current_proc->name,current_proc->pid); \
+    proc_exit(current_proc, 1);
+
 int pagefault(uint32_t cr0, uint32_t cr2, uint32_t cr3) {
   int error = new_cpu->error_code;
   printf("pagefault while %s a %s page\nat address 0x%x in %sspace.\n", 
@@ -35,10 +38,10 @@ int pagefault(uint32_t cr0, uint32_t cr2, uint32_t cr3) {
     (error & USER) ? "user" : "kernel"
   );
   
-  printf("EIP: 0x%x\n", new_cpu->eip);
+  printf("EIP: 0x%x, ESP: 0x%x\n", new_cpu->eip, new_cpu->esp);
   
-  printf("kill process %s with pid %d...\n",current_proc->name,current_proc->pid);
-  proc_exit(current_proc, 1);
+  EXIT;
+  
   return 1;
 }
 

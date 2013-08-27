@@ -36,7 +36,7 @@
 #define PROC_DEBUG 0
 
 static pid_t proc_count = 0;
-static size_t kernel_stack_size = 0x100000;
+static size_t kernel_stack_size = 0x1000;
 static size_t user_stack_size   = 0x1000;
 
 proc_t *first_proc = NULL;
@@ -208,6 +208,18 @@ proc_t *proc_fork(proc_t *parent) {
 void proc_waitpid(proc_t *proc, pid_t pid) {
   proc_sleep(proc);
   proc->waitpid = pid;
+}
+
+void proc_increase_stack(proc_t *proc, int pages) {
+  int i;
+  for(i = 0; i < pages; i++) {
+    uintptr_t vaddr = proc->user_stack - PAGE_SIZE;
+    uintptr_t paddr = pmm_alloc();
+    vmm_map_page(proc->context, vaddr, paddr, VMM_USER_FLAGS);
+    
+    proc->user_stack -= PAGE_SIZE;
+    proc->stack_size += PAGE_SIZE;
+  }
 }
 
 int proc_sleep(proc_t *proc) {

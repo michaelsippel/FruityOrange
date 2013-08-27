@@ -31,9 +31,17 @@
 
 proc_t *current_proc = NULL;
 
+int stackfault(uint32_t cr0, uint32_t cr2, uint32_t cr3) {
+  proc_increase_stack(current_proc, 1);
+  
+  return 1;
+}
+
 void init_scheduler(void) {
   set_irq_handler(0x0, schedule);
   proc_t *idle_proc = create_proc(&idle, "idle", NULL, DPL_KERNELMODE);
+  
+  set_exception_handler(0x0c, stackfault);
   
   scheduler_init_syscalls();
 }

@@ -101,6 +101,7 @@ int proc_wake(proc_t *proc);
 int proc_exit(proc_t *proc, int status);
 int proc_kill(proc_t *proc);
 proc_t *proc_fork(proc_t *parent);
+void proc_increase_stack(proc_t *proc, int pages);
 fd_t proc_get_unused_fd(proc_t *proc);
 pid_t get_pid(void);
 

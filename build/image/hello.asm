@@ -1,7 +1,7 @@
 
 ; fasm demonstration of writing simple ELF executable
 
-format ELF executable 3
+format ELF executable
 entry start
 
 segment readable executable
